@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://cn5r0bguul06d"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/HexagonalTileRenderer.cs" id="1_cnjlt"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_ookgy"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("ArrayMesh_ookgy")
+script = ExtResource("1_cnjlt")
