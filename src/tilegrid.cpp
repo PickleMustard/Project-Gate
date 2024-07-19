@@ -1,4 +1,8 @@
 #include "tilegrid.h"
+#include "godot_cpp/classes/engine.hpp"
+#include "godot_cpp/classes/scene_tree.hpp"
+#include "godot_cpp/core/math.hpp"
+#include "godot_cpp/variant/utility_functions.hpp"
 #include "level_generator.h"
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
@@ -7,7 +11,7 @@
 using namespace godot;
 
 void TileGrid::_bind_methods() {
-	//godot::ClassDB::bind_method(godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate, Vector2i(), float(), bool());
+	//godot::ClassDB::bind_method(godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForhexFromCoordinate, Vector2i(), float(), bool());
 }
 
 Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped) {
@@ -54,14 +58,80 @@ void TileGrid::_notification(int p_what) {
 }
 
 TileGrid::TileGrid() {
-    is_flat_topped = true;
-    tile_grid = HashMap<String, Tile *>{};
+	is_flat_topped = true;
+	tile_grid = HashMap<String, Tile *>{};
 }
 
 TileGrid::~TileGrid() {
-    tile_grid.clear();
+	tile_grid.clear();
 }
 
+Tile *TileGrid::findTileOnGrid(Vector2i location) {
+	Tile *found_tile = tile_grid.get(vformat("hex %d,%d", location[0], location[1]));
+	return found_tile;
+}
+
+Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
+	Vector<Tile *> neighbors{};
+	String locations[]{ vformat("hex %d,%d", tile->getColumn(), tile->getRow() + 1), vformat("hex %d,%d", tile->getColumn() + 1, tile->getRow()), vformat("hex %d,%d", tile->getColumn() + 1, tile->getRow() - 1),
+		vformat("hex %d,%d", tile->getColumn(), tile->getRow() - 1), vformat("hex %d,%d", tile->getColumn() - 1, tile->getRow()), vformat("hex %d,%d", tile->getColumn() - 1, tile->getRow() + 1) };
+
+	for (int i = 0; i < 6; i++) {
+		if (tile_grid.has(locations[i])) {
+			neighbors.push_back(tile_grid.get(locations[i]));
+		}
+	}
+	return neighbors;
+}
+
+Vector2 axialRound(Vector2 hex) {
+	//return cubeToAxial(cubeRound(axialToCube(hex)));
+    return Vector2(0,0);
+}
+
+Vector3 cubeRound(Vector3 hex) {
+	float rounded_q = Math::round(hex.x);
+	float rounded_r = Math::round(hex.y);
+	float rounded_s = Math::round(hex.z);
+
+	float q_diff = Math::abs(rounded_q - hex.x);
+	float r_diff = Math::abs(rounded_r - hex.y);
+	float s_diff = Math::abs(rounded_s - hex.z);
+
+	if (q_diff > r_diff && q_diff > s_diff) {
+		rounded_q = -rounded_r - rounded_s;
+	} else if (r_diff >= s_diff) {
+		rounded_r = -rounded_q - rounded_s;
+	} else {
+		rounded_s = -rounded_q - rounded_r;
+	}
+
+	return Vector3(rounded_q, rounded_r, rounded_s);
+}
+
+Vector2 cubeToAxial(Vector3 hex) {
+	return Vector2(hex.x, hex.y);
+}
+
+Vector3 axialToCube(Vector2 hex) {
+	float cube_q = hex.x;
+	float cube_r = hex.y;
+	float cube_s = -hex.x - hex.y;
+	return Vector3(cube_q, cube_r, cube_s);
+}
+
+Vector2 axialToOffset(Vector2 hex) {
+	float column = hex.x;
+	float row = hex.y + (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
+
+	return Vector2(column, row);
+}
+
+Vector2 offsetToAxial(Vector2 hex) {
+	float q = hex.x;
+	float r = hex.y - (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
+	return Vector2(q, r);
+}
 
 /*
 void godot::TileGrid::LayoutGrid() {

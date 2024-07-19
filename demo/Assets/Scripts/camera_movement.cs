@@ -23,7 +23,7 @@ public partial class camera_movement : Node3D
         i_handle.PannedCamera += panCamera;
         i_handle.RotatedCameraLeft += RotateCameraLeft;
         i_handle.RotatedCameraRight += RotateCameraRight;
-        Position = TileGrid.GetPositionForHexFromCoordinate(new Vector2I(500, 500), 1.0f, true) + new Vector3(0, 45, 0);
+        //Position = TileGrid.GetPositionForHexFromCoordinate(new Vector2I(500, 500), 1.0f, true) + new Vector3(0, 45, 0);
     }
 
     private void RotateCameraLeft() {

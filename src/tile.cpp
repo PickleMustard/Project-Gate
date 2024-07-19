@@ -24,7 +24,11 @@ Tile::Tile() {
 	mesh = rl->load("res://sphere.tres", "Mesh");
 	meshInst->set_mesh(mesh);
 	this->add_child(meshInst);
-    memdelete(rl);
+    meshInst->create_convex_collision();
+    TypedArray<Node> children = meshInst->get_children();
+    meshInst->get_child(children[0])->reparent(this, false);
+    //UtilityFunctions::print(meshInst->get_child_count());
+	memdelete(rl);
 }
 
 Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height) {
@@ -39,9 +43,25 @@ Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, f
 	mesh = rl->load("res://sphere.tres", "Mesh");
 	meshInst->set_mesh(mesh);
 	this->add_child(meshInst);
-    memdelete(rl);
+    meshInst->create_convex_collision();
+    TypedArray<Node> children = meshInst->get_children();
+    meshInst->get_child(children[0])->reparent(this, false);
+    //UtilityFunctions::print(meshInst->get_child_count());
+	memdelete(rl);
 }
 
 void Tile::set_tile_position(Vector3 new_pos) {
-    this->set_position(new_pos);
+	this->set_position(new_pos);
+}
+
+Vector2i Tile::getLocation() {
+	return Vector2i(column, row);
+}
+
+int Tile::getColumn() {
+	return column;
+}
+
+int Tile::getRow() {
+	return row;
 }

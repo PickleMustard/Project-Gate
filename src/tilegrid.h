@@ -22,16 +22,16 @@ public:
 	bool is_flat_topped;
 	HashMap<String, Tile *> tile_grid;
 
-	//Tile findTileOnGrid(Vector2i location);
-	//Vector<Tile> GetNeighbors(Tile tile);
+	Tile *findTileOnGrid(Vector2i location);
+	Vector<Tile *> GetNeighbors(Tile *tile);
 	static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
-	//Vector2 positionToGrid(Vector3 location);
-	//Vector2 axialRound(Vector2 hex);
-	//Vector3 cubeRound(Vector3 hex);
-	//Vector2 cubeToAxial(Vector3 hex);
-	//Vector3 axialToCube(Vector2 hex);
-	//Vector2 axialToOffset(Vector2 hex);
-	//Vector2 offsetToAxial(Vector2 hex);
+	Vector2 positionToGrid(Vector3 location);
+	Vector2 axialRound(Vector2 hex);
+	Vector3 cubeRound(Vector3 hex);
+	Vector2 cubeToAxial(Vector3 hex);
+	Vector3 axialToCube(Vector2 hex);
+	Vector2 axialToOffset(Vector2 hex);
+	Vector2 offsetToAxial(Vector2 hex);
 	void _notification(int p_what);
 	TileGrid();
 	~TileGrid();
