@@ -103,8 +103,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 	}
 }
 
-template <uint8_t N>
-LevelGenerator::m_Best_Neighbors<N> LevelGenerator::m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors<N> best_neighbors, int level) {
+LevelGenerator::m_Best_Neighbors LevelGenerator::m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbors, int level) {
 	if (node == nullptr) {
 		return best_neighbors;
 	}
@@ -116,21 +115,23 @@ LevelGenerator::m_Best_Neighbors<N> LevelGenerator::m_FindNearest(m_Room_Tree_No
 	m_Room_Tree_Node *good_side = nullptr;
 	m_Room_Tree_Node *bad_side = nullptr;
 
-	UtilityFunctions::print(vformat("Node Center: %d, %d | goal_room: %d, %d", node->room_center[0], node->room_center[1], goal_room[0], goal_room[1]));
+	//UtilityFunctions::print(vformat("Node Center: %d, %d | goal_room: %d, %d", node->room_center[0], node->room_center[1], goal_room[0], goal_room[1]));
 	if (node->room_center != goal_room) {
-		UtilityFunctions::print("Here");
+		//UtilityFunctions::print("Here");
 		if (curr_distance < second_best_distance) {
 			if (curr_distance < best_distance) {
 				UtilityFunctions::print("Least Distance");
-				best_neighbors.neighbor_list[1] = best_neighbors.neighbor_list[0];
-				best_neighbors.neighbor_list[0] = node->room_center;
+				best_neighbors.neighbor_list.set(1, best_neighbors.neighbor_list[0]);
+				best_neighbors.neighbor_list.set(0, node->room_center);
 			} else {
-				best_neighbors.neighbor_list[1] = node->room_center;
+				best_neighbors.neighbor_list.set(1, node->room_center);
 			}
 		}
 	}
 
-	if (!(level % 2)) { //On even levels, check the q value
+	bool level_is_even = !(level % 2);
+
+	if (level_is_even) { //On even levels, check the q value
 		if (goal_room[0] < node->room_center[0]) {
 			good_side = node->left_node;
 			bad_side = node->right_node;
@@ -138,7 +139,7 @@ LevelGenerator::m_Best_Neighbors<N> LevelGenerator::m_FindNearest(m_Room_Tree_No
 			good_side = node->right_node;
 			bad_side = node->left_node;
 		}
-	} else {
+	} else { //On odd levels, check the r value
 		if (goal_room[1] < node->room_center[1]) {
 			good_side = node->left_node;
 			bad_side = node->right_node;
@@ -147,10 +148,31 @@ LevelGenerator::m_Best_Neighbors<N> LevelGenerator::m_FindNearest(m_Room_Tree_No
 			bad_side = node->left_node;
 		}
 	}
-
 	UtilityFunctions::print(vformat("Best Neighbor: %d, %d | Second Best Neighbor: %d, %d", best_neighbors.neighbor_list[0][0], best_neighbors.neighbor_list[0][1], best_neighbors.neighbor_list[1][0], best_neighbors.neighbor_list[1][1]));
 	best_neighbors = m_FindNearest(good_side, goal_room, best_neighbors, level++);
-	UtilityFunctions::print(vformat("Best Neighbor: %d, %d | Second Best Neighbor: %d, %d", best_neighbors.neighbor_list[0][0], best_neighbors.neighbor_list[0][1], best_neighbors.neighbor_list[1][0], best_neighbors.neighbor_list[1][1]));
+	/*
+	 * Even levels split the space on the R-axis, Odd levels split the space on the Q-axis
+	 * Want to find a possible point on the intersection of the splitting axis
+	 * On Even, Take the Current Node's Q and Goal Node's R to find theoretical point
+	 * On Odd, Take the Goal Node's Q and the Current Node's R to find the theoretical point
+	 * Calculate the distance from this theoretical point to the goal
+	 * If theoretical distance is better than second_best_distance, explore the bad side
+	 */
+	if (level_is_even) {
+		Vector2i theoretical_point = Vector2i{ node->room_center[0], goal_room[1] };
+		int theoretical_distance = m_HexDistance(goal_room, theoretical_point);
+		UtilityFunctions::print(vformat("Theoretical Distance: %d, Second Best Distance: %d", theoretical_distance, second_best_distance));
+		if (theoretical_distance <= second_best_distance) {
+			best_neighbors = m_FindNearest(bad_side, goal_room, best_neighbors, level++);
+		}
+	} else {
+		Vector2i theoretical_point = Vector2i{ goal_room[0], node->room_center[1] };
+		int theoretical_distance = m_HexDistance(goal_room, theoretical_point);
+		UtilityFunctions::print(vformat("Theoretical Distance: %d, Second Best Distance: %d", theoretical_distance, second_best_distance));
+		if (theoretical_distance <= second_best_distance) {
+			best_neighbors = m_FindNearest(bad_side, goal_room, best_neighbors, level++);
+		}
+	}
 
 	return best_neighbors;
 }
@@ -164,67 +186,61 @@ LevelGenerator::m_Best_Neighbors<N> LevelGenerator::m_FindNearest(m_Room_Tree_No
  */
 Vector<Vector2i> LevelGenerator::m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size) {
 	Vector<Vector2i> neighbor_list{};
-	/*
-	 * Nearest Pseudo-code
-	 * nearest(Node n, Point goal, Node best):
-	 *    If n is null, return best
-	 *    If n.distance(goal) < best.distance(goal), best = n
-	 *    If goal < n:
-	 *        GoodSide = n."Left" Child
-	 *        BadSide = n."Right" Child
-	 *    else:
-	 *        GoodSide = n."Right" Child
-	 *        BadSide = n. "Left" Child
-	 *    best = nearest(goodSide, goal, best)
-	 *    If bad side could still have something useful (i.e, there exists a point on the axial lines projecting to infinity from point and goal that intersect and is less than best)
-	 *        best = nearest(badSide, goal, best)
-	 *    return best
-	 *
-	 */
-
 	UtilityFunctions::print(vformat("Root: %d, %d | Right: %d, %d", root->room_center[0], root->room_center[1], root->right_node->room_center[0], root->right_node->room_center[1]));
-  m_Best_Neighbors<3> neighbors = {{Vector2i{1000000, 1000000}, Vector2i{1000000, 1000000}, Vector2i{1000000, 1000000}}};
-	//m_Best_Neighbors neighbors = {2,
-    //Vector2i({1000000, 1000000}, Vector2i{1000000, 1000000})};
-	neighbors = m_FindNearest(root, root->room_center, neighbors, 0);
+	m_GenerateNeighborsForNode(root, root, neighbor_list, 0);
+	/*
+	m_Best_Neighbors neighbors = {{Vector2i{1000000, 1000000}, Vector2i{1000000, 1000000}, Vector2i{1000000, 1000000}}};
+	  neighbors = m_FindNearest(root, root->room_center, neighbors, 0);
 
-	for (int i = 0; i < room_centers.size() - 2; i++) {
-		int lowest_distance = 1000000;
-		/*
-			int second_lowest_distance = lowest_distance;
-			int neighbor = i;
-			int second_neighbor = neighbor;
-			for (int j = i + 1; j < room_centers.size() - 1; j++) {
-		  int distance = m_HexDistance(room_centers[i], room_centers[j]);
-				if (distance < second_lowest_distance) {
-					if (distance < lowest_distance) {
-						lowest_distance = distance;
-						neighbor = j;
-					} else {
-						second_lowest_distance = distance;
-						second_neighbor = j;
-					}
-				}
-			}
-		neighbor_list.push_back(room_centers[i]);
-		neighbor_list.push_back(room_centers[neighbor]);
-		neighbor_list.push_back(room_centers[second_neighbor]);*/
-	}
-	neighbor_list.push_back(root->room_center);
-	UtilityFunctions::print(vformat("Root: %d q, %d r", root->room_center[0], root->room_center[1]));
-	neighbor_list.push_back(neighbors.neighbor_list[0]);
-	UtilityFunctions::print(vformat("First Neighbor: %d q, %d r", neighbors.neighbor_list[0][0], neighbors.neighbor_list[0][1]));
-	neighbor_list.push_back(neighbors.neighbor_list[1]);
-	UtilityFunctions::print(vformat("Second Neighbor: %d q, %d r", neighbors.neighbor_list[1][0], neighbors.neighbor_list[1][1]));
-	UtilityFunctions::print(neighbor_list.size());
+	  for (int i = 0; i < room_centers.size() - 2; i++) {
+		  int lowest_distance = 1000000;
+			  int second_lowest_distance = lowest_distance;
+			  int neighbor = i;
+			  int second_neighbor = neighbor;
+			  for (int j = i + 1; j < room_centers.size() - 1; j++) {
+			int distance = m_HexDistance(room_centers[i], room_centers[j]);
+				  if (distance < second_lowest_distance) {
+					  if (distance < lowest_distance) {
+						  lowest_distance = distance;
+						  neighbor = j;
+					  } else {
+						  second_lowest_distance = distance;
+						  second_neighbor = j;
+					  }
+				  }
+			  }
+		  neighbor_list.push_back(room_centers[i]);
+		  neighbor_list.push_back(room_centers[neighbor]);
+		  neighbor_list.push_back(room_centers[second_neighbor]);
+	  }
+	  neighbor_list.push_back(root->room_center);
+	  UtilityFunctions::print(vformat("Root: %d q, %d r", root->room_center[0], root->room_center[1]));
+	  neighbor_list.push_back(neighbors.neighbor_list[0]);
+	  UtilityFunctions::print(vformat("First Neighbor: %d q, %d r", neighbors.neighbor_list[0][0], neighbors.neighbor_list[0][1]));
+	  neighbor_list.push_back(neighbors.neighbor_list[1]);
+	  UtilityFunctions::print(vformat("Second Neighbor: %d q, %d r", neighbors.neighbor_list[1][0], neighbors.neighbor_list[1][1]));
+	  UtilityFunctions::print(neighbor_list.size());
 
-	neighbors = { Vector2i{ 1000000, 100000 }, Vector2i{ 1000000, 1000000 } };
-	neighbors = m_FindNearest(root, root->right_node->room_center, neighbors, 1);
-	neighbor_list.push_back(root->right_node->room_center);
-	neighbor_list.push_back(neighbors.neighbor_list[0]);
-	neighbor_list.push_back(neighbors.neighbor_list[1]);
+	  neighbors = {{Vector2i{ 1000000, 100000 }, Vector2i{ 1000000, 1000000 }}};
+	  neighbors = m_FindNearest(root, root->right_node->room_center, neighbors, 1);
+	  neighbor_list.push_back(root->right_node->room_center);
+	  neighbor_list.push_back(neighbors.neighbor_list[0]);
+	  neighbor_list.push_back(neighbors.neighbor_list[1]);*/
 
 	return neighbor_list;
+}
+
+void LevelGenerator::m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level) {
+	if (current_node == nullptr) {
+		return;
+	}
+	m_Best_Neighbors neighbors = { { Vector2i{ 1000000, 1000000 }, Vector2i{ 1000000, 1000000 } } };
+	neighbors = m_FindNearest(root, current_node->room_center, neighbors, level);
+	neighbor_list.push_back(current_node->room_center);
+	neighbor_list.push_back(neighbors.neighbor_list[0]);
+	neighbor_list.push_back(neighbors.neighbor_list[1]);
+	m_GenerateNeighborsForNode(current_node->left_node, root, neighbor_list, level++);
+	m_GenerateNeighborsForNode(current_node->right_node, root, neighbor_list, level++);
 }
 
 /*
@@ -242,10 +258,7 @@ Vector<Vector2i> LevelGenerator::m_GenerateMST(const Vector<Vector2i> &room_cent
  * tile_bit_map: Filled with all locations of tiles
  * root_room: Pointer to the root_room of the k-d tree spanning all generated rooms
  */
-LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room
-		/*<Vector2i> &room_centers*/,
-		int &num_of_rooms_remaining, int current_level, int max_level, Vector2i max_grid_size) {
-	//
+LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room, int &num_of_rooms_remaining, int current_level, int max_level, Vector2i max_grid_size) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	int grid_center_q = max_grid_size[0];
 	int grid_center_r = max_grid_size[1];
@@ -402,7 +415,7 @@ void LevelGenerator::m_FillBitMap(Vector<uint8_t> &tile_bit_map, int q_center, i
  * No direct returns
  */
 void LevelGenerator::m_ConnectTiles(Vector<uint8_t> &tile_bit_map, Vector<Vector2i> room_neighbors) {
-	for (int i = 0; i < room_neighbors.size() -1; i += 3) {
+	for (int i = 0; i < room_neighbors.size() - 1; i += 3) {
 		m_DrawLineTiles(tile_bit_map, room_neighbors[i], room_neighbors[i + 1]);
 		m_DrawLineTiles(tile_bit_map, room_neighbors[i], room_neighbors[i + 2]);
 	}

@@ -32,11 +32,9 @@ private:
 		m_Room_Tree_Node *right_node;
 	};
 
-  template <u_int8_t N>
-  struct m_Best_Neighbors {
-    static const u_int8_t list_size;
-    Vector2i neighbor_list[N];
-  };
+	struct m_Best_Neighbors {
+		Vector<Vector2i> neighbor_list;
+	};
 
 	float m_outerSize;
 	float m_innerSize;
@@ -58,8 +56,8 @@ public:
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
-  template<u_int8_t N>
-  m_Best_Neighbors<N> m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors<N> best_neighbor, int level);
+	void m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level);
+	m_Best_Neighbors m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbor, int level);
 	m_Room_Tree_Node *m_GenerateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room /*Vector<Vector2i> &room_centers*/, int &num_of_rooms_remaining,
 			int current_level, int max_level, Vector2i max_grid_size);
 	bool m_OverlappingRooms(const Vector<uint8_t> &tile_bit_map, Vector2i center, int radius);
@@ -68,7 +66,7 @@ private:
 	void m_DrawLineTiles(Vector<uint8_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center);
 	void m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level);
 	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
-  int m_HexDistance(Vector2i first_room, Vector2i second_room);
+	int m_HexDistance(Vector2i first_room, Vector2i second_room);
 };
 } //namespace godot
 #endif
