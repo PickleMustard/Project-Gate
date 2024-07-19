@@ -9,6 +9,7 @@
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 
+#include <sys/types.h>
 #include <tile.h>
 #include <tilegrid.h>
 
@@ -18,7 +19,7 @@ class LevelGenerator : public Object {
 	GDCLASS(LevelGenerator, Object);
 
 private:
-	struct _Room {
+	struct m_Room {
 		Vector2i room_center;
 		Vector<Vector2i> room_neighbors;
 		int level;
@@ -30,11 +31,18 @@ private:
 		m_Room_Tree_Node *left_node;
 		m_Room_Tree_Node *right_node;
 	};
-	float _outerSize;
-	float _innerSize;
-	float _height;
-	bool _is_flat_topped;
-	Vector2i _maximum_grid_size;
+
+  template <u_int8_t N>
+  struct m_Best_Neighbors {
+    static const u_int8_t list_size;
+    Vector2i neighbor_list[N];
+  };
+
+	float m_outerSize;
+	float m_innerSize;
+	float m_height;
+	bool m_is_flat_topped;
+	Vector2i m_maximum_grid_size;
 
 protected:
 	static void _bind_methods();
@@ -45,19 +53,22 @@ public:
 	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, const Vector2i &grid_size);
 	~LevelGenerator();
 
-	HashMap<String, Tile *> generateLevel(TileGrid *root);
+	HashMap<String, Tile *> GenerateLevel(TileGrid *root);
 
 private:
-	void m_generateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
-	Vector<Vector2i> m_generateMST(const Vector<Vector2i> &room_centers);
-	m_Room_Tree_Node *m_generateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room /*Vector<Vector2i> &room_centers*/, int &num_of_rooms_remaining,
+	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
+	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
+  template<u_int8_t N>
+  m_Best_Neighbors<N> m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors<N> best_neighbor, int level);
+	m_Room_Tree_Node *m_GenerateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room /*Vector<Vector2i> &room_centers*/, int &num_of_rooms_remaining,
 			int current_level, int max_level, Vector2i max_grid_size);
-	bool m_overlappingRooms(const Vector<uint8_t> &tile_bit_map, Vector2i center, int radius);
-	void m_fillBitMap(Vector<uint8_t> &tile_bit_map, int q_center, int r_center, int radius);
-	void m_connectTiles(Vector<uint8_t> &tile_bit_map, Vector<Vector2i> room_neighbors);
-	void m_drawLineTiles(Vector<uint8_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center);
+	bool m_OverlappingRooms(const Vector<uint8_t> &tile_bit_map, Vector2i center, int radius);
+	void m_FillBitMap(Vector<uint8_t> &tile_bit_map, int q_center, int r_center, int radius);
+	void m_ConnectTiles(Vector<uint8_t> &tile_bit_map, Vector<Vector2i> room_neighbors);
+	void m_DrawLineTiles(Vector<uint8_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center);
 	void m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level);
-	Vector2i m_hexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
+	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
+  int m_HexDistance(Vector2i first_room, Vector2i second_room);
 };
 } //namespace godot
 #endif

@@ -53,7 +53,7 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
 void TileGrid::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
 		LevelGenerator *showrooms = memnew(LevelGenerator(outer_size, inner_size, height, is_flat_topped, Vector2i(1000, 1000)));
-		tile_grid = showrooms->generateLevel(this);
+		tile_grid = showrooms->GenerateLevel(this);
 	}
 }
 
