@@ -55,7 +55,9 @@ HashMap<String, Tile *> LevelGenerator::generateLevel(TileGrid *root) {
 	int num_of_rooms = 40;
 	Vector2i gridCenter(_maximum_grid_size[0] / 2, _maximum_grid_size[1] / 2);
 
-	m_generateTileBitMap(tile_bit_map, rooms_kd_tree, num_of_rooms, 0, 3, gridCenter);
+	rooms_kd_tree = m_generateTileBitMap(tile_bit_map, rooms_kd_tree, num_of_rooms, 0, 3, gridCenter);
+	UtilityFunctions::print(rooms_kd_tree);
+	//UtilityFunctions::print(vformat("%d q, %d r", location[0], location[1]));
 
 	Vector<Vector2i> room_neighbors(m_generateMST(room_centers));
 	UtilityFunctions::print(room_neighbors.size());
@@ -152,7 +154,8 @@ Vector<Vector2i> LevelGenerator::m_generateMST(const Vector<Vector2i> &room_cent
  * tile_bit_map: Filled with all locations of tiles
  * No direct returns
  */
-void LevelGenerator::m_generateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room /*<Vector2i> &room_centers*/, int &num_of_rooms_remaining, int current_level, int max_level, Vector2i max_grid_size) {
+LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_generateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room
+                                                       /*<Vector2i> &room_centers*/, int &num_of_rooms_remaining, int current_level, int max_level, Vector2i max_grid_size) {
 	//
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	int grid_center_q = max_grid_size[0];
@@ -181,6 +184,11 @@ void LevelGenerator::m_generateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_
 			(tries < 100));
 	//room_centers.push_back(Vector2i(grid_center_q, grid_center_r));
 	Vector2i new_room = Vector2i(grid_center_q, grid_center_r);
+	if (root_room == nullptr) {
+		UtilityFunctions::print(root_room);
+		root_room = new m_Room_Tree_Node{ new_room, nullptr, nullptr };
+		UtilityFunctions::print(root_room);
+	}
 	m_AddNodeToTree(root_room, new_room, 0);
 	m_fillBitMap(tile_bit_map, grid_center_q, grid_center_r, radius);
 	num_of_rooms_remaining--;
@@ -200,6 +208,7 @@ void LevelGenerator::m_generateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_
 		}
 	}
 	rnd = nullptr;
+  return root_room;
 	//
 }
 
@@ -207,19 +216,16 @@ void LevelGenerator::m_generateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_
  * Add a node to the k-d tree. Checks against q then r.
  */
 void LevelGenerator::m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level) {
-	if (root_room == nullptr) {
-		root_room = new m_Room_Tree_Node { new_room, nullptr, nullptr };
-	}
 	if (!(level % 2)) {
 		if (new_room.x < root_room->room_center.x) {
 			if (root_room->left_node == nullptr) {
-				root_room->left_node = new m_Room_Tree_Node { new_room, nullptr, nullptr };
+				root_room->left_node = new m_Room_Tree_Node{ new_room, nullptr, nullptr };
 			} else {
 				m_AddNodeToTree(root_room->left_node, new_room, level++);
 			}
 		} else if (new_room.x >= root_room->room_center.x) {
 			if (root_room->right_node == nullptr) {
-				root_room->right_node = new m_Room_Tree_Node { new_room, nullptr, nullptr };
+				root_room->right_node = new m_Room_Tree_Node{ new_room, nullptr, nullptr };
 			} else {
 				m_AddNodeToTree(root_room->right_node, new_room, level++);
 			}
@@ -227,18 +233,18 @@ void LevelGenerator::m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_r
 	} else {
 		if (new_room.y < root_room->room_center.y) {
 			if (root_room->left_node == nullptr) {
-				root_room->left_node = new m_Room_Tree_Node { new_room, nullptr, nullptr };
+				root_room->left_node = new m_Room_Tree_Node{ new_room, nullptr, nullptr };
 			} else {
 				m_AddNodeToTree(root_room->left_node, new_room, level++);
 			}
 		} else if (new_room.y >= root_room->room_center.y) {
 			if (root_room->right_node == nullptr) {
-				root_room->right_node = new m_Room_Tree_Node { new_room, nullptr, nullptr };
+				root_room->right_node = new m_Room_Tree_Node{ new_room, nullptr, nullptr };
 			} else {
 				m_AddNodeToTree(root_room->right_node, new_room, level++);
 			}
 		}
-  }
+	}
 }
 
 /*
