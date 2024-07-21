@@ -11,9 +11,11 @@
 
 #include <sys/types.h>
 #include <tile.h>
-#include <tilegrid.h>
+//#include <tilegrid.h>
 
 namespace godot {
+
+class TileGrid;
 
 class LevelGenerator : public Object {
 	GDCLASS(LevelGenerator, Object);

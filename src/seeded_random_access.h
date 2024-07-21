@@ -17,15 +17,15 @@ public:
 	SeededRandomAccess(uint32_t seed);
 	SeededRandomAccess(uint64_t seed);
 	~SeededRandomAccess();
-    void _init();
+	void _init();
 
 protected:
 	static void _bind_methods();
 
 private:
-	static SeededRandomAccess *_instance;
-    godot::Ref<RandomNumberGenerator> generator;
-    uint64_t _seed;
+	static SeededRandomAccess *m_instance;
+	godot::Ref<RandomNumberGenerator> m_generator;
+	uint64_t m_seed;
 };
 } //namespace godot
 #endif

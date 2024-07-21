@@ -11,56 +11,56 @@
 
 using namespace godot;
 
-SeededRandomAccess *SeededRandomAccess::_instance = nullptr;
+SeededRandomAccess *SeededRandomAccess::m_instance = nullptr;
 
 SeededRandomAccess::SeededRandomAccess() {
-	generator.instantiate();
-	generator->init_ref();
-	//UtilityFunctions::print(generator->get_reference_count());
-	_seed = 15672;
-	generator->set_seed(_seed);
-	ERR_FAIL_COND(_instance != nullptr);
-	_instance = this;
+	m_generator.instantiate();
+	m_generator->init_ref();
+	//UtilityFunctions::print(m_generator->get_reference_count());
+	m_seed = 15672;
+	m_generator->set_seed(m_seed);
+	ERR_FAIL_COND(m_instance != nullptr);
+	m_instance = this;
 }
 
 SeededRandomAccess::SeededRandomAccess(uint32_t seed) {
-	generator.instantiate();
-	generator->init_ref();
-	_seed = seed;
-	generator->set_seed(seed);
-	ERR_FAIL_COND(_instance != nullptr);
-	_instance = this;
+	m_generator.instantiate();
+	m_generator->init_ref();
+	m_seed = seed;
+	m_generator->set_seed(seed);
+	ERR_FAIL_COND(m_instance != nullptr);
+	m_instance = this;
 }
 
 SeededRandomAccess::SeededRandomAccess(uint64_t seed) {
-	generator.instantiate();
-	generator->init_ref();
-	_seed = seed;
-	generator->set_seed(seed);
-	ERR_FAIL_COND(_instance != nullptr);
-	_instance = this;
+	m_generator.instantiate();
+	m_generator->init_ref();
+	m_seed = seed;
+	m_generator->set_seed(seed);
+	ERR_FAIL_COND(m_instance != nullptr);
+	m_instance = this;
 }
 
 SeededRandomAccess::~SeededRandomAccess() {
-	ERR_FAIL_COND(_instance != this);
-	_instance = nullptr;
+	ERR_FAIL_COND(m_instance != this);
+	m_instance = nullptr;
 }
 
 void SeededRandomAccess::_init() {
-	generator->init_ref();
-	generator->set_seed(_seed);
+	m_generator->init_ref();
+	m_generator->set_seed(m_seed);
 }
 
 int SeededRandomAccess::GetInteger(int lower_limit, int upper_limit) {
-	//UtilityFunctions::print(generator.is_valid());
-	//ERR_FAIL_COND_V_MSG(generator == nullptr, 0, "Something happened");
-	ERR_FAIL_NULL_V_MSG(generator, 0, "Soemthing happened");
-	return generator->randi_range(lower_limit, upper_limit);
+	//UtilityFunctions::print(m_generator.is_valid());
+	//ERR_FAIL_COND_V_MSG(m_generator == nullptr, 0, "Something happened");
+	ERR_FAIL_NULL_V_MSG(m_generator, 0, "Soemthing happened");
+	return m_generator->randi_range(lower_limit, upper_limit);
 }
 
 int SeededRandomAccess::GetWholeNumber(int upper_limit) {
-	ERR_FAIL_NULL_V_MSG(generator, 0, "Soemthing happened");
-	return generator->randi_range(0, upper_limit);
+	ERR_FAIL_NULL_V_MSG(m_generator, 0, "Soemthing happened");
+	return m_generator->randi_range(0, upper_limit);
 }
 
 void SeededRandomAccess::_bind_methods() {
@@ -69,8 +69,8 @@ void SeededRandomAccess::_bind_methods() {
 }
 
 SeededRandomAccess *SeededRandomAccess::GetInstance() {
-	if (_instance != nullptr) {
-		return _instance;
+	if (m_instance != nullptr) {
+		return m_instance;
 	} else {
 		return nullptr;
 	}

@@ -52,33 +52,39 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
 
 void TileGrid::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
-		LevelGenerator *showrooms = memnew(LevelGenerator(outer_size, inner_size, height, is_flat_topped, Vector2i(1000, 1000)));
-		tile_grid = showrooms->GenerateLevel(this);
+		if (m_showrooms == nullptr) {
+			m_showrooms = memnew(LevelGenerator(m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
+			m_tile_grid = m_showrooms->GenerateLevel(this);
+		}
 	}
 }
 
+void TileGrid::GenerateTileGrid() {
+	m_tile_grid = m_showrooms->GenerateLevel(this);
+}
+
 TileGrid::TileGrid() {
-	is_flat_topped = true;
-	tile_grid = HashMap<String, Tile *>{};
+	m_is_flat_topped = true;
+	m_tile_grid = HashMap<String, Tile *>{};
 }
 
 TileGrid::~TileGrid() {
-	tile_grid.clear();
+	m_tile_grid.clear();
 }
 
-Tile *TileGrid::findTileOnGrid(Vector2i location) {
-	Tile *found_tile = tile_grid.get(vformat("hex %d,%d", location[0], location[1]));
+Tile *TileGrid::FindTileOnGrid(Vector2i location) {
+	Tile *found_tile = m_tile_grid.get(vformat("hex %d,%d", location[0], location[1]));
 	return found_tile;
 }
 
 Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 	Vector<Tile *> neighbors{};
-	String locations[]{ vformat("hex %d,%d", tile->getColumn(), tile->getRow() + 1), vformat("hex %d,%d", tile->getColumn() + 1, tile->getRow()), vformat("hex %d,%d", tile->getColumn() + 1, tile->getRow() - 1),
-		vformat("hex %d,%d", tile->getColumn(), tile->getRow() - 1), vformat("hex %d,%d", tile->getColumn() - 1, tile->getRow()), vformat("hex %d,%d", tile->getColumn() - 1, tile->getRow() + 1) };
+	String locations[]{ vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() + 1), vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow()), vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow() - 1),
+		vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() - 1), vformat("hex %d,%d", tile->GetColumn() - 1, tile->GetRow()), vformat("hex %d,%d", tile->GetColumn() - 1, tile->GetRow() + 1) };
 
 	for (int i = 0; i < 6; i++) {
-		if (tile_grid.has(locations[i])) {
-			neighbors.push_back(tile_grid.get(locations[i]));
+		if (m_tile_grid.has(locations[i])) {
+			neighbors.push_back(m_tile_grid.get(locations[i]));
 		}
 	}
 	return neighbors;
@@ -86,7 +92,7 @@ Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 
 Vector2 axialRound(Vector2 hex) {
 	//return cubeToAxial(cubeRound(axialToCube(hex)));
-    return Vector2(0,0);
+	return Vector2(0, 0);
 }
 
 Vector3 cubeRound(Vector3 hex) {

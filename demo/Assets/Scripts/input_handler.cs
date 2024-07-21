@@ -10,6 +10,9 @@ public partial class input_handler : Node
     public delegate void PannedCameraEventHandler(Vector2 original_mouse_position, Vector2 moved_mouse_position);
 
     [Signal]
+    public delegate void PickTileEventHandler(Vector2 mouse_screen_position);
+
+    [Signal]
     public delegate void RotatedCameraLeftEventHandler();
 
     [Signal]
@@ -22,6 +25,7 @@ public partial class input_handler : Node
     public override void _Input(InputEvent @event) {
         if(@event is InputEventMouseButton mouseEvent && mouseEvent.ButtonIndex == MouseButton.Left) {
             GD.Print("Left mouse was pressed");
+            EmitSignal(SignalName.PickTile, mouse_position);
         } else if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
             if(!panning && mouseEventMid.Pressed) {
             panning = true;

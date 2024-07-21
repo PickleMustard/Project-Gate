@@ -1,29 +1,26 @@
-[gd_scene load_steps=3 format=3 uid="uid://dlfb38moythai"]
+[gd_scene load_steps=4 format=3 uid="uid://dlfb38moythai"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_6s4tb"]
 [ext_resource type="Script" path="res://Assets/Scripts/input_handler.cs" id="1_g7u70"]
+[ext_resource type="Script" path="res://Assets/Scripts/Camera_Projection.cs" id="2_ch463"]
 
 [node name="true_parent" type="Node3D"]
 
 [node name="Pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 624.667, 60.7132, 1175.23)
 script = ExtResource("1_6s4tb")
-camera_movement_speed = 0.1
-camera_panning_speed = 0.1
-rotation_duration = 0.2
 
 [node name="Camera3D" type="Camera3D" parent="Pivot"]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
 
-[node name="tile_grid" type="Node3D" parent="."]
+[node name="RayProjector" type="Node3D" parent="Pivot" node_paths=PackedStringArray("camera")]
+script = ExtResource("2_ch463")
+camera = NodePath("../Camera3D")
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("1_g7u70")
 
-[node name="TileGrid" type="TileGrid" parent="."]
-
-[node name="Tile" type="Tile" parent="."]
-transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, 635.279, 0, 1261.24)
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.0147271, -0.982632, -0.184978, -0.0779855, -0.185564, 0.979533, -0.996846, 0, -0.0793639, 689.459, 131.64, 1078.68)
+
+[node name="TileGrid" type="TileGrid" parent="."]

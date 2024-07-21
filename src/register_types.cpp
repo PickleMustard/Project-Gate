@@ -17,12 +17,12 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 	}
 	ClassDB::register_class<GDExample>();
 	ClassDB::register_class<TileGrid>();
-    ClassDB::register_class<Tile>();
+	ClassDB::register_class<Tile>();
 	ClassDB::register_class<SeededRandomAccess>();
 	ClassDB::register_class<LevelGenerator>();
 
-    SeededRandomAccess *SRA = memnew(SeededRandomAccess);
-    Engine::get_singleton()->register_singleton("GlobalSeededRandom", SRA);
+	SeededRandomAccess *SRA = memnew(SeededRandomAccess);
+	Engine::get_singleton()->register_singleton("GlobalSeededRandom", SRA);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
