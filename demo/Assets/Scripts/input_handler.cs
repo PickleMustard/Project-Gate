@@ -23,10 +23,10 @@ public partial class input_handler : Node
     private bool panning = false;
 
     public override void _Input(InputEvent @event) {
-        if(@event is InputEventMouseButton mouseEvent && mouseEvent.ButtonIndex == MouseButton.Left) {
+        /*if(@event is InputEventMouseButton mouseEvent && mouseEvent.ButtonIndex == MouseButton.Left) {
             GD.Print("Left mouse was pressed");
             EmitSignal(SignalName.PickTile, mouse_position);
-        } else if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
+        } else*/ if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
             if(!panning && mouseEventMid.Pressed) {
             panning = true;
             mouse_position = GetViewport().GetMousePosition();

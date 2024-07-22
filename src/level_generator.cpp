@@ -94,7 +94,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outerSize, m_innerSize, m_height));
 			//
 			grid_of_tiles.insert(vformat("Hex %d,%d", q, r), new_tile);
-      UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));
+      //UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));
 			root->add_child(new_tile, true, Node::INTERNAL_MODE_BACK);
 			new_tile->set_owner(root->get_owner());
       new_tile->set_name(vformat("Hex %d,%d", q, r));

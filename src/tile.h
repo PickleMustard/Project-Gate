@@ -8,7 +8,7 @@
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
 #include "godot_cpp/classes/static_body3d.hpp"
-//#include "tilecollisionobject.h"
+#include "tile_collision.h"
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
@@ -27,8 +27,8 @@ private:
 	float m_inner_size;
 	float m_height;
 	MeshInstance3D *m_mesh_inst = memnew(MeshInstance3D);
-  StaticBody3D *m_collision_body = memnew(StaticBody3D);
-  //TileCollisionObject *m_collision_body = memnew(TileCollisionObject);
+  //StaticBody3D *m_collision_body = memnew(StaticBody3D);
+  TileCollision *m_collision_body = memnew(TileCollision);
   CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
 	Ref<Mesh> m_mesh = memnew(Mesh);
 	ResourceLoader *m_rl = memnew(ResourceLoader);
