@@ -11,7 +11,6 @@
 
 #include <sys/types.h>
 #include <tile.h>
-//#include <tilegrid.h>
 
 namespace godot {
 

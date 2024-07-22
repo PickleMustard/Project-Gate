@@ -22,5 +22,3 @@ script = ExtResource("1_g7u70")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.0147271, -0.982632, -0.184978, -0.0779855, -0.185564, 0.979533, -0.996846, 0, -0.0793639, 689.459, 131.64, 1078.68)
-
-[node name="TileGrid" type="TileGrid" parent="."]

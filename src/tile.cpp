@@ -24,14 +24,16 @@ Tile::Tile() {
 	m_mesh = m_rl->load("res://sphere.tres", "Mesh");
 	m_mesh_inst->set_mesh(m_mesh);
 	this->set_name(vformat("Hex %d,%d", m_row, m_column));
-	this->add_child(m_mesh_inst);
+  m_collision_body->add_child(m_collision_shape);
+  m_collision_body->add_child(m_mesh_inst);
+
+  m_mesh_inst->create_convex_collision();
+  m_collision_shape->make_convex_from_siblings();
+
+  TypedArray<Node> children = m_mesh_inst->get_children();
+  m_mesh_inst->get_child(children[0])->reparent(this, false);
   this->add_child(m_collision_body);
-  m_collision_body->create_shape_owner(m_mesh_inst);
-	//m_mesh_inst->set_owner(this);
-	m_mesh_inst->create_convex_collision();
-	TypedArray<Node> children = m_mesh_inst->get_children();
-	m_mesh_inst->get_child(children[0])->reparent(this, false);
-	//UtilityFunctions::print(meshInst->get_child_count());
+
 	memdelete(m_rl);
 }
 
@@ -47,21 +49,26 @@ Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, f
 	m_mesh = m_rl->load("res://sphere.tres", "Mesh");
 	m_mesh_inst->set_mesh(m_mesh);
 	this->set_name(vformat("Hex %d,%d", m_row, m_column));
-	this->add_child(m_mesh_inst);
-  this->add_child(m_collision_body);
-  m_collision_body->create_shape_owner(m_mesh_inst);
+
+  m_collision_body->add_child(m_collision_shape);
+  m_collision_body->add_child(m_mesh_inst);
+
   m_collision_body->set_ray_pickable(true);
-	//m_mesh_inst->set_owner(this);
 	m_mesh_inst->create_convex_collision();
+  m_collision_shape->make_convex_from_siblings();
+
 	TypedArray<Node> children = m_mesh_inst->get_children();
 	m_mesh_inst->get_child(children[0])->reparent(this, false);
-	//UtilityFunctions::print(meshInst->get_child_count());
+  this->add_child(m_collision_body);
+
+  //m_collision_shape->_input(const Ref<InputEvent> &event) += NotifyLog();
 	memdelete(m_rl);
 }
 
 void Tile::SetOwner(Node *owner){
   m_mesh_inst->set_owner(owner);
   m_collision_body->set_owner(owner);
+  m_collision_shape->set_owner(owner);
 }
 
 void Tile::NotifyLog() {

@@ -3,6 +3,7 @@
 #include "godot_cpp/classes/engine.hpp"
 #include "level_generator.h"
 #include "seeded_random_access.h"
+#include "tile_collision.h"
 #include "tilegrid.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -16,6 +17,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 		return;
 	}
 	ClassDB::register_class<GDExample>();
+  ClassDB::register_class<TileCollision>();
 	ClassDB::register_class<TileGrid>();
 	ClassDB::register_class<Tile>();
 	ClassDB::register_class<SeededRandomAccess>();
