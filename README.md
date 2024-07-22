@@ -1,22 +1,27 @@
-# godot-cpp template
-This repository serves as a quickstart template for GDExtension development with Godot 4.0+.
+# Gate of Scalad (WIP Name)
+Adventure through procedurally generated rooms and fight unique enemies in this rogue-lite tactical rpg. Command your units across the different geographic features that generate in specialized levels. Equip them with varied and fun equipment to best the grunts and bosses you encounter. Can you help them escape?
+
+This project is not accepting contributions. It is a personal project to better my skills in C++ and C#, better my understanding of Godot, and reinforce computer graphics and linear algebra concepts.
 
 ## Contents
-* An empty Godot project (`demo/`)
-* godot-cpp as a submodule (`godot-cpp/`)
-* GitHub Issues template (`.github/ISSUE_TEMPLATE.yml`)
-* GitHub CI/CD to publish your library packages when creating a release (`.github/workflows/builds.yml`)
-* preconfigured source files for C++ development of the GDExtension (`src/`)
+* Main Godot project files under the "game-files" directory
+* GDExtension files under /Gate-of-Scalad/src
+* Sconstruct python make system to build the C++ GDExtension tool
 
 ## Usage
-To use this template, log in to github and click the green "Use this template" button at the top of the repository page.
-This will let you create a copy of this repository with a clean git history. Make sure you clone the correct branch as these are configured for development of their respective Godot development branches and differ from each other. Refer to the docs to see what changed between the versions.
+### Building
+** Note: This has only been tested on Linux **
+1. To build the GDExtension for level generation, ensure python3 is installed on the system with the pip module SCons:latest installed
+2. At the top level of the directory, use the command
+```bash scons platform={platform_name}```
+to build the GDextension for your current platform
+3. Open the project in Godot. If the objects defined under src are available to add to a scene, the extension has compiled properly
 
-For getting started after cloning your own copy to your local machine, you should: 
-* initialize the godot-cpp git submodule via `git submodule update --init`
-* change the name of your library
-  * change the name of the compiled library file inside the `SConstruct` file by modifying the `libname` string.
-  * change the pathnames of the to be loaded library name inside the `demo/bin/example.gdextension` file. By replacing `libgdexample` to the name specified in your `SConstruct` file.
-  * change the name of the `demo/bin/example.gdextension` file
-* change the `entry_symbol` string inside your `demo/bin/your-extension.gdextension` file to be configured for your GDExtension name. This should be the same as the `GDExtensionBool GDE_EXPORT` external C function. As the name suggests, this sets the entry function for your GDExtension to be loaded by the Godot editors C API.
-* register the classes you want Godot to interact with inside the `register_types.cpp` file in the initialization method (here `initialize_gdextension_types`) in the syntax `ClassDB::register_class<CLASS-NAME>();`.
+Attribution: Godot-Foundation for forked [godot-cpp-template repository](https://github.com/godotengine/godot-cpp-template)
+
+### Godot
+There is not a fully built release available to download and play. To test the game in its current state, please follow the following instructions:
+1. Download the latest Godot Engine - .NET build. Ensure it is the .NET build as the project makes extensive use of the language
+2. Open the repository through Godot using either the GUI Project Manager or use the command `godot --path <directory> --editor` to get to the editor
+3. This will allow you to play with terrain generation variables and customize it
+4. To interact with the game, either click the play button in the top right of the editor or use the command `godot --path <directory>`
