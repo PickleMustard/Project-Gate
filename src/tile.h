@@ -7,7 +7,6 @@
 #include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
-#include "godot_cpp/classes/static_body3d.hpp"
 #include "tile_collision.h"
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -37,6 +36,7 @@ public:
 	static void _bind_methods();
 	Tile();
 	Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height);
+  ~Tile();
 	Vector2i GetLocation();
 	int GetRow();
 	int GetColumn();

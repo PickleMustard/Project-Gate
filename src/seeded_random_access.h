@@ -6,6 +6,11 @@
 #include "godot_cpp/classes/ref.hpp"
 #include <cstdint>
 namespace godot {
+/*
+ * The Seeded Random Access Class creates a singleton object with a defined seed
+ * This is to allow the random aspects of the game to be predictable and repeatable
+ * All aspects of the game that use randomness will use these functions to ensure the same seed is used
+ */
 class SeededRandomAccess : public godot::Object {
 public:
 	GDCLASS(SeededRandomAccess, Object);
@@ -23,7 +28,7 @@ protected:
 	static void _bind_methods();
 
 private:
-	static SeededRandomAccess *m_instance;
+	static SeededRandomAccess *g_instance;
 	godot::Ref<RandomNumberGenerator> m_generator;
 	uint64_t m_seed;
 };
