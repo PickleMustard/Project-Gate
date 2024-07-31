@@ -4,6 +4,7 @@
 #include "level_generator.h"
 #include "seeded_random_access.h"
 #include "tile_collision.h"
+#include "tile_notifier.h"
 #include "tilegrid.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -17,14 +18,24 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 		return;
 	}
 	ClassDB::register_class<GDExample>();
+  //Tile Objects
   ClassDB::register_class<TileCollision>();
 	ClassDB::register_class<TileGrid>();
 	ClassDB::register_class<Tile>();
-	ClassDB::register_class<SeededRandomAccess>();
+
+  //Level Objects
 	ClassDB::register_class<LevelGenerator>();
 
+  //Singletons
+  ClassDB::register_class<SeededRandomAccess>();
+  ClassDB::register_class<TileNotifier>();
+
+  //Register Singletons
 	SeededRandomAccess *SRA = memnew(SeededRandomAccess);
 	Engine::get_singleton()->register_singleton("GlobalSeededRandom", SRA);
+
+  TileNotifier *Notifier = memnew(TileNotifier);
+  Engine::get_singleton()->register_singleton("GlobalTileNotifier", Notifier);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {

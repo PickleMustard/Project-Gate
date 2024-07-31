@@ -8,8 +8,19 @@ public partial class Camera_Projection : Node3D
 
   public override void _Ready()
   {
+    Callable notify = new Callable(this, "NotifyLog");
     //input_handler i_handle = GetNode<Node>("/root/true_parent/input_handler") as input_handler;
     //i_handle.PickTile += FindTileAtPosition;
+    var test = Engine.GetSingleton("GlobalTileNotifier");
+    var testTimer = new Timer();
+    var signals = test.GetSignalList();
+    test.Connect(signals[0]["name"].ToString(), notify);
+    GD.Print(signals[0]["name"].ToString());
+    //Connect(signals[0]["name"].ToString(), notify);
+    GD.Print(test.HasSignal("TileSelected"));
+    GD.Print(test.GetType());
+    GD.Print(testTimer.GetType());
+    GD.Print(signals);
 
   }
 
@@ -23,7 +34,9 @@ public partial class Camera_Projection : Node3D
     GD.Print($"Query: {collision}");
   }
 
-  public void NotifyLog() {
+  public void NotifyLog(Node tile)
+  {
     GD.Print("Something");
+    GD.Print(tile.GetParent().ToString());
   }
 }

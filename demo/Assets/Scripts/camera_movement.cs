@@ -18,7 +18,9 @@ public partial class camera_movement : Node3D
 
     public override void _Ready() {
         input_handler i_handle = GetNode<Node>("/root/true_parent/input_handler") as input_handler;
-        GD.Print(i_handle);
+        //GD.Print("Test");
+        //GD.Print(i_handle.GetSignalList());
+        //GD.Print("Test");
         i_handle.MovedCamera += moveCamera;
         i_handle.PannedCamera += panCamera;
         i_handle.RotatedCameraLeft += RotateCameraLeft;

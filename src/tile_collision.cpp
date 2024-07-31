@@ -4,6 +4,7 @@
 #include "godot_cpp/core/object.hpp"
 #include "godot_cpp/variant/signal.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "tile_notifier.h"
 
 using namespace godot;
 
@@ -41,5 +42,5 @@ void TileCollision::_input_event(Camera3D *camera, const Ref<InputEvent> &event,
 
 void TileCollision::NotifyLog() {
   UtilityFunctions::print("In NotifyLog");
-  emit_signal("notify");
+  TileNotifier::getInstance()->TileSelected(this);
 }

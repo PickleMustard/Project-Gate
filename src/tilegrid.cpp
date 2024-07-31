@@ -70,21 +70,21 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
  * This signals the grid to either reform its current grid or generate a new one
  */
 void TileGrid::_notification(int p_what) {
-	/*if (p_what == NOTIFICATION_READY) {
-		if (this->get_child_count() > 0) {
-			UtilityFunctions::print("Children Exist; Erasing and regenerating");
-			m_tile_grid.clear();
-			int num_childs = get_child_count();
-			for (int i = 0; i < num_childs; i++) {
-				remove_child(get_child(i));
-			}
-		}
-		if (m_showrooms == nullptr) {
-			UtilityFunctions::print("Nullptr: Constructing new level");
+	if (p_what == NOTIFICATION_READY) {
+		//if (this->get_child_count() > 0) {
+		//	UtilityFunctions::print("Children Exist; Erasing and regenerating");
+		//	m_tile_grid.clear();
+		//	int num_childs = get_child_count();
+		//	for (int i = 0; i < num_childs; i++) {
+		//		remove_child(get_child(i));
+		//	}
+		//}
+		//if (m_showrooms == nullptr) {
+			//UtilityFunctions::print("Nullptr: Constructing new level");
 			m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
 			m_tile_grid = m_showrooms->GenerateLevel(this);
-		}
-	}*/
+		//}
+	}
 }
 
 /*

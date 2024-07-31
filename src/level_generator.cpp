@@ -56,7 +56,7 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	Vector<uint8_t> tile_bit_map;
 	tile_bit_map.resize(m_maximum_grid_size[0] * m_maximum_grid_size[1]);
 	tile_bit_map.fill(0);
-	int num_of_rooms = 40;
+	int num_of_rooms = 5;
 	Vector2i gridCenter(m_maximum_grid_size[0] / 2, m_maximum_grid_size[1] / 2);
 
 	rooms_kd_tree = m_GenerateTileBitMap(tile_bit_map, rooms_kd_tree, num_of_rooms, 0, 3, gridCenter);

@@ -9,16 +9,15 @@ namespace godot {
 class TileCollision : public StaticBody3D {
 	GDCLASS(TileCollision, StaticBody3D);
 
-protected:
 
 public:
 	//void _ready() override;
   static void _bind_methods();
-  void _register_methods();
   TileCollision();
   ~TileCollision();
 	void NotifyLog();
 	void _input_event(Camera3D *camera, const Ref<InputEvent> &event, const Vector3 &position, const Vector3 &normal, int32_t shape_idx) override;
+protected:
 };
 } //namespace godot
 

@@ -31,6 +31,7 @@ private:
   CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
 	Ref<Mesh> m_mesh = memnew(Mesh);
 	ResourceLoader *m_rl = memnew(ResourceLoader);
+  void (*TileSelected)(Tile*);
 
 public:
 	static void _bind_methods();
