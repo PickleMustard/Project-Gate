@@ -14,6 +14,7 @@ protected:
 public:
 	//void _ready() override;
   static void _bind_methods();
+  void _register_methods();
   TileCollision();
   ~TileCollision();
 	void NotifyLog();

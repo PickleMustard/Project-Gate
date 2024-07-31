@@ -13,6 +13,7 @@ using namespace godot;
 void LevelGenerator::_bind_methods() {
 }
 
+
 LevelGenerator::LevelGenerator() {
 	m_outerSize = 1.0f;
 	m_innerSize = 0.0f;
@@ -36,6 +37,7 @@ LevelGenerator::LevelGenerator(float outer_size, float inner_size, float height,
 LevelGenerator::~LevelGenerator() {
 	//Clean up allocated objects
 }
+
 
 /*
  * Administrator function that generates the 3D tiles that make up a level

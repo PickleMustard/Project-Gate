@@ -116,7 +116,7 @@ int SeededRandomAccess::GetWholeNumber(int upper_limit) {
 void SeededRandomAccess::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetInteger", "lower_limit", "upper_limit"), &SeededRandomAccess::GetInteger, int(), int());
 	godot::ClassDB::bind_method(godot::D_METHOD("GetWholeNumber", "upper_limit"), &SeededRandomAccess::GetWholeNumber, int());
-  godot::ClassDB::bind_method(godot::D_METHOD("GetInstance"), SeededRandomAccess::GetInstance());
+//  godot::ClassDB::bind_method(godot::D_METHOD("GetInstance"), &SeededRandomAccess::GetInstance());
 }
 
 /*

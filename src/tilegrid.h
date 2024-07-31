@@ -18,15 +18,20 @@ public:
 	Vector<Tile> m_path;
 	float m_size = 3.0f;
 	int m_radius = 7;
-	float m_outer_size = 1.0f;
+	float tile_m_outer_size = 1.0f;
 	float m_inner_size = 0.0f;
 	float m_height = 1.0f;
 	bool m_is_flat_topped;
 	HashMap<String, Tile *> m_tile_grid;
 
+  TileGrid();
+  ~TileGrid();
+
+  void set_outer_size(float new_size);
+  float get_outer_size();
+
 	Tile *FindTileOnGrid(Vector2i location);
 	Vector<Tile *> GetNeighbors(Tile *tile);
-	static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
 	Vector2 PositionToGrid(Vector3 location);
 	Vector2 AxialRound(Vector2 hex);
 	Vector3 CubeRound(Vector3 hex);
@@ -34,13 +39,13 @@ public:
 	Vector3 AxialToCube(Vector2 hex);
 	Vector2 AxialToOffset(Vector2 hex);
 	Vector2 OffsetToAxial(Vector2 hex);
-	void _notification(int p_what);
   void GenerateTileGrid();
-	TileGrid();
-	~TileGrid();
+
+  static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
 
 protected:
-	static void _bind_methods();
+  void _notification(int p_what);
+  static void _bind_methods();
 
 private:
   LevelGenerator *m_showrooms = nullptr;

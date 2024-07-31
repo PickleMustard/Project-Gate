@@ -1,6 +1,8 @@
 #include "tilegrid.h"
+#include "godot_cpp/classes/global_constants.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/property_info.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "level_generator.h"
 #include <godot_cpp/templates/hash_map.hpp>
@@ -9,9 +11,6 @@
 
 using namespace godot;
 
-void TileGrid::_bind_methods() {
-	//godot::ClassDB::bind_method(godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForhexFromCoordinate, Vector2i(), float(), bool());
-}
 
 /*
  * Function to derive the position in world space for a tile given its row, column coordinates, size, and orientation
@@ -71,7 +70,7 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
  * This signals the grid to either reform its current grid or generate a new one
  */
 void TileGrid::_notification(int p_what) {
-	if (p_what == NOTIFICATION_READY) {
+	/*if (p_what == NOTIFICATION_READY) {
 		if (this->get_child_count() > 0) {
 			UtilityFunctions::print("Children Exist; Erasing and regenerating");
 			m_tile_grid.clear();
@@ -82,16 +81,18 @@ void TileGrid::_notification(int p_what) {
 		}
 		if (m_showrooms == nullptr) {
 			UtilityFunctions::print("Nullptr: Constructing new level");
-			m_showrooms = memnew(LevelGenerator(m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
+			m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
 			m_tile_grid = m_showrooms->GenerateLevel(this);
 		}
-	}
+	}*/
 }
 
 /*
  * Devoted Function to generate the tile_grid
  */
 void TileGrid::GenerateTileGrid() {
+	UtilityFunctions::print("Nullptr: Constructing new level");
+	m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
 	m_tile_grid = m_showrooms->GenerateLevel(this);
 }
 
@@ -236,7 +237,7 @@ Vector2 axialToOffset(Vector2 hex) {
  *
  * Parameters:
  * hex: Vector2 row, column offset notation of tile position
- *
+  *
  * Returns:
  * Vector2: q, r axial notation tile position
  */
@@ -254,3 +255,21 @@ TypedArray<Node> children = this->get_children();
 for(int i = 0; i < num_childs; i++) {
 	children[i].
 }*/
+
+void TileGrid::set_outer_size(float new_size){
+  tile_m_outer_size = new_size;
+}
+
+float TileGrid::get_outer_size() {
+  return tile_m_outer_size;
+}
+
+void TileGrid::_bind_methods() {
+  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
+  godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
+  godot::ClassDB::bind_method(godot::D_METHOD("set_outer_size", "new_size"), &TileGrid::set_outer_size);
+  godot::ClassDB::bind_method(godot::D_METHOD("get_outer_size"), &TileGrid::get_outer_size);
+
+  ADD_GROUP("Tile Properties", "tile_");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_m_outer_size", PROPERTY_HINT_NONE, "suffix:s", PROPERTY_USAGE_NONE), "set_outer_size", "get_outer_size");
+}

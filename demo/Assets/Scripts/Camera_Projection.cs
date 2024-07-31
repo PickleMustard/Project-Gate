@@ -8,8 +8,9 @@ public partial class Camera_Projection : Node3D
 
   public override void _Ready()
   {
-    input_handler i_handle = GetNode<Node>("/root/true_parent/input_handler") as input_handler;
-    i_handle.PickTile += FindTileAtPosition;
+    //input_handler i_handle = GetNode<Node>("/root/true_parent/input_handler") as input_handler;
+    //i_handle.PickTile += FindTileAtPosition;
+
   }
 
 
