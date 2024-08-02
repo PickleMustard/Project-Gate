@@ -1,16 +1,18 @@
 #include "tilegrid.h"
 #include "godot_cpp/classes/global_constants.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/object.hpp"
 #include "godot_cpp/core/property_info.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/variant/variant.hpp"
 #include "level_generator.h"
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
 using namespace godot;
-
 
 /*
  * Function to derive the position in world space for a tile given its row, column coordinates, size, and orientation
@@ -80,9 +82,9 @@ void TileGrid::_notification(int p_what) {
 		//	}
 		//}
 		//if (m_showrooms == nullptr) {
-			//UtilityFunctions::print("Nullptr: Constructing new level");
-			m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
-			m_tile_grid = m_showrooms->GenerateLevel(this);
+		//UtilityFunctions::print("Nullptr: Constructing new level");
+		//m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, Vector2i(1000, 1000)));
+		//m_tile_grid = m_showrooms->GenerateLevel(this);
 		//}
 	}
 }
@@ -91,9 +93,9 @@ void TileGrid::_notification(int p_what) {
  * Devoted Function to generate the tile_grid
  */
 void TileGrid::GenerateTileGrid() {
-	UtilityFunctions::print("Nullptr: Constructing new level");
-	m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
-	m_tile_grid = m_showrooms->GenerateLevel(this);
+	//UtilityFunctions::print("Nullptr: Constructing new level");
+	//m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, Vector2i(1000, 1000)));
+	//m_tile_grid = m_showrooms->GenerateLevel(this);
 }
 
 /*
@@ -101,7 +103,7 @@ void TileGrid::GenerateTileGrid() {
  * Creates the reference to the grids HashMap
  */
 TileGrid::TileGrid() {
-	m_is_flat_topped = true;
+	m_tile_is_flat_topped = true;
 	m_tile_grid = HashMap<String, Tile *>{};
 }
 
@@ -237,7 +239,7 @@ Vector2 axialToOffset(Vector2 hex) {
  *
  * Parameters:
  * hex: Vector2 row, column offset notation of tile position
-  *
+ *
  * Returns:
  * Vector2: q, r axial notation tile position
  */
@@ -256,20 +258,53 @@ for(int i = 0; i < num_childs; i++) {
 	children[i].
 }*/
 
-void TileGrid::set_outer_size(float new_size){
-  tile_m_outer_size = new_size;
+void TileGrid::SetOuterSize(float new_size) {
+	m_tile_outer_size = new_size;
 }
 
-float TileGrid::get_outer_size() {
-  return tile_m_outer_size;
+float TileGrid::GetOuterSize() {
+	return m_tile_outer_size;
+}
+
+void TileGrid::SetInnerSize(float new_size) {
+	m_tile_inner_size = new_size;
+}
+
+float TileGrid::GetInnerSize() {
+	return m_tile_inner_size;
+}
+
+void TileGrid::SetFlatTopped(bool is_flat) {
+  m_tile_is_flat_topped = is_flat;
+}
+
+bool TileGrid::GetFlatTopped() {
+  return m_tile_is_flat_topped;
+}
+
+void TileGrid::SetTileHeight(float new_height){
+  m_tile_height = new_height;
+}
+
+float TileGrid::GetTileHeight() {
+  return m_tile_height;
 }
 
 void TileGrid::_bind_methods() {
-  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
-  godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
-  godot::ClassDB::bind_method(godot::D_METHOD("set_outer_size", "new_size"), &TileGrid::set_outer_size);
-  godot::ClassDB::bind_method(godot::D_METHOD("get_outer_size"), &TileGrid::get_outer_size);
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
+	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetInnerSize", "new_size"), &TileGrid::SetInnerSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetInnerSize"), &TileGrid::GetInnerSize);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetFlatTopped", "is_flat"), &TileGrid::SetFlatTopped);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetFlatTopped"), &TileGrid::GetFlatTopped);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetTileHeight", "new_height"), &TileGrid::SetTileHeight);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
 
-  ADD_GROUP("Tile Properties", "tile_");
-  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_m_outer_size", PROPERTY_HINT_NONE, "suffix:s", PROPERTY_USAGE_NONE), "set_outer_size", "get_outer_size");
+	ADD_GROUP("Tile Properties", "m_tile_");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
 }

@@ -1,5 +1,6 @@
 #ifndef TILEGRID_H
 #define TILEGRID_H
+#include "godot_cpp/variant/vector2i.hpp"
 #pragma once
 
 #include "tile.h"
@@ -18,17 +19,31 @@ public:
 	Vector<Tile> m_path;
 	float m_size = 3.0f;
 	int m_radius = 7;
-	float tile_m_outer_size = 1.0f;
-	float m_inner_size = 0.0f;
-	float m_height = 1.0f;
-	bool m_is_flat_topped;
+	float m_tile_outer_size = 1.0f;
+	float m_tile_inner_size = 0.0f;
+	float m_tile_height = 1.0f;
+	bool m_tile_is_flat_topped;
 	HashMap<String, Tile *> m_tile_grid;
 
   TileGrid();
   ~TileGrid();
 
-  void set_outer_size(float new_size);
-  float get_outer_size();
+  void SetSize(float new_size);
+  float GetSize();
+  void SetRadius(int new_radius);
+  int GetRadius();
+  void SetOuterSize(float new_size);
+  float GetOuterSize();
+  void SetInnerSize(float new_size);
+  float GetInnerSize();
+  void SetTileHeight(float new_height);
+  float GetTileHeight();
+  void SetFlatTopped(bool is_ft);
+  bool GetFlatTopped();
+  void SetGridSize(Vector2i new_size);
+  Vector2i GetGridSize();
+  HashMap<String, Tile *> GetTileMap();
+
 
 	Tile *FindTileOnGrid(Vector2i location);
 	Vector<Tile *> GetNeighbors(Tile *tile);
