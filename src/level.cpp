@@ -15,7 +15,7 @@ godot::Level::Level() {
   }
   m_tile_grid = memnew(TileGrid);
 
-  //OS::get_singleton()->connect("GenerateLevel", godot::Call);
+  OS::get_singleton()->connect("GenerateLevel", );
 UtilityFunctions::print(get_child_count());
 
 }
