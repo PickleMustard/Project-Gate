@@ -1,5 +1,6 @@
 #ifndef TILEGRID_H
 #define TILEGRID_H
+#include "godot_cpp/variant/variant.hpp"
 #include "godot_cpp/variant/vector2i.hpp"
 #pragma once
 
@@ -54,9 +55,17 @@ public:
 	Vector3 AxialToCube(Vector2 hex);
 	Vector2 AxialToOffset(Vector2 hex);
 	Vector2 OffsetToAxial(Vector2 hex);
+
+  godot::Vector<Tile> CalculatePath(Vector3 starting_location, Vector3 end_location);
+  godot::Vector<Tile> RetracePath(Tile start_tile, Tile end_tile);
+  int CalculateDistance(Tile location, Tile destination);
+  Vector2i SubtractHex(Vector2i a, Vector2i b);
+  int LengthHex(Vector2i hex);
+  int DistanceHex(Vector2i a, Vector2i b);
   void GenerateTileGrid();
 
   static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
+
 
 protected:
   void _notification(int p_what);
