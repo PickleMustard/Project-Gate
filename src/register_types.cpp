@@ -6,6 +6,7 @@
 #include "tile_collision.h"
 #include "tile_notifier.h"
 #include "tilegrid.h"
+#include "level.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
@@ -25,6 +26,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 
   //Level Objects
 	ClassDB::register_class<LevelGenerator>();
+  ClassDB::register_class<Level>();
 
   //Singletons
   ClassDB::register_class<SeededRandomAccess>();

@@ -26,7 +26,6 @@ private:
 	float m_tile_inner_size;
 	float m_tile_height;
 	MeshInstance3D *m_mesh_inst = memnew(MeshInstance3D);
-	//StaticBody3D *m_collision_body = memnew(StaticBody3D);
 	TileCollision *m_collision_body = memnew(TileCollision);
 	CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
 	Ref<Mesh> m_mesh = memnew(Mesh);

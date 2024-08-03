@@ -1,5 +1,4 @@
 #include "tile.h"
-#include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
@@ -107,11 +106,6 @@ Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, f
 }
 
 Tile::~Tile() {
-  m_collision_shape->queue_free();
-  m_mesh_inst->queue_free();
-  m_mesh.unref();
-  m_collision_body->queue_free();
-  this->queue_free();
 }
 
 /*
