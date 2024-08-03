@@ -17,6 +17,7 @@ public partial class MoveToLocation: Node3D {
     public void MoveUnit(Vector3 location) {
       if(path.Count <= 0 && !moving) {
         current_location = this.Position;
+        //EmitSignal(SignalName.)
       }
     }
 

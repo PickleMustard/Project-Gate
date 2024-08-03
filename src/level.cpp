@@ -1,7 +1,8 @@
 #include "level.h"
-#include "godot_cpp/classes/os.hpp"
+#include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/callable.hpp"
+#include "godot_cpp/variant/callable_method_pointer.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
 #include "level_generator.h"
@@ -15,8 +16,8 @@ godot::Level::Level() {
   }
   m_tile_grid = memnew(TileGrid);
 
-  OS::get_singleton()->connect("GenerateLevel", );
-UtilityFunctions::print(get_child_count());
+  Engine::get_singleton()->connect("RegenerateGrid", callable_mp(this, &godot::Level::GenerateLevel));
+  UtilityFunctions::print(get_child_count());
 
 }
 

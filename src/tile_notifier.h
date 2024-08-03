@@ -4,8 +4,9 @@
 #include "tile_collision.h"
 namespace godot {
 class TileNotifier : public godot::Node {
-public:
 	GDCLASS(TileNotifier, godot::Node);
+
+public:
 	TileNotifier();
 	~TileNotifier();
 	void TileSelected(godot::TileCollision *selected_tile);

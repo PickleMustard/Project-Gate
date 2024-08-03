@@ -39,6 +39,8 @@ public partial class input_handler : Node
             moved_mouse_position = GetViewport().GetMousePosition();
             EmitSignal(SignalName.PannedCamera, mouse_position, moved_mouse_position);
             mouse_position = moved_mouse_position;
+        } else if(@event is InputEventKey keyEvent && keyEvent.Keycode == Key.R) {
+          EmitSignal(SignalName.RegenerateGrid);
         }
 
     }
