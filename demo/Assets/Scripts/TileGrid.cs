@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class TileGrid : Node3D {
+/*public partial class TileGrid : Node3D {
     public Dictionary<string, Tile> gridOfTiles;
     //public static List<Tile> gridOfTiles;
     //For a hexagonal grid, just uses the x component of gridSize
@@ -49,7 +49,7 @@ public partial class TileGrid : Node3D {
                 gridOfTiles.Add($"Hex {y},{x}",tile);
                 GD.Print($"Added child {y},{x}");
             }
-        }*/
+        }*
 
         for (int q = -radius; q <= radius; q++) {
             int r1 = Mathf.Max(-radius, -q - radius);
@@ -127,7 +127,7 @@ public partial class TileGrid : Node3D {
                 Gizmos.DrawCube(t.tilePosition, Vector3.one);
             }
         }
-    }*/
+    }*
 
     //Get the neighbors of the Tile (X is the column and Z is the row)
     public List<Tile> GetNeighbors(Tile tile){
@@ -155,7 +155,7 @@ public partial class TileGrid : Node3D {
         Q is referenced as x
         R is referenced as y
         S is referenced as z
-    */
+    *
     static Vector2 axialRound(Vector2 hex){
         return cubeToAxial(cubeRound(axialToCube(hex)));
     }
@@ -212,4 +212,4 @@ public partial class TileGrid : Node3D {
         GD.Print(string.Format("Offset to Axial Conv: Q: {0} | R: {1}", q, r));
         return new Vector2(q, r);
     }
-}
+}*/

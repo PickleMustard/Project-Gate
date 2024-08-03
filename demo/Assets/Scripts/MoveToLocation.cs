@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class MoveToLocation: Node3D {
+/*public partial class MoveToLocation: Node3D {
     private Vector3 current_location, wanted_location, hit_location;
     private bool moving = false;
     private Queue<Tile> path = new Queue<Tile>();
@@ -87,4 +87,4 @@ public partial class MoveToLocation: Node3D {
     }
 
 
-}
+}*/

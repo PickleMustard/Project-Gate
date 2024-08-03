@@ -21,6 +21,17 @@ public partial class input_handler : Node
     private Vector2 mouse_position;
     private Vector2 moved_mouse_position;
     private bool panning = false;
+    private Node Level;
+    private Godot.Collections.Dictionary RegenerateGrid;
+
+    public override void _Ready() {
+      Level = GetNode<Node>("/root/true_parent/Level");
+      GD.Print(Level.ToString());
+      RegenerateGrid = Level.GetSignalList()[0];
+      GD.Print(Level.GetSignalConnectionList(RegenerateGrid["name"].ToString()));
+      GD.Print(RegenerateGrid);
+
+    }
 
     public override void _Input(InputEvent @event) {
         /*if(@event is InputEventMouseButton mouseEvent && mouseEvent.ButtonIndex == MouseButton.Left) {
@@ -40,7 +51,7 @@ public partial class input_handler : Node
             EmitSignal(SignalName.PannedCamera, mouse_position, moved_mouse_position);
             mouse_position = moved_mouse_position;
         } else if(@event is InputEventKey keyEvent && keyEvent.Keycode == Key.R) {
-          EmitSignal(SignalName.RegenerateGrid);
+          Level.EmitSignal(RegenerateGrid["name"].ToString());
         }
 
     }

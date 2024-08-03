@@ -16,7 +16,6 @@ public partial class Camera_Projection : Node3D
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
     GD.Print(signals[0]["name"].ToString());
-    //Connect(signals[0]["name"].ToString(), notify);
     GD.Print(test.HasSignal("TileSelected"));
     GD.Print(test.GetType());
     GD.Print(testTimer.GetType());
