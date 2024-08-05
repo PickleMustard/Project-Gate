@@ -31,10 +31,10 @@ private:
   String m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
   String m_tile_mesh_name;
   Tile *m_path_parent;
-	MeshInstance3D *m_mesh_inst = memnew(MeshInstance3D);
+	//MeshInstance3D *m_mesh_inst = memnew(MeshInstance3D);
 	TileCollision *m_collision_body = memnew(TileCollision);
 	CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
-  TileMeshGenerator *m_mesh_generator;
+  TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator);
 	Ref<Mesh> m_mesh = memnew(Mesh);
 	ResourceLoader *m_rl = memnew(ResourceLoader);
 	void (*TileSelected)(Tile *);
