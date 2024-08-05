@@ -33,9 +33,10 @@ public partial class Camera_Projection : Node3D
     GD.Print($"Query: {collision}");
   }
 
-  public void NotifyLog(Node tile)
+  public void NotifyLog(Node tile_collider)
   {
     GD.Print("Something");
-    GD.Print(tile.GetParent().ToString());
+    GD.Print(tile_collider.GetParent().ToString());
+    Node tile = tile_collider.GetParent();
   }
 }
