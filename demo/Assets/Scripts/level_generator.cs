@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class level_generator
+/*public partial class level_generator
 {
     private float outerSize;
     private float innerSize;
@@ -102,7 +102,7 @@ public partial class level_generator
      *Generates a random number of rooms to generate coming out from that center room
      *The initial layer has a random # of rooms generated going at different directions | this is subtracted from the total
      *
-     */
+     *
     private void generateTileBitMap(byte[] tile_bit_map, List<Vector2I> room_centers,
             int num_of_rooms_remaining, int current_level, int max_level, Vector2I max_grid_size) {
         SeededRandomAccess rnd = SeededRandomAccess.staticSeededRandomAccess;
@@ -201,4 +201,4 @@ public partial class level_generator
 
     }
 
-}
+}*/

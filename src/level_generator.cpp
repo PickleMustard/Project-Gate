@@ -13,7 +13,6 @@ using namespace godot;
 void LevelGenerator::_bind_methods() {
 }
 
-
 LevelGenerator::LevelGenerator() {
 	m_outerSize = 1.0f;
 	m_innerSize = 0.0f;
@@ -26,18 +25,18 @@ LevelGenerator::LevelGenerator(const Vector2i &grid_size) {
 	m_maximum_grid_size = grid_size;
 }
 
-LevelGenerator::LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, const Vector2i &grid_size) {
+LevelGenerator::LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size) {
 	m_outerSize = outer_size;
 	m_innerSize = inner_size;
 	m_height = height;
 	m_is_flat_topped = is_flat_topped;
 	m_maximum_grid_size = grid_size;
+	m_num_rooms = num_rooms;
 }
 
 LevelGenerator::~LevelGenerator() {
 	//Clean up allocated objects
 }
-
 
 /*
  * Administrator function that generates the 3D tiles that make up a level
@@ -56,10 +55,10 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	Vector<uint8_t> tile_bit_map;
 	tile_bit_map.resize(m_maximum_grid_size[0] * m_maximum_grid_size[1]);
 	tile_bit_map.fill(0);
-	int num_of_rooms = 5;
+	int m_num_rooms = 5;
 	Vector2i gridCenter(m_maximum_grid_size[0] / 2, m_maximum_grid_size[1] / 2);
 
-	rooms_kd_tree = m_GenerateTileBitMap(tile_bit_map, rooms_kd_tree, num_of_rooms, 0, 3, gridCenter);
+	rooms_kd_tree = m_GenerateTileBitMap(tile_bit_map, rooms_kd_tree, m_num_rooms, 0, 3, gridCenter);
 	//UtilityFunctions::print(rooms_kd_tree);
 	//UtilityFunctions::print(vformat("%d q, %d r", location[0], location[1]));
 
@@ -96,11 +95,11 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outerSize, m_innerSize, m_height));
 			//
 			grid_of_tiles.insert(vformat("Hex %d,%d", q, r), new_tile);
-      //UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));
+			//UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));
 			root->add_child(new_tile, true, Node::INTERNAL_MODE_BACK);
 			new_tile->set_owner(root->get_owner());
-      new_tile->set_name(vformat("Hex %d,%d", q, r));
-      new_tile->SetOwner(root->get_owner());
+			new_tile->set_name(vformat("Hex %d,%d", q, r));
+			new_tile->SetOwner(root->get_owner());
 			//root->set_editable_instance(new_tile, true);
 			new_tile->SetTilePosition(location);
 			//
@@ -215,7 +214,7 @@ void LevelGenerator::m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, 
  * Arguments:
  * tile_bit_map: Reference to the Vector of unsigned bytes storing data about whether a tile is present at the row,column location
  * room_centers: Reference to the Vector of 2D Integer Vectors storing a room's center tile's row,column position
- * num_of_rooms_remaining: Reference to the # of rooms left available to generate
+ * m_num_rooms_remaining: Reference to the # of rooms left available to generate
  * current_level: Describes the level of the tree the generator is currently on
  * max_level: Describes the max level of the tree that the generator can go to
  * max_grid_size: 2D Integer Vector that describes the maximum row, column boundaries of the generator

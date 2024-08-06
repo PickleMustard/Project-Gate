@@ -1,16 +1,20 @@
 #include "tilegrid.h"
-#include "godot_cpp/classes/global_constants.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/memory.hpp"
+#include "godot_cpp/core/object.hpp"
 #include "godot_cpp/core/property_info.hpp"
+#include "godot_cpp/templates/hash_set.hpp"
+#include "godot_cpp/templates/vector.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/variant/variant.hpp"
 #include "level_generator.h"
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
 using namespace godot;
-
 
 /*
  * Function to derive the position in world space for a tile given its row, column coordinates, size, and orientation
@@ -71,18 +75,20 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
  */
 void TileGrid::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
-		//if (this->get_child_count() > 0) {
-		//	UtilityFunctions::print("Children Exist; Erasing and regenerating");
-		//	m_tile_grid.clear();
-		//	int num_childs = get_child_count();
-		//	for (int i = 0; i < num_childs; i++) {
-		//		remove_child(get_child(i));
-		//	}
-		//}
+		if (this->get_child_count() > 0) {
+			UtilityFunctions::print("Children Exist; Erasing and regenerating");
+			m_tile_grid.clear();
+			int num_childs = get_child_count();
+			TypedArray<Node> children = get_children();
+
+			//for (int i = 0; i < num_childs; i++) {
+			//UtilityFunctions::print(children[0].stringify());
+			//}
+		}
 		//if (m_showrooms == nullptr) {
-			//UtilityFunctions::print("Nullptr: Constructing new level");
-			m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
-			m_tile_grid = m_showrooms->GenerateLevel(this);
+		//UtilityFunctions::print("Nullptr: Constructing new level");
+		//m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, Vector2i(1000, 1000)));
+		//m_tile_grid = m_showrooms->GenerateLevel(this);
 		//}
 	}
 }
@@ -92,8 +98,9 @@ void TileGrid::_notification(int p_what) {
  */
 void TileGrid::GenerateTileGrid() {
 	UtilityFunctions::print("Nullptr: Constructing new level");
-	m_showrooms = memnew(LevelGenerator(tile_m_outer_size, m_inner_size, m_height, m_is_flat_topped, Vector2i(1000, 1000)));
+	m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
 	m_tile_grid = m_showrooms->GenerateLevel(this);
+  memdelete(m_showrooms);
 }
 
 /*
@@ -101,8 +108,15 @@ void TileGrid::GenerateTileGrid() {
  * Creates the reference to the grids HashMap
  */
 TileGrid::TileGrid() {
-	m_is_flat_topped = true;
+	m_tile_is_flat_topped = true;
 	m_tile_grid = HashMap<String, Tile *>{};
+}
+
+TileGrid::TileGrid(Vector3 origin, int num_rooms) {
+  m_tile_is_flat_topped = true;
+  m_tile_grid = HashMap<String, Tile *>{};
+  m_grid_origin = origin;
+  m_grid_num_rooms = num_rooms;
 }
 
 /*
@@ -237,7 +251,7 @@ Vector2 axialToOffset(Vector2 hex) {
  *
  * Parameters:
  * hex: Vector2 row, column offset notation of tile position
-  *
+ *
  * Returns:
  * Vector2: q, r axial notation tile position
  */
@@ -256,20 +270,170 @@ for(int i = 0; i < num_childs; i++) {
 	children[i].
 }*/
 
-void TileGrid::set_outer_size(float new_size){
-  tile_m_outer_size = new_size;
+/*
+ * Calculate the path a unit should take from its current tile to the desired tile
+ * Arguments:
+ * starting_location: Vector2i column, row representation of the tile unit is currently on
+ * end_location: Vector2i column, row representation of the desired tile to end on
+ *
+ * Returns:
+ * path: Vector of Tile* describing the optimal path to travel for a unit
+ *
+ * Errors:
+ * Empty Vector: Returns an empty vector if the path cannot be calculated (i.e. if tilegrid is split or does not connect)
+ */
+godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_location) {
+	Tile *first_node, *wanted_node;
+	godot::Vector<Tile *> open_tiles;
+	godot::HashSet<Tile *> closed_tiles;
+	godot::Vector<Tile *> final_path;
+  godot::Array final_path_arr;
+	godot::Vector<Tile *> neighbors;
+
+	first_node = FindTileOnGrid(starting_location);
+	wanted_node = FindTileOnGrid(starting_location);
+
+	open_tiles.push_back(first_node);
+	while (open_tiles.size() > 0) {
+		Tile *current_tile = open_tiles[0];
+		for (int i = 1; i < open_tiles.size(); i++) {
+			if (open_tiles[i]->GetFCost() <= current_tile->GetFCost()) {
+				if (open_tiles[i]->GetHCost() < current_tile->GetHCost()) {
+					current_tile = open_tiles[i];
+				}
+			}
+		}
+		open_tiles.erase(current_tile);
+		closed_tiles.insert(current_tile);
+		if (current_tile == wanted_node) {
+			final_path = RetracePath(first_node, wanted_node);
+      for(Tile *t : final_path) {
+        final_path_arr.append(t);
+      }
+			return final_path_arr;
+		}
+
+		neighbors = GetNeighbors(current_tile);
+		for (Tile *neighbor : neighbors) {
+			if (neighbor->GetTileType() == "obstacle" || closed_tiles.has(neighbor)) {
+				continue;
+			}
+
+			int new_cost_to_neighbor = current_tile->GetGCost() + CalculateDistance(current_tile, neighbor);
+			if (new_cost_to_neighbor < neighbor->GetGCost() || !open_tiles.has(neighbor)) {
+				neighbor->SetGCost(new_cost_to_neighbor);
+				neighbor->SetHCost(CalculateDistance(neighbor, wanted_node));
+				neighbor->SetParent(current_tile);
+			}
+			if (!open_tiles.has(neighbor)) {
+				open_tiles.push_back(neighbor);
+			}
+		}
+	}
+	return final_path_arr;
 }
 
-float TileGrid::get_outer_size() {
-  return tile_m_outer_size;
+/*
+ * Retraces the optimal path into a vector from an end location to the start location
+ * Arguments:
+ * start_tile: Starting tile that the path should originate from
+ * end_tile: Ending tile that path should end on
+ *
+ * Returns:
+ * retraced_path: Path of
+ */
+godot::Vector<Tile *> TileGrid::RetracePath(Tile *start_tile, Tile *end_tile) {
+	Vector<Tile *> retraced_path{};
+	Tile *current_tile = end_tile;
+
+	while (current_tile != start_tile) {
+		retraced_path.push_back(current_tile);
+		current_tile = current_tile->GetParent();
+	}
+	retraced_path.reverse();
+	return retraced_path;
+}
+
+int TileGrid::CalculateDistance(Tile *location, Tile *destination) {
+	return DistanceHex(location->GetLocation(), destination->GetLocation());
+}
+
+Vector2i TileGrid::SubtractHex(Vector2i a, Vector2i b) {
+	return Vector2i(a.x - b.x, a.y - b.y);
+}
+
+int TileGrid::LengthHex(Vector2i hex) {
+	return (hex.x + hex.y + (hex.x + hex.y) / 2);
+}
+
+int TileGrid::DistanceHex(Vector2i a, Vector2i b) {
+	return LengthHex(SubtractHex(a, b));
+}
+
+void TileGrid::SetOuterSize(float new_size) {
+	m_tile_outer_size = new_size;
+}
+
+float TileGrid::GetOuterSize() {
+	return m_tile_outer_size;
+}
+
+void TileGrid::SetInnerSize(float new_size) {
+	m_tile_inner_size = new_size;
+}
+
+float TileGrid::GetInnerSize() {
+	return m_tile_inner_size;
+}
+
+void TileGrid::SetFlatTopped(bool is_flat) {
+	m_tile_is_flat_topped = is_flat;
+}
+
+bool TileGrid::GetFlatTopped() {
+	return m_tile_is_flat_topped;
+}
+
+void TileGrid::SetTileHeight(float new_height) {
+	m_tile_height = new_height;
+}
+
+float TileGrid::GetTileHeight() {
+	return m_tile_height;
+}
+
+int TileGrid::GetNumRooms() {
+  return m_grid_num_rooms;
+}
+
+void TileGrid::SetNumRooms(int num_rooms) {
+  m_grid_num_rooms = num_rooms;
+  GenerateTileGrid();
 }
 
 void TileGrid::_bind_methods() {
-  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
-  godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
-  godot::ClassDB::bind_method(godot::D_METHOD("set_outer_size", "new_size"), &TileGrid::set_outer_size);
-  godot::ClassDB::bind_method(godot::D_METHOD("get_outer_size"), &TileGrid::get_outer_size);
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
+	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetInnerSize", "new_size"), &TileGrid::SetInnerSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetInnerSize"), &TileGrid::GetInnerSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetFlatTopped", "is_flat"), &TileGrid::SetFlatTopped);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetFlatTopped"), &TileGrid::GetFlatTopped);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetTileHeight", "new_height"), &TileGrid::SetTileHeight);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetNumRooms", "num_rooms"), &TileGrid::SetNumRooms);
+  godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
-  ADD_GROUP("Tile Properties", "tile_");
-  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_m_outer_size", PROPERTY_HINT_NONE, "suffix:s", PROPERTY_USAGE_NONE), "set_outer_size", "get_outer_size");
+  //godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
+  godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
+
+
+	ADD_GROUP("Tile Properties", "m_tile_");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
+  ADD_GROUP("Grid Properties", "m_grid_");
+  ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
 }

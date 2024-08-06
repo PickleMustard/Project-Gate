@@ -1,11 +1,12 @@
 #include "register_types.h"
-#include "gdexample.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "level_generator.h"
 #include "seeded_random_access.h"
 #include "tile_collision.h"
+#include "tile_mesh_generator.h"
 #include "tile_notifier.h"
 #include "tilegrid.h"
+#include "level.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
@@ -17,14 +18,15 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	ClassDB::register_class<GDExample>();
-  //Tile Objects
-  ClassDB::register_class<TileCollision>();
-	ClassDB::register_class<TileGrid>();
-	ClassDB::register_class<Tile>();
-
   //Level Objects
-	ClassDB::register_class<LevelGenerator>();
+  ClassDB::register_class<Level>();
+  ClassDB::register_class<LevelGenerator>();
+
+  //Tile Objects
+	ClassDB::register_class<Tile>();
+  ClassDB::register_class<TileCollision>();
+  ClassDB::register_class<TileGrid>();
+  ClassDB::register_class<TileMeshGenerator>();
 
   //Singletons
   ClassDB::register_class<SeededRandomAccess>();

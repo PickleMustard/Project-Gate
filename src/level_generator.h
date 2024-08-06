@@ -42,6 +42,7 @@ private:
 	float m_height;
 	bool m_is_flat_topped;
 	Vector2i m_maximum_grid_size;
+  int m_num_rooms;
 
 protected:
 	static void _bind_methods();
@@ -49,7 +50,7 @@ protected:
 public:
 	LevelGenerator();
 	LevelGenerator(const Vector2i &grid_size);
-	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, const Vector2i &grid_size);
+	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size);
 	~LevelGenerator();
 
 	HashMap<String, Tile *> GenerateLevel(TileGrid *root);

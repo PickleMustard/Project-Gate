@@ -11,10 +11,10 @@ namespace godot {
  * This is to allow the random aspects of the game to be predictable and repeatable
  * All aspects of the game that use randomness will use these functions to ensure the same seed is used
  */
-class SeededRandomAccess : public godot::Object {
-public:
+class SeededRandomAccess : public Object {
 	GDCLASS(SeededRandomAccess, Object);
 
+public:
 	static SeededRandomAccess *GetInstance();
 	int GetWholeNumber(int upper_limit);
 	int GetInteger(int lower_limit, int upper_limit);

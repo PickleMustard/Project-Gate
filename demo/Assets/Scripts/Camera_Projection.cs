@@ -16,7 +16,6 @@ public partial class Camera_Projection : Node3D
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
     GD.Print(signals[0]["name"].ToString());
-    //Connect(signals[0]["name"].ToString(), notify);
     GD.Print(test.HasSignal("TileSelected"));
     GD.Print(test.GetType());
     GD.Print(testTimer.GetType());
@@ -34,9 +33,10 @@ public partial class Camera_Projection : Node3D
     GD.Print($"Query: {collision}");
   }
 
-  public void NotifyLog(Node tile)
+  public void NotifyLog(Node tile_collider)
   {
     GD.Print("Something");
-    GD.Print(tile.GetParent().ToString());
+    GD.Print(tile_collider.GetParent().ToString());
+    Node tile = tile_collider.GetParent();
   }
 }
