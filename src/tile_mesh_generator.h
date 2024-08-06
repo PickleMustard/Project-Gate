@@ -40,7 +40,7 @@ public:
 	TileMeshGenerator(float inner_size, float outer_size, float height, bool is_flat_topped);
 	~TileMeshGenerator();
 
-	Ref<Mesh> DrawMesh();
+	void DrawMesh();
 
 protected:
 	static void _bind_methods();

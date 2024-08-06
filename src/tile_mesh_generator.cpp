@@ -1,9 +1,9 @@
 #include "tile_mesh_generator.h"
 #include "godot_cpp/classes/array_mesh.hpp"
 #include "godot_cpp/classes/mesh.hpp"
+#include "godot_cpp/classes/multi_mesh.hpp"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/rendering_server.hpp"
-#include "godot_cpp/classes/resource_saver.hpp"
 #include "godot_cpp/core/math.hpp"
 #include "godot_cpp/variant/array.hpp"
 #include "godot_cpp/variant/packed_int64_array.hpp"
@@ -11,7 +11,6 @@
 #include "godot_cpp/variant/packed_vector3_array.hpp"
 #include "godot_cpp/variant/rid.hpp"
 #include "godot_cpp/variant/string.hpp"
-#include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
 #include "godot_cpp/variant/vector3.hpp"
 
@@ -104,18 +103,13 @@ godot::Vector3 godot::TileMeshGenerator::_GetPoint(float size, float height, int
 
 }
 
-godot::Ref<godot::Mesh> godot::TileMeshGenerator::DrawMesh() {
-  //ResourceSaver *rl = memnew(ResourceSaver);
-  //Error cannot_save;
-  //String name = vformat("res://Assets/Tile_Meshes/Mesh: %f, %f, %f, %b.tres", m_inner_size, m_outer_size, m_height, m_is_flat_topped);
+void godot::TileMeshGenerator::DrawMesh() {
   _DrawFaces();
   _CombineFaces();
 
   Ref<ArrayMesh> arr_mes = Ref<ArrayMesh>(memnew(ArrayMesh));
   arr_mes->add_surface_from_arrays(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES, m_surface_arrays);
   this->set_mesh(arr_mes);
-  //cannot_save = rl->save(this->get_mesh(), name, ResourceSaver::SaverFlags::FLAG_COMPRESS);
-  return this->get_mesh();
 }
 
 void godot::TileMeshGenerator::_bind_methods() {

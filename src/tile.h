@@ -34,7 +34,7 @@ private:
 	//MeshInstance3D *m_mesh_inst = memnew(MeshInstance3D);
 	TileCollision *m_collision_body = memnew(TileCollision);
 	CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
-  TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator);
+  TileMeshGenerator *m_mesh_generator;
 	Ref<Mesh> m_mesh = memnew(Mesh);
 	ResourceLoader *m_rl = memnew(ResourceLoader);
 	void (*TileSelected)(Tile *);

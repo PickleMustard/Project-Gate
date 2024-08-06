@@ -50,8 +50,10 @@ public partial class input_handler : Node
             moved_mouse_position = GetViewport().GetMousePosition();
             EmitSignal(SignalName.PannedCamera, mouse_position, moved_mouse_position);
             mouse_position = moved_mouse_position;
-        } else if(@event is InputEventKey keyEvent && keyEvent.Keycode == Key.R) {
+        } else if(@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.R) {
           Level.EmitSignal(RegenerateGrid["name"].ToString());
+        } else if(@event is InputEventKey printEvent && printEvent.Keycode == Key.P) {
+          PrintOrphanNodes();
         }
 
     }

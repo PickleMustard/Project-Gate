@@ -2,6 +2,7 @@
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/core/object.hpp"
 #include "godot_cpp/core/property_info.hpp"
 #include "godot_cpp/templates/hash_set.hpp"
@@ -81,7 +82,7 @@ void TileGrid::_notification(int p_what) {
 			TypedArray<Node> children = get_children();
 
 			//for (int i = 0; i < num_childs; i++) {
-			UtilityFunctions::print(children[0].stringify());
+			//UtilityFunctions::print(children[0].stringify());
 			//}
 		}
 		//if (m_showrooms == nullptr) {
@@ -97,8 +98,9 @@ void TileGrid::_notification(int p_what) {
  */
 void TileGrid::GenerateTileGrid() {
 	UtilityFunctions::print("Nullptr: Constructing new level");
-	m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, Vector2i(1000, 1000)));
+	m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
 	m_tile_grid = m_showrooms->GenerateLevel(this);
+  memdelete(m_showrooms);
 }
 
 /*
@@ -108,6 +110,13 @@ void TileGrid::GenerateTileGrid() {
 TileGrid::TileGrid() {
 	m_tile_is_flat_topped = true;
 	m_tile_grid = HashMap<String, Tile *>{};
+}
+
+TileGrid::TileGrid(Vector3 origin, int num_rooms) {
+  m_tile_is_flat_topped = true;
+  m_tile_grid = HashMap<String, Tile *>{};
+  m_grid_origin = origin;
+  m_grid_num_rooms = num_rooms;
 }
 
 /*
@@ -393,6 +402,15 @@ float TileGrid::GetTileHeight() {
 	return m_tile_height;
 }
 
+int TileGrid::GetNumRooms() {
+  return m_grid_num_rooms;
+}
+
+void TileGrid::SetNumRooms(int num_rooms) {
+  m_grid_num_rooms = num_rooms;
+  GenerateTileGrid();
+}
+
 void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
@@ -404,6 +422,8 @@ void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetFlatTopped"), &TileGrid::GetFlatTopped);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetTileHeight", "new_height"), &TileGrid::SetTileHeight);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetNumRooms", "num_rooms"), &TileGrid::SetNumRooms);
+  godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
   //godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
   godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
@@ -414,4 +434,6 @@ void TileGrid::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
+  ADD_GROUP("Grid Properties", "m_grid_");
+  ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
 }
