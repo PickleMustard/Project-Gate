@@ -92,7 +92,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 
 			Vector3 location = TileGrid::GetPositionForHexFromCoordinate(Vector2i(q, r), m_outerSize, m_is_flat_topped);
 			//
-			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outerSize, m_innerSize, m_height));
+			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outerSize, m_innerSize, m_height, tile_map.get(i)));
 			//
 			grid_of_tiles.insert(vformat("Hex %d,%d", q, r), new_tile);
 			//UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));

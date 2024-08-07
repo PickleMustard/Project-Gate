@@ -6,6 +6,7 @@
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "tile_mesh_generator.h"
+#include <cstdint>
 
 using namespace godot;
 
@@ -61,13 +62,14 @@ Tile::Tile() {
 	m_tile_outer_size = 1.0f;
 	m_tile_inner_size = 0.0f;
 	m_tile_height = 1.0f;
+  m_tile_type = 0;
 	m_mesh_generator = memnew(TileMeshGenerator(m_tile_inner_size, m_tile_outer_size, m_tile_height, m_tile_is_flat_topped));
-	m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_tile_inner_size * 10), (m_tile_outer_size * 10), (m_tile_height * 10), m_tile_is_flat_topped);
+	m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s_%d.tres", (m_tile_inner_size * 10), (m_tile_outer_size * 10), (m_tile_height * 10), m_tile_is_flat_topped, m_tile_type);
 	if (m_rl->exists(m_tile_mesh_name)) {
 		m_mesh = m_rl->load(m_tile_mesh_name, "Mesh");
     m_mesh_generator->set_mesh(m_mesh);
 	} else {
-		m_mesh_generator->DrawMesh();
+		m_mesh_generator->DrawMesh(m_tile_type);
 	}
 	this->set_name(vformat("Hex %d,%d", m_tile_row, m_tile_column));
 	m_collision_body->add_child(m_collision_shape);
@@ -101,7 +103,7 @@ Tile::Tile() {
  *
  * Functions exactly the same as default constructor
  */
-Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height) {
+Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
 	this->set_position(position);
 	m_tile_row = r;
 	m_tile_column = c;
@@ -109,13 +111,14 @@ Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, f
 	m_tile_outer_size = outer_size;
 	m_tile_inner_size = inner_size;
 	m_tile_height = height;
+  m_tile_type = type;
 	m_mesh_generator = memnew(TileMeshGenerator(m_tile_inner_size, m_tile_outer_size, m_tile_height, m_tile_is_flat_topped));
-	m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_tile_inner_size * 10), (m_tile_outer_size * 10), (m_tile_height * 10), m_tile_is_flat_topped);
+	m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_tile_inner_size * 10), (m_tile_outer_size * 10), (m_tile_height * 10), m_tile_is_flat_topped, m_tile_type);
 	if (m_rl->exists(m_tile_mesh_name)) {
 		m_mesh = m_rl->load(m_tile_mesh_name, "Mesh");
 		m_mesh_generator->set_mesh(m_mesh);
 	} else {
-		m_mesh_generator->DrawMesh();
+		m_mesh_generator->DrawMesh(m_tile_type);
 	}
 	this->set_name(vformat("Hex %d,%d", m_tile_row, m_tile_column));
 
@@ -259,6 +262,6 @@ Tile *Tile::GetParent() {
 	return m_path_parent;
 }
 
-String Tile::GetTileType() {
+uint8_t Tile::GetTileType() {
 	return m_tile_type;
 }
