@@ -37,8 +37,14 @@ private:
 		Vector<Vector2i> neighbor_list;
 	};
 
-	float m_outerSize;
-	float m_innerSize;
+  struct m_Room_Graph_Node {
+    Vector<m_Room_Graph_Node *> parents;
+    Vector<m_Room_Graph_Node *> children;
+    Vector<Vector2i> direction;
+  };
+
+	float m_outer_size;
+	float m_inner_size;
 	float m_height;
 	bool m_is_flat_topped;
 	Vector2i m_maximum_grid_size;

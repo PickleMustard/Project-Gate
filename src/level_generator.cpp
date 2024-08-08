@@ -1,8 +1,15 @@
 #include "level_generator.h"
+#include "godot_cpp/classes/collision_shape3d.hpp"
+#include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/node.hpp"
+#include "godot_cpp/classes/resource_loader.hpp"
+#include "godot_cpp/classes/resource_saver.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "seeded_random_access.h"
+#include "tile_collision.h"
+#include "tile_mesh_generator.h"
 #include "tilegrid.h"
 #include <sys/types.h>
 #include <cstdint>
@@ -14,8 +21,8 @@ void LevelGenerator::_bind_methods() {
 }
 
 LevelGenerator::LevelGenerator() {
-	m_outerSize = 1.0f;
-	m_innerSize = 0.0f;
+	m_outer_size = 1.0f;
+	m_inner_size = 0.0f;
 	m_height = 1.0f;
 	m_is_flat_topped = true;
 	m_maximum_grid_size = Vector2i(1000, 1000);
@@ -26,8 +33,8 @@ LevelGenerator::LevelGenerator(const Vector2i &grid_size) {
 }
 
 LevelGenerator::LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size) {
-	m_outerSize = outer_size;
-	m_innerSize = inner_size;
+	m_outer_size = outer_size;
+	m_inner_size = inner_size;
 	m_height = height;
 	m_is_flat_topped = is_flat_topped;
 	m_maximum_grid_size = grid_size;
@@ -55,7 +62,7 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	Vector<uint8_t> tile_bit_map;
 	tile_bit_map.resize(m_maximum_grid_size[0] * m_maximum_grid_size[1]);
 	tile_bit_map.fill(0);
-	int m_num_rooms = 5;
+	//int m_num_rooms = 5;
 	Vector2i gridCenter(m_maximum_grid_size[0] / 2, m_maximum_grid_size[1] / 2);
 
 	rooms_kd_tree = m_GenerateTileBitMap(tile_bit_map, rooms_kd_tree, m_num_rooms, 0, 3, gridCenter);
@@ -90,19 +97,50 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 			int q = i / m_maximum_grid_size[1];
 			int r = i - (q * m_maximum_grid_size[1]);
 
-			Vector3 location = TileGrid::GetPositionForHexFromCoordinate(Vector2i(q, r), m_outerSize, m_is_flat_topped);
+			Vector3 location = TileGrid::GetPositionForHexFromCoordinate(Vector2i(q, r), m_outer_size, m_is_flat_topped);
 			//
-			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outerSize, m_innerSize, m_height, tile_map.get(i)));
+			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_map.get(i)));
 			//
 			grid_of_tiles.insert(vformat("Hex %d,%d", q, r), new_tile);
 			//UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));
-			root->add_child(new_tile, true, Node::INTERNAL_MODE_BACK);
-			new_tile->set_owner(root->get_owner());
-			new_tile->set_name(vformat("Hex %d,%d", q, r));
-			new_tile->SetOwner(root->get_owner());
+			//root->add_child(new_tile, true, Node::INTERNAL_MODE_BACK);
+			//new_tile->set_owner(root->get_owner());
+			//new_tile->set_name(vformat("Hex %d,%d", q, r));
+			//new_tile->SetOwner(root->get_owner());
 			//root->set_editable_instance(new_tile, true);
-			new_tile->SetTilePosition(location);
-			//
+			//new_tile->SetTilePosition(location);
+
+			TileCollision *m_collision_body = memnew(TileCollision);
+			CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
+			TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
+
+			String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), m_is_flat_topped, tile_map.get(i));
+			ResourceLoader *m_rl = memnew(ResourceLoader);
+			Ref<Mesh> m_mesh;
+			if (m_rl->exists(m_tile_mesh_name)) {
+				m_mesh = m_rl->load(m_tile_mesh_name, "Mesh");
+				m_mesh_generator->set_mesh(m_mesh);
+			} else {
+				m_mesh = m_mesh_generator->DrawMesh(tile_map.get(i));
+				ResourceSaver *m_rs = memnew(ResourceSaver);
+				m_rs->save(m_mesh, m_tile_mesh_name, ResourceSaver::FLAG_COMPRESS);
+        memdelete(m_rs);
+			}
+      memdelete(m_rl);
+			m_collision_body->set_name(vformat("Hex %d,%d", q, r));
+			root->add_child(m_collision_body, true, Node::INTERNAL_MODE_BACK);
+			m_collision_body->set_owner(root->get_owner());
+
+			m_collision_body->add_child(m_collision_shape);
+			m_collision_shape->set_owner(root->get_owner());
+
+			m_collision_body->add_child(m_mesh_generator);
+			m_mesh_generator->set_owner(root->get_owner());
+
+			m_collision_body->set_ray_pickable(true);
+			//m_mesh_generator->create_convex_collision();
+			m_collision_shape->make_convex_from_siblings();
+			m_collision_body->set_position(location);
 		}
 	}
 }

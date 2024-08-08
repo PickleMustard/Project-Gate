@@ -21,11 +21,11 @@ public:
 	Vector<Tile *> m_path;
 	float m_size = 3.0f;
 	int m_radius = 7;
-	float m_tile_outer_size = 1.0f;
+	float m_tile_outer_size = 3.0f;
 	float m_tile_inner_size = 0.0f;
-	float m_tile_height = 1.0f;
+	float m_tile_height = 3.0f;
 	bool m_tile_is_flat_topped;
-  int m_grid_num_rooms = 5;
+  int m_grid_num_rooms = 15;
 	HashMap<String, Tile *> m_tile_grid;
 
 	TileGrid();

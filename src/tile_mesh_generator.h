@@ -1,6 +1,7 @@
 #ifndef TILE_MESH_GENERATOR_H
 #define TILE_MESH_GENERATOR_H
 
+#include "godot_cpp/classes/array_mesh.hpp"
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/vector.hpp"
@@ -41,7 +42,7 @@ public:
 	TileMeshGenerator(float inner_size, float outer_size, float height, bool is_flat_topped);
 	~TileMeshGenerator();
 
-	void DrawMesh(uint8_t type);
+	Ref<ArrayMesh> DrawMesh(uint8_t type);
 
 protected:
 	static void _bind_methods();

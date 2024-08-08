@@ -6,6 +6,8 @@ public partial class Camera_Projection : Node3D
   [Export]
   public Camera3D camera;
 
+  int counter = 0;
+
   public override void _Ready()
   {
     Callable notify = new Callable(this, "NotifyLog");
@@ -36,6 +38,8 @@ public partial class Camera_Projection : Node3D
   public void NotifyLog(Node tile_collider)
   {
     GD.Print("Something");
+    GD.Print($"Counter: %d", counter);
+    counter++;
     GD.Print(tile_collider.GetParent().ToString());
     Node tile = tile_collider.GetParent();
   }

@@ -36,21 +36,21 @@ godot::TileMeshGenerator::~TileMeshGenerator() {
 
 void godot::TileMeshGenerator::_DrawFaces(uint8_t type) {
 	m_faces = {};
+  /* Top Plane */
 	for (int point = 0; point < 6; point++) {
 		m_faces.push_back(_CreateFace(m_inner_size, m_outer_size, m_height / 2.0f, m_height / 2.0f, point));
 	}
-	if (type > 1) {
-		for (int point = 0; point < 6; point++) {
-			m_faces.push_back(_CreateFace(m_inner_size, m_outer_size, -m_height / 2.0f, -m_height / 2.0f, point));
-		}
-
-		for (int point = 0; point < 6; point++) {
-			m_faces.push_back(_CreateFace(m_inner_size, m_outer_size, m_height / 2.0f, -m_height / 2.0f, point));
-		}
-
-		for (int point = 0; point < 6; point++) {
-			m_faces.push_back(_CreateFace(m_inner_size, m_outer_size, -m_height / 2.0f, m_height / 2.0f, point));
-		}
+  /* Bottom Plane */
+	for (int point = 0; point < 6; point++) {
+		m_faces.push_back(_CreateFace(m_inner_size, m_outer_size, -m_height / 2.0f, -m_height / 2.0f, point));
+	}
+  /*Outside Plane */
+	for (int point = 0; point < 6; point++) {
+		m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height / 2.0f, -m_height / 2.0f, point));
+	}
+  /*Inside Plane */
+	for (int point = 0; point < 6; point++) {
+		m_faces.push_back(_CreateFace(m_inner_size, m_inner_size, -m_height / 2.0f, m_height / 2.0f, point));
 	}
 }
 
@@ -103,13 +103,14 @@ godot::Vector3 godot::TileMeshGenerator::_GetPoint(float size, float height, int
 	return Vector3((size * Math::cos(angle_rad)), height, size * Math::sin(angle_rad));
 }
 
-void godot::TileMeshGenerator::DrawMesh(uint8_t type) {
+godot::Ref<godot::ArrayMesh> godot::TileMeshGenerator::DrawMesh(uint8_t type) {
 	_DrawFaces(type);
 	_CombineFaces();
 
 	Ref<ArrayMesh> arr_mes = Ref<ArrayMesh>(memnew(ArrayMesh));
 	arr_mes->add_surface_from_arrays(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES, m_surface_arrays);
 	this->set_mesh(arr_mes);
+	return arr_mes;
 }
 
 void godot::TileMeshGenerator::_bind_methods() {

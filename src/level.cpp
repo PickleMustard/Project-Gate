@@ -35,7 +35,7 @@ void godot::Level::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateLevel"), &Level::GenerateLevel);
 
 	ADD_GROUP("Level Properties", "m_level_");
-  ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "m_level_grid_def"), "SetGridDefinitionOrigin", "GetGridDefinitionOrigin");
+  //ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "m_level_grid_def"), "SetGridDefinitionOrigin", "GetGridDefinitionOrigin");
 }
 
 void godot::Level::GenerateLevel() {
