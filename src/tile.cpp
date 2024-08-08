@@ -1,48 +1,9 @@
 #include "tile.h"
-#include "godot_cpp/classes/mesh_instance3d.hpp"
-#include "godot_cpp/classes/ref.hpp"
-#include "godot_cpp/classes/resource_loader.hpp"
-#include "godot_cpp/classes/resource_saver.hpp"
-#include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
-#include "tile_mesh_generator.h"
+#include <cstdint>
 
 using namespace godot;
 
-/*
- * Binding Methods to allow use in C#
- * Tile_Position allows a specific tile to change location
- */
-void Tile::_bind_methods() {
-	godot::ClassDB::bind_method(godot::D_METHOD("set_tile_position", "new_pos"), &Tile::SetTilePosition, Vector3());
-	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &Tile::SetOuterSize);
-	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &Tile::GetOuterSize);
-	godot::ClassDB::bind_method(godot::D_METHOD("SetInnerSize", "new_size"), &Tile::SetInnerSize);
-	godot::ClassDB::bind_method(godot::D_METHOD("GetInnerSize"), &Tile::GetInnerSize);
-	godot::ClassDB::bind_method(godot::D_METHOD("SetFlatTopped", "is_flat"), &Tile::SetFlatTopped);
-	godot::ClassDB::bind_method(godot::D_METHOD("GetFlatTopped"), &Tile::GetFlatTopped);
-	godot::ClassDB::bind_method(godot::D_METHOD("SetTileHeight", "new_height"), &Tile::SetTileHeight);
-	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &Tile::GetTileHeight);
-
-	ADD_GROUP("Tile Properties", "m_tile_");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
-}
-
-void Tile::_notification(int p_what) {
-	if (p_what == NOTIFICATION_READY) {
-		ResourceSaver *rs = memnew(ResourceSaver);
-		m_rl = memnew(ResourceLoader);
-		//UtilityFunctions::print(vformat("mesh_name: %s", m_tile_mesh_name));
-		if (!(m_rl->exists(m_tile_mesh_name))) {
-			rs->save(m_mesh, m_tile_mesh_name, ResourceSaver::FLAG_COMPRESS);
-		}
-		memdelete(rs);
-		memdelete(m_rl);
-	}
-}
 
 /*
  * Default constructor for a tile; should almost never be called
@@ -54,36 +15,13 @@ void Tile::_notification(int p_what) {
  */
 Tile::Tile() {
 	UtilityFunctions::print("Unparametered Constructor");
-	this->set_position(Vector3(0.0f, 0.0f, 0.0f));
 	m_tile_row = 0;
 	m_tile_column = 0;
 	m_tile_is_flat_topped = true;
 	m_tile_outer_size = 1.0f;
 	m_tile_inner_size = 0.0f;
 	m_tile_height = 1.0f;
-	m_mesh_generator = memnew(TileMeshGenerator(m_tile_inner_size, m_tile_outer_size, m_tile_height, m_tile_is_flat_topped));
-	m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_tile_inner_size * 10), (m_tile_outer_size * 10), (m_tile_height * 10), m_tile_is_flat_topped);
-	if (m_rl->exists(m_tile_mesh_name)) {
-		m_mesh = m_rl->load(m_tile_mesh_name, "Mesh");
-    m_mesh_generator->set_mesh(m_mesh);
-	} else {
-		m_mesh_generator->DrawMesh();
-	}
-	this->set_name(vformat("Hex %d,%d", m_tile_row, m_tile_column));
-	m_collision_body->add_child(m_collision_shape);
-	m_collision_body->add_child(m_mesh_generator);
-
-	m_mesh_generator->create_convex_collision();
-
-	m_collision_shape->make_convex_from_siblings();
-
-	TypedArray<Node> children = m_mesh_generator->get_children();
-
-	m_mesh_generator->get_child(children[0])->reparent(this, false);
-	this->add_child(m_collision_body);
-
-	memdelete(m_rl);
-	memdelete(m_mesh_generator);
+  m_tile_type = 0;
 }
 
 /*
@@ -101,55 +39,19 @@ Tile::Tile() {
  *
  * Functions exactly the same as default constructor
  */
-Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height) {
-	this->set_position(position);
+Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
 	m_tile_row = r;
 	m_tile_column = c;
 	m_tile_is_flat_topped = flat_topped;
 	m_tile_outer_size = outer_size;
 	m_tile_inner_size = inner_size;
 	m_tile_height = height;
-	m_mesh_generator = memnew(TileMeshGenerator(m_tile_inner_size, m_tile_outer_size, m_tile_height, m_tile_is_flat_topped));
-	m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_tile_inner_size * 10), (m_tile_outer_size * 10), (m_tile_height * 10), m_tile_is_flat_topped);
-	if (m_rl->exists(m_tile_mesh_name)) {
-		m_mesh = m_rl->load(m_tile_mesh_name, "Mesh");
-		m_mesh_generator->set_mesh(m_mesh);
-	} else {
-		m_mesh_generator->DrawMesh();
-	}
-	this->set_name(vformat("Hex %d,%d", m_tile_row, m_tile_column));
-
-	m_collision_body->add_child(m_collision_shape);
-	m_collision_body->add_child(m_mesh_generator);
-
-	m_collision_body->set_ray_pickable(true);
-	m_mesh_generator->create_convex_collision();
-	m_collision_shape->make_convex_from_siblings();
-
-	TypedArray<Node> children = m_mesh_generator->get_children();
-	m_mesh_generator->get_child(children[0])->reparent(this, false);
-	this->add_child(m_collision_body);
-
-	memdelete(m_rl);
+  m_tile_type = type;
 }
 
 Tile::~Tile() {
 }
 
-/*
- * Sets the owner of the node and its children to the specified owner
- * Allows the nodes to appear in the tree view
- *
- * Parameters: Pointer to the Node object that will own the tile
- *
- * Sets the owner of the mesh, collision body, and shape to the new owner
- */
-void Tile::SetOwner(Node *owner) {
-	m_mesh_generator->set_owner(owner);
-	m_collision_body->set_owner(owner);
-	m_collision_shape->set_owner(owner);
-	this->set_owner(owner);
-}
 
 /*
  * Test Function to output to a log
@@ -166,7 +68,7 @@ void Tile::NotifyLog() {
  * new_pos: Vector3 containing the new position in world space to move the tile to
  */
 void Tile::SetTilePosition(Vector3 new_pos) {
-	this->set_position(new_pos);
+	//this->set_position(new_pos);
 }
 
 /*
@@ -259,6 +161,6 @@ Tile *Tile::GetParent() {
 	return m_path_parent;
 }
 
-String Tile::GetTileType() {
+uint8_t Tile::GetTileType() {
 	return m_tile_type;
 }

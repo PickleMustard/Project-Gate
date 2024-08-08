@@ -97,7 +97,7 @@ void TileGrid::_notification(int p_what) {
  * Devoted Function to generate the tile_grid
  */
 void TileGrid::GenerateTileGrid() {
-	UtilityFunctions::print("Nullptr: Constructing new level");
+	UtilityFunctions::print(vformat("Constructing New Grid with %d num rooms", m_grid_num_rooms));
 	m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
 	m_tile_grid = m_showrooms->GenerateLevel(this);
   memdelete(m_showrooms);
@@ -315,7 +315,7 @@ godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_lo
 
 		neighbors = GetNeighbors(current_tile);
 		for (Tile *neighbor : neighbors) {
-			if (neighbor->GetTileType() == "obstacle" || closed_tiles.has(neighbor)) {
+			if (neighbor->GetTileType() == 4 || closed_tiles.has(neighbor)) {
 				continue;
 			}
 
