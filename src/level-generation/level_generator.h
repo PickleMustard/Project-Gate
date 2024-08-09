@@ -10,7 +10,7 @@
 #include <godot_cpp/variant/vector2i.hpp>
 
 #include <sys/types.h>
-#include <tile.h>
+#include "tile.h"
 
 namespace godot {
 
@@ -38,8 +38,11 @@ private:
 	};
 
   struct m_Room_Graph_Node {
-    Vector<m_Room_Graph_Node *> parents;
-    Vector<m_Room_Graph_Node *> children;
+    Vector<m_Room_Graph_Node> parents;
+    Vector<m_Room_Graph_Node> children;
+    int shape;
+    int no_touchy_space_radius;
+    Vector2i node_center;
     Vector<Vector2i> direction;
   };
 
@@ -75,6 +78,7 @@ private:
 	void m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level);
 	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
 	int m_HexDistance(Vector2i first_room, Vector2i second_room);
+  void m_GenerateRoomGraph(m_Room_Graph_Node &entry_node);
 };
 } //namespace godot
 #endif

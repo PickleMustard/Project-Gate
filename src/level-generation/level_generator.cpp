@@ -1,4 +1,4 @@
-#include "level_generator.h"
+#include "level-generation/level_generator.h"
 #include "godot_cpp/classes/collision_shape3d.hpp"
 #include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/node.hpp"
@@ -76,6 +76,10 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	m_GenerateRoom(tile_bit_map, tile_grid, root);
 
 	return tile_grid;
+}
+
+void LevelGenerator::m_GenerateRoomGraph(m_Room_Graph_Node &entry_node) {
+
 }
 
 /*
