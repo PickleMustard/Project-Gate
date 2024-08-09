@@ -7,6 +7,7 @@
 #include "level-generation/tilegrid.h"
 #include "level-generation/level.h"
 #include "level-generation/level_generator.h"
+#include "yaml/yaml_parser.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
@@ -18,6 +19,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+  ClassDB::register_class<YamlParser>();
   //Level Objects
   ClassDB::register_class<Level>();
   ClassDB::register_class<LevelGenerator>();
@@ -38,6 +40,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
 
   TileNotifier *Notifier = memnew(TileNotifier);
   Engine::get_singleton()->register_singleton("GlobalTileNotifier", Notifier);
+
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {

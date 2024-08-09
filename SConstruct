@@ -65,6 +65,7 @@ corePath = "src/"
 modules = getSubdirs(corePath)
 
 env.Append(CPPPATH=["src/"])
+env.Append(LIBS=["libryml"])
 
 sources = Glob(os.path.join(corePath, '*.cpp'))
 for module in modules:

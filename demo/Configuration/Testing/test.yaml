@@ -1,0 +1,16 @@
+
+# This is a comment
+name: John Doe
+age: 35
+address:
+  street: 123 Main St
+  city: Anytown
+  state: CA
+  zip: 12345
+hobbies:
+  - reading
+  - hiking
+  - cooking
+favorite_color: blue
+is_employed: true
+salary: 50000.00

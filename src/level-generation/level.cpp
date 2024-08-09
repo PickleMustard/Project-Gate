@@ -11,6 +11,7 @@
 #include "godot_cpp/variant/vector3.hpp"
 #include "level_generator.h"
 #include "tilegrid.h"
+#include "yaml/yaml_parser.h"
 
 godot::Level::Level() {
 	m_level_generator = memnew(LevelGenerator);
@@ -22,6 +23,7 @@ godot::Level::Level() {
 	m_tile_grid = memnew(TileGrid);
   m_level_grid_def["origin"] = Vector3(0,0,0);
   m_level_grid_def["num_rooms"] = 5;
+  YamlParser::test_yaml_caller();
 
 	//Engine::get_singleton()->connect("RegenerateGrid", callable_mp(this, &godot::Level::GenerateLevel));
 	UtilityFunctions::print(get_child_count());
