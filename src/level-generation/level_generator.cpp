@@ -86,7 +86,12 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph() {
   String file = "res://Configuration/Testing/test.yaml";
   Dictionary graph_to_build = YamlParser::parse_file(file);
   UtilityFunctions::print("here");
-  UtilityFunctions::print(JSON::stringify(graph_to_build));
+  Array Nodes = graph_to_build["Nodes"];
+  UtilityFunctions::print(JSON::stringify(graph_to_build["Nodes"]));
+  UtilityFunctions::print(Nodes.size());
+  for (int i = 0; i < Nodes.size(); i++) {
+    UtilityFunctions::print(JSON::stringify(Nodes[i]));
+  }
 
 
 	return rooms_graph;
