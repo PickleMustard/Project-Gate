@@ -23,7 +23,7 @@ godot::Level::Level() {
 	m_tile_grid = memnew(TileGrid);
   m_level_grid_def["origin"] = Vector3(0,0,0);
   m_level_grid_def["num_rooms"] = 5;
-  YamlParser::test_yaml_caller();
+  //YamlParser::test_yaml_caller();
 
 	//Engine::get_singleton()->connect("RegenerateGrid", callable_mp(this, &godot::Level::GenerateLevel));
 	UtilityFunctions::print(get_child_count());

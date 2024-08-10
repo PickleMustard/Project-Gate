@@ -1,16 +1,24 @@
+Adjacency:
+  - node_a:
+    - "edge_1"
+    - "edge_2"
+  - node_b:
+    - "edge_3"
 
-# This is a comment
-name: John Doe
-age: 35
-address:
-  street: 123 Main St
-  city: Anytown
-  state: CA
-  zip: 12345
-hobbies:
-  - reading
-  - hiking
-  - cooking
-favorite_color: blue
-is_employed: true
-salary: 50000.00
+Nodes:
+  - node_a:
+      room_type: "hexagonal"
+      room_min_size: 10
+      room_max_size: 20
+  - node_b:
+      room_type: "custom"
+      room_def: "Configuration/Testing/room_1.yaml"
+  - node_c:
+      room_type: "hexagonal"
+      room_min_size: 5
+      room_max_size: 8
+
+Edges:
+  - edge_1:
+      from: node_a
+      to: node_b

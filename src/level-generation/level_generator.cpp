@@ -1,5 +1,6 @@
 #include "level-generation/level_generator.h"
 #include "godot_cpp/classes/collision_shape3d.hpp"
+#include "godot_cpp/classes/json.hpp"
 #include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
@@ -11,6 +12,7 @@
 #include "tile_collision.h"
 #include "tile_mesh_generator.h"
 #include "tilegrid.h"
+#include "yaml/yaml_parser.h"
 #include <sys/types.h>
 #include <cstdint>
 #include <godot_cpp/templates/vector.hpp>
@@ -74,12 +76,20 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	m_ConnectTiles(tile_bit_map, room_neighbors);
 	//
 	m_GenerateRoom(tile_bit_map, tile_grid, root);
+  m_GenerateRoomGraph();
 
 	return tile_grid;
 }
 
-void LevelGenerator::m_GenerateRoomGraph(m_Room_Graph_Node &entry_node) {
+LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph() {
+	LevelGenerator::m_Rooms_Graph *rooms_graph = new m_Rooms_Graph{ HashMap<int, m_Room_Vertex *>{} };
+  String file = "res://Configuration/Testing/test.yaml";
+  Dictionary graph_to_build = YamlParser::parse_file(file);
+  UtilityFunctions::print("here");
+  UtilityFunctions::print(JSON::stringify(graph_to_build));
 
+
+	return rooms_graph;
 }
 
 /*
@@ -128,9 +138,9 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 				m_mesh = m_mesh_generator->DrawMesh(tile_map.get(i));
 				ResourceSaver *m_rs = memnew(ResourceSaver);
 				m_rs->save(m_mesh, m_tile_mesh_name, ResourceSaver::FLAG_COMPRESS);
-        memdelete(m_rs);
+				memdelete(m_rs);
 			}
-      memdelete(m_rl);
+			memdelete(m_rl);
 			m_collision_body->set_name(vformat("Hex %d,%d", q, r));
 			root->add_child(m_collision_body, true, Node::INTERNAL_MODE_BACK);
 			m_collision_body->set_owner(root->get_owner());

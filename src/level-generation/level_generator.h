@@ -27,11 +27,30 @@ private:
 		bool visited;
 	};
 
-	struct m_Room_Tree_Node {
-		Vector2i room_center;
-		m_Room_Tree_Node *left_node;
-		m_Room_Tree_Node *right_node;
-	};
+  struct m_Room_Tree_Node {
+    Vector2i room_center;
+    m_Room_Tree_Node *left_node;
+    m_Room_Tree_Node *right_node;
+  };
+
+  struct m_Room_Vertex;
+
+  struct m_Room_Edge {
+    int weight;
+    Vector2i direction;
+    m_Room_Vertex *destination;
+  };
+
+  struct m_Room_Vertex {
+    int position;
+    int no_touchy_space_shape;
+    Vector2i no_touchy_space;
+    godot::HashMap<int, m_Room_Edge *> edges;
+  };
+
+  struct m_Rooms_Graph {
+    godot::HashMap<int, m_Room_Vertex *> vertices;
+  };
 
 	struct m_Best_Neighbors {
 		Vector<Vector2i> neighbor_list;
@@ -66,6 +85,7 @@ public:
 
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
+  m_Rooms_Graph* m_GenerateRoomGraph();
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
 	void m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level);
 	m_Best_Neighbors m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbor, int level);
@@ -78,7 +98,6 @@ private:
 	void m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level);
 	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
 	int m_HexDistance(Vector2i first_room, Vector2i second_room);
-  void m_GenerateRoomGraph(m_Room_Graph_Node &entry_node);
 };
 } //namespace godot
 #endif

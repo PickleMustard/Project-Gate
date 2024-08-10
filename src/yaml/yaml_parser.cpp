@@ -2,6 +2,7 @@
 #include "godot_cpp/classes/file_access.hpp"
 #include "godot_cpp/classes/json.hpp"
 #include "godot_cpp/variant/char_string.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
@@ -28,6 +29,27 @@ void godot::YamlParser::_bind_methods() {
 
 }
 
+godot::Dictionary godot::YamlParser::parse_file(godot::String file) {
+  godot::JSON parse_result;
+  godot::Dictionary results;
+  ryml::Parser parser;
+  godot::String input_string = "";
+  godot::Ref<godot::FileAccess> fa = godot::FileAccess::open(file, FileAccess::READ);
+  while(!fa->eof_reached()) {
+    input_string += fa->get_line() + '\n';
+  }
+  godot::CharString temporary_string = input_string.utf8();
+  c4::substr text_string = ryml::to_substr(temporary_string.ptrw());
+  c4::yml::Tree tree = parser.parse_in_place("", text_string);
+  char buf[100000];
+  c4::substr output_json = buf;
+  ryml::emit_json(tree, output_json);
+  input_string = output_json.str;
+  input_string = input_string.substr(0, input_string.rfind("}") + 1);
+  UtilityFunctions::print(vformat("Input String: %s", input_string));
+  results = parse_result.parse_string(input_string);
+  return results;
+}
 void godot::YamlParser::test_yaml(godot::CharString text) {
 	ryml::Parser parser;
 	godot::JSON *parseResult = memnew(godot::JSON);
@@ -51,9 +73,9 @@ void godot::YamlParser::test_yaml_caller() {
   godot::String input_string = "";
   godot::Ref<godot::FileAccess> fa = godot::FileAccess::open("res://Configuration/Testing/test.yaml", FileAccess::READ);
   while(!fa->eof_reached()) {
-    godot::String temp = fa->get_line();
-    printf("Line read: %s\n", temp.utf8().ptrw());
-    input_string += temp + '\n';
+    godot::String json_string = fa->get_line();
+    printf("Line read: %s\n", json_string.utf8().ptrw());
+    input_string += json_string + '\n';
   }
   CharStringT<char> ymlb = input_string.utf8();
   printf("Final Input: %s\n", ymlb.ptr());
