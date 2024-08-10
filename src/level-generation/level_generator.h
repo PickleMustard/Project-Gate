@@ -43,13 +43,13 @@ private:
 
   struct m_Room_Vertex {
     int position;
-    int no_touchy_space_shape;
+    int room_shape;
     Vector2i no_touchy_space;
-    godot::HashMap<int, m_Room_Edge *> edges;
+    godot::HashMap<String, m_Room_Edge *> edges;
   };
 
   struct m_Rooms_Graph {
-    godot::HashMap<int, m_Room_Vertex *> vertices;
+    godot::HashMap<String, m_Room_Vertex *> vertices;
   };
 
 	struct m_Best_Neighbors {
@@ -86,6 +86,7 @@ public:
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
   m_Rooms_Graph* m_GenerateRoomGraph();
+  void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
 	void m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level);
 	m_Best_Neighbors m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbor, int level);

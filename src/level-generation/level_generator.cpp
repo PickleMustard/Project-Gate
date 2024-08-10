@@ -67,35 +67,67 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	//int m_num_rooms = 5;
 	Vector2i gridCenter(m_maximum_grid_size[0] / 2, m_maximum_grid_size[1] / 2);
 
-	rooms_kd_tree = m_GenerateTileBitMap(tile_bit_map, rooms_kd_tree, m_num_rooms, 0, 3, gridCenter);
+	//rooms_kd_tree = m_GenerateTileBitMap(tile_bit_map, rooms_kd_tree, m_num_rooms, 0, 3, gridCenter);
 	//UtilityFunctions::print(rooms_kd_tree);
 	//UtilityFunctions::print(vformat("%d q, %d r", location[0], location[1]));
 
-	Vector<Vector2i> room_neighbors(m_GenerateMST(room_centers, rooms_kd_tree, 2));
-	UtilityFunctions::print(room_neighbors.size());
-	m_ConnectTiles(tile_bit_map, room_neighbors);
+	//Vector<Vector2i> room_neighbors(m_GenerateMST(room_centers, rooms_kd_tree, 2));
+	//UtilityFunctions::print(room_neighbors.size());
+	//m_ConnectTiles(tile_bit_map, room_neighbors);
 	//
-	m_GenerateRoom(tile_bit_map, tile_grid, root);
-  m_GenerateRoomGraph();
+  m_Rooms_Graph *rooms_graph = m_GenerateRoomGraph();
+  m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
+  m_GenerateRoom(tile_bit_map, tile_grid, root);
+
 
 	return tile_grid;
 }
 
 LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph() {
-	LevelGenerator::m_Rooms_Graph *rooms_graph = new m_Rooms_Graph{ HashMap<int, m_Room_Vertex *>{} };
+	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
+	LevelGenerator::m_Rooms_Graph *rooms_graph = new m_Rooms_Graph{ HashMap<String, m_Room_Vertex *>{} };
   String file = "res://Configuration/Testing/test.yaml";
   Dictionary graph_to_build = YamlParser::parse_file(file);
   UtilityFunctions::print("here");
   Array Nodes = graph_to_build["Nodes"];
-  UtilityFunctions::print(JSON::stringify(graph_to_build["Nodes"]));
-  UtilityFunctions::print(Nodes.size());
+  Array Edges = graph_to_build["Edges"];
+  //Generate the vertices
   for (int i = 0; i < Nodes.size(); i++) {
-    UtilityFunctions::print(JSON::stringify(Nodes[i]));
+    Dictionary node = Nodes[i];
+    String hash_name = vformat("node_%d", i);
+    Vector2i no_touchy_space;
+
+    Dictionary node_meta = node[hash_name];
+    Array room_bounding_zone = node_meta["room_no_touchy"];
+    int room_type = node_meta["room_type"];
+
+    switch (room_type) {
+      case 1: //hexagon
+        no_touchy_space[0] = room_bounding_zone[0];
+        break;
+      case 2:
+        no_touchy_space[0] = room_bounding_zone[0];
+        no_touchy_space[1] = room_bounding_zone[1];
+        break;
+    }
+    m_Room_Vertex new_room {i, room_type, no_touchy_space, HashMap<String, m_Room_Edge *> {}};
+    rooms_graph->vertices.insert(hash_name, &new_room);
+    UtilityFunctions::print(no_touchy_space);
   }
 
+  for(int i = 0; i < Edges.size(); i++) {
+    Dictionary edge = Edges[i];
+    String edge_hash_name = vformat("edge_%d", i);
 
+    Dictionary edge_meta = edge[edge_hash_name];
+    Array edge_direction_meta = edge_meta["direction"];
+    Vector2i direction{edge_direction_meta[0], edge_direction_meta[1]};
+    m_Room_Edge new_edge {rnd->GetInteger(5, 8), direction, rooms_graph->vertices[edge_meta["to"]]};
+    rooms_graph->vertices[edge_meta["from"]]->edges.insert(edge_hash_name, &new_edge);
+  }
 	return rooms_graph;
 }
+
 
 /*
  * Goes through the tile_bit_map and will generate a 3D hexagon tile where the map states there to be one
@@ -121,13 +153,6 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_map.get(i)));
 			//
 			grid_of_tiles.insert(vformat("Hex %d,%d", q, r), new_tile);
-			//UtilityFunctions::print(vformat("Tile Name: %s", new_tile->get_name()));
-			//root->add_child(new_tile, true, Node::INTERNAL_MODE_BACK);
-			//new_tile->set_owner(root->get_owner());
-			//new_tile->set_name(vformat("Hex %d,%d", q, r));
-			//new_tile->SetOwner(root->get_owner());
-			//root->set_editable_instance(new_tile, true);
-			//new_tile->SetTilePosition(location);
 
 			TileCollision *m_collision_body = memnew(TileCollision);
 			CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
@@ -335,6 +360,23 @@ LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<ui
 	rnd = nullptr;
 	return root_room;
 	//
+}
+
+void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin) {
+  SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
+  int num_of_rooms = graph->vertices.size();
+  for(int i = 0; i < num_of_rooms; i++) {
+    UtilityFunctions::print(vformat("Currently processing room: %d", i));
+		int radius = rnd->GetInteger(5, 8);
+    for (int q = -radius; q <= radius; q++) {
+      int r1 = Math::max(-radius, -q - radius);
+      int r2 = Math::min(radius, -q + radius);
+      for (int r = r1; r <= r2; r++) {
+        tile_bit_map.set((grid_origin[0] + q) * m_maximum_grid_size[1] + (grid_origin[1] + r), 1);
+      }
+    }
+
+  }
 }
 
 /*
