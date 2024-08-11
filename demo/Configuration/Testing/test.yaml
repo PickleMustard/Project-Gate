@@ -11,12 +11,18 @@ Nodes:
       room_no_touchy:
         - 8
   - node_1:
-      room_type: 4 #Custom
+      room_type: 2 #Custom
       room_def: "Configuration/Testing/room_1.yaml"
       room_no_touchy:
         - 8
+        - 5
   - node_2:
-      room_type: 2 #Ellipse
+      room_type: 6 #Ellipse
+      room_no_touchy:
+        - 8
+        - 5
+  - node_3:
+      room_type: 1
       room_no_touchy:
         - 8
         - 5
@@ -33,5 +39,16 @@ Edges:
       to: "node_2"
       direction:
         - 1
+        - -1
+  - edge_2:
+      from: "node_0"
+      to: "node_3"
+      direction:
         - 1
-
+        - -1
+  - edge_3:
+      from: "node_2"
+      to: "node_3"
+      direction:
+        - -1
+        - -1

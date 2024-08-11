@@ -22,3 +22,5 @@ camera = NodePath("../Camera3D")
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("1_g7u70")
+
+[node name="Level" type="Level" parent="."]

@@ -48,6 +48,7 @@ godot::Dictionary godot::YamlParser::parse_file(godot::String file) {
   input_string = input_string.substr(0, input_string.rfind("}") + 1);
   UtilityFunctions::print(vformat("Input String: %s", input_string));
   results = parse_result.parse_string(input_string);
+  fa->close();
   return results;
 }
 void godot::YamlParser::test_yaml(godot::CharString text) {
