@@ -44,7 +44,9 @@ private:
   struct m_Room_Vertex {
     int position;
     int room_shape;
-    Vector2i no_touchy_space;
+    int radius;
+    Vector2i bounding_zone;
+    Vector2i location;
     godot::HashMap<String, m_Room_Edge *> edges;
   };
 
@@ -85,7 +87,7 @@ public:
 
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
-  m_Rooms_Graph* m_GenerateRoomGraph();
+  m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
   void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
 	void m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level);

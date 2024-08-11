@@ -1,7 +1,7 @@
 Adjacency:
   - node_0:
-    - edge_0
-    - edge_1
+    - "edge_0"
+    - "edge_1"
   - node_1:
     - "edge_2"
 
@@ -23,8 +23,15 @@ Nodes:
 
 Edges:
   - edge_0:
-      from: node_0
-      to: node_1
+      from: "node_0"
+      to: "node_1"
       direction:
         - 1
         - 0
+  - edge_1:
+      from: "node_0"
+      to: "node_2"
+      direction:
+        - 1
+        - 1
+
