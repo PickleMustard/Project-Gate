@@ -18,6 +18,12 @@ public partial class input_handler : Node
     [Signal]
     public delegate void RotatedCameraRightEventHandler();
 
+    [Signal]
+    public delegate void ScrollCameraCloserEventHandler();
+
+    [Signal]
+    public delegate void ScrollCameraFurtherEventHandler();
+
     private Vector2 mouse_position;
     private Vector2 moved_mouse_position;
     private bool panning = false;
@@ -34,10 +40,7 @@ public partial class input_handler : Node
     }
 
     public override void _Input(InputEvent @event) {
-        /*if(@event is InputEventMouseButton mouseEvent && mouseEvent.ButtonIndex == MouseButton.Left) {
-            GD.Print("Left mouse was pressed");
-            EmitSignal(SignalName.PickTile, mouse_position);
-        } else*/ if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
+        if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
             if(!panning && mouseEventMid.Pressed) {
             panning = true;
             mouse_position = GetViewport().GetMousePosition();
@@ -54,6 +57,10 @@ public partial class input_handler : Node
           Level.EmitSignal(RegenerateGrid["name"].ToString());
         } else if(@event is InputEventKey printEvent && printEvent.Keycode == Key.P) {
           PrintOrphanNodes();
+        } else if(@event is InputEventMouseButton mouseEventScrollin && mouseEventScrollin.ButtonIndex == MouseButton.WheelUp ) {
+          EmitSignal(SignalName.ScrollCameraCloser);
+        } else if(@event is InputEventMouseButton mouseEventScrollout && mouseEventScrollout.ButtonIndex == MouseButton.WheelDown ) {
+          EmitSignal(SignalName.ScrollCameraFurther);
         }
 
     }

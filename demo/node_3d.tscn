@@ -10,17 +10,15 @@
 transform = Transform3D(0.0147271, -0.982632, -0.184978, -0.0779855, -0.185564, 0.979533, -0.996846, 0, -0.0793639, 689.459, 131.64, 1078.68)
 
 [node name="Pivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2071.75, 28.9441, 3804.01)
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 2406, 30, 3804)
 script = ExtResource("1_6s4tb")
 
-[node name="Camera3D" type="Camera3D" parent="Pivot"]
-transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+[node name="Camera" type="Camera3D" parent="Pivot"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 0)
 
 [node name="RayProjector" type="Node3D" parent="Pivot" node_paths=PackedStringArray("camera")]
 script = ExtResource("2_ch463")
-camera = NodePath("../Camera3D")
+camera = NodePath("../Camera")
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("1_g7u70")
-
-[node name="Level" type="Level" parent="."]
