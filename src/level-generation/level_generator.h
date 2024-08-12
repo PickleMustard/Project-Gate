@@ -10,7 +10,7 @@
 #include <godot_cpp/variant/vector2i.hpp>
 
 #include <sys/types.h>
-#include <tile.h>
+#include "tile.h"
 
 namespace godot {
 
@@ -27,19 +27,43 @@ private:
 		bool visited;
 	};
 
-	struct m_Room_Tree_Node {
-		Vector2i room_center;
-		m_Room_Tree_Node *left_node;
-		m_Room_Tree_Node *right_node;
-	};
+  struct m_Room_Tree_Node {
+    Vector2i room_center;
+    m_Room_Tree_Node *left_node;
+    m_Room_Tree_Node *right_node;
+  };
+
+  struct m_Room_Vertex;
+
+  struct m_Room_Edge {
+    int weight;
+    Vector2i direction;
+    m_Room_Vertex *destination;
+  };
+
+  struct m_Room_Vertex {
+    int position;
+    int room_shape;
+    int radius;
+    Vector2i bounding_zone;
+    Vector2i location;
+    godot::HashMap<String, m_Room_Edge *> edges;
+  };
+
+  struct m_Rooms_Graph {
+    godot::HashMap<String, m_Room_Vertex *> vertices;
+  };
 
 	struct m_Best_Neighbors {
 		Vector<Vector2i> neighbor_list;
 	};
 
   struct m_Room_Graph_Node {
-    Vector<m_Room_Graph_Node *> parents;
-    Vector<m_Room_Graph_Node *> children;
+    Vector<m_Room_Graph_Node> parents;
+    Vector<m_Room_Graph_Node> children;
+    int shape;
+    int no_touchy_space_radius;
+    Vector2i node_center;
     Vector<Vector2i> direction;
   };
 
@@ -63,6 +87,9 @@ public:
 
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
+  m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
+  void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
+  void m_ConnectGraphNodes(Vector<uint8_t> &tile_bilt_map, m_Rooms_Graph *graph);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
 	void m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level);
 	m_Best_Neighbors m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbor, int level);
