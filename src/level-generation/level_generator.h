@@ -45,6 +45,8 @@ private:
     int position;
     int room_shape;
     int radius;
+    int purpose;
+    char32_t color;
     Vector2i bounding_zone;
     Vector2i location;
     godot::HashMap<String, m_Room_Edge *> edges;
@@ -88,6 +90,7 @@ public:
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
   m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
+  void m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph);
   void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
   void m_ConnectGraphNodes(Vector<uint8_t> &tile_bilt_map, m_Rooms_Graph *graph);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);

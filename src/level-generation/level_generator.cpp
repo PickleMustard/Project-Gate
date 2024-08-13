@@ -97,10 +97,14 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 		Vector2i no_touchy_space;
 
 		Dictionary node_meta = node[hash_name];
-		Array room_bounding_zone = node_meta["room_no_touchy"];
-		int room_type = node_meta["room_type"];
+		Array room_bounding_zone = node_meta["room_bounding_zone"];
+		Array size_constraints = node_meta["room_size_extents"];
+		Array color_possibilities = node_meta["color_possibilities"];
+		String room_color = color_possibilities[rnd->GetInteger(0, color_possibilities.size() - 1)];
+		int room_shape = node_meta["room_type"];
+    int room_purpose = node_meta["room_purpose"];
 
-		switch (room_type) {
+		switch (room_shape) {
 			case 1: //hexagon
 				no_touchy_space[0] = room_bounding_zone[0];
 				break;
@@ -109,7 +113,7 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 				no_touchy_space[1] = room_bounding_zone[1];
 				break;
 		}
-		m_Room_Vertex *new_room = new m_Room_Vertex{ i, room_type, rnd->GetInteger(8, 20), no_touchy_space, Vector2i{ 0, 0 }, HashMap<String, m_Room_Edge *>{} };
+		m_Room_Vertex *new_room = new m_Room_Vertex{ i, room_shape, rnd->GetInteger(size_constraints[0], size_constraints[1]), room_purpose, room_color[0], no_touchy_space, Vector2i{ 0, 0 }, HashMap<String, m_Room_Edge *>{} };
 		rooms_graph->vertices.insert(hash_name, new_room);
 	}
 
@@ -120,22 +124,40 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 		String edge_dict_name = vformat("edge_%d", i);
 
 		Dictionary edge_meta = edge[edge_dict_name];
-		Array edge_direction_meta = edge_meta["direction"];
-		Vector2i direction{ edge_direction_meta[0], edge_direction_meta[1] };
-		m_Room_Edge *new_edge = new m_Room_Edge{ rnd->GetInteger(8, 50), direction, rooms_graph->vertices[edge_meta["to"]] };
-		String edge_hash_name = vformat("%s_edge_%d", edge_meta["from"], rooms_graph->vertices[edge_meta["from"]]->edges.size());
-		Vector2i from_radius{ rooms_graph->vertices[edge_meta["from"]]->radius, rooms_graph->vertices[edge_meta["from"]]->radius };
-		Vector2i to_radius{ rooms_graph->vertices[edge_meta["to"]]->radius, rooms_graph->vertices[edge_meta["to"]]->radius };
-		rooms_graph->vertices[edge_meta["to"]]->location = rooms_graph->vertices[edge_meta["from"]]->location + Vector2i((new_edge->weight + rooms_graph->vertices[edge_meta["from"]]->radius + rooms_graph->vertices[edge_meta["to"]]->radius) * new_edge->direction[0], (new_edge->weight + rooms_graph->vertices[edge_meta["from"]]->radius + rooms_graph->vertices[edge_meta["to"]]->radius) * new_edge->direction[1]);
-		rooms_graph->vertices[edge_meta["from"]]->edges.insert(edge_hash_name, new_edge);
+		if (edge_meta.has("direction")) {
+			Array edge_direction_meta = edge_meta["direction"];
+			Array edge_distance_extents = edge_meta["distance_extents"];
+			int distance_constraint = edge_meta["distance_constraint"];
+      Vector2i direction{ edge_direction_meta[0], edge_direction_meta[1] };
+      m_Room_Edge *new_edge = new m_Room_Edge{ rnd->GetInteger(edge_distance_extents[0], edge_distance_extents[1]), direction, rooms_graph->vertices[edge_meta["to"]] };
+      String edge_hash_name = vformat("%s_edge_%d", edge_meta["from"], rooms_graph->vertices[edge_meta["from"]]->edges.size());
+      Vector2i from_radius{ rooms_graph->vertices[edge_meta["from"]]->radius, rooms_graph->vertices[edge_meta["from"]]->radius };
+      Vector2i to_radius{ rooms_graph->vertices[edge_meta["to"]]->radius, rooms_graph->vertices[edge_meta["to"]]->radius };
+      rooms_graph->vertices[edge_meta["to"]]->location = rooms_graph->vertices[edge_meta["from"]]->location + Vector2i(((new_edge->weight + rooms_graph->vertices[edge_meta["from"]]->radius + rooms_graph->vertices[edge_meta["to"]]->radius) * new_edge->direction[0] / distance_constraint), ((new_edge->weight + rooms_graph->vertices[edge_meta["from"]]->radius + rooms_graph->vertices[edge_meta["to"]]->radius) * new_edge->direction[1] / distance_constraint));
+      rooms_graph->vertices[edge_meta["from"]]->edges.insert(edge_hash_name, new_edge);
+		} else {
+      String edge_hash_name = vformat("%s_edge_%d", edge_meta["from"], rooms_graph->vertices[edge_meta["from"]]->edges.size());
+      m_Room_Edge *new_edge = new m_Room_Edge{ 0, Vector2i(0,0), rooms_graph->vertices[edge_meta["to"]] };
+      rooms_graph->vertices[edge_meta["from"]]->edges.insert(edge_hash_name, new_edge);
+    }
 	}
 	return rooms_graph;
+}
+
+/* What I can do is preprocess a map of color combinations for nodes based on a configuration file
+ * Going through each non-start/-end node, if a pattern matching one in the map is found,
+ * Replace the tiles in the match with the specified pattern in the map
+ *
+ */
+void LevelGenerator::m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph) {
+
 }
 
 void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph) {
 	int nums_rooms = graph->vertices.size();
 	for (int i = 0; i < nums_rooms; i++) {
 		String node_hash = vformat("node_%d", i);
+		UtilityFunctions::print("color: ", graph->vertices[node_hash]->color);
 		int num_edges = graph->vertices[node_hash]->edges.size();
 		if (num_edges > 0) {
 			for (int j = 0; j < num_edges; j++) {
@@ -390,6 +412,7 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 		Vector2i room_location = graph->vertices[node_hash]->location;
 		int room_shape = graph->vertices[node_hash]->room_shape;
 		UtilityFunctions::print("Current Room Type: ", graph->vertices[node_hash]->room_shape);
+    UtilityFunctions::print("Current Room Purpose: ", graph->vertices[node_hash]->purpose);
 		UtilityFunctions::print(vformat("Room location: %d, %d", room_location[0], room_location[1]));
 		int radius = graph->vertices[node_hash]->radius;
 		switch (room_shape) {
@@ -423,7 +446,7 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 					}
 				}
 				break;
-      //Rectangle
+				//Rectangle
 			case 4:
 				for (int q = -radius; q <= radius; q++) {
 					int r1 = Math::max(-radius, (-q * 2) - radius);
