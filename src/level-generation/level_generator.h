@@ -85,10 +85,10 @@ public:
 	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size);
 	~LevelGenerator();
 
-	HashMap<String, Tile *> GenerateLevel(TileGrid *root);
+	HashMap<String, Tile *> *GenerateLevel(TileGrid *root);
 
 private:
-	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
+	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> *grid_of_tiles, TileGrid *root);
   m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
   void m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph);
   void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);

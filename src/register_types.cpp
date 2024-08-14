@@ -25,7 +25,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<LevelGenerator>();
 
   //Tile Objects
-	//ClassDB::register_class<Tile>();
+	ClassDB::register_class<Tile>();
   ClassDB::register_class<TileCollision>();
   ClassDB::register_class<TileGrid>();
   ClassDB::register_class<TileMeshGenerator>();

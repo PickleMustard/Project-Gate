@@ -56,8 +56,8 @@ LevelGenerator::~LevelGenerator() {
  * Returns:
  * tile_grid: HashMap<String, Tile *>: A HashMap of every instantiated tile object hashed to its q,r location
  */
-HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
-	HashMap<String, Tile *> tile_grid = HashMap<String, Tile *>{};
+HashMap<String, Tile *> *LevelGenerator::GenerateLevel(TileGrid *root) {
+	HashMap<String, Tile *> *tile_grid = new HashMap<String, Tile *>{};
 	Vector<Vector2i> room_centers{};
 	m_Room_Tree_Node *rooms_kd_tree = nullptr;
 
@@ -79,6 +79,7 @@ HashMap<String, Tile *> LevelGenerator::GenerateLevel(TileGrid *root) {
 	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
 	m_ConnectGraphNodes(tile_bit_map, rooms_graph);
 	m_GenerateRoom(tile_bit_map, tile_grid, root);
+  UtilityFunctions::print("Tile Grid Before Return: ", tile_grid->size());
 
 	return tile_grid;
 }
@@ -183,7 +184,7 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_
  * root: Tile objects are added as children of the root Godot Node
  * No direct returns
  */
-void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root) {
+void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> *grid_of_tiles, TileGrid *root) {
 	for (int i = 0; i < tile_map.size(); i++) {
 		if (tile_map.get(i) > 0) {
 			int q = i / m_maximum_grid_size[1];
@@ -193,7 +194,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, T
 			//
 			Tile *new_tile = memnew(Tile(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_map.get(i)));
 			//
-			grid_of_tiles.insert(vformat("Hex %d,%d", q, r), new_tile);
+			grid_of_tiles->insert(vformat("hex %d,%d", q, r), new_tile);
 
 			TileCollision *m_collision_body = memnew(TileCollision);
 			CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);

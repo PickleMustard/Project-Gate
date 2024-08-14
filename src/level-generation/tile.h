@@ -2,6 +2,7 @@
 #define TILE_H
 
 #include "godot_cpp/classes/collision_object3d.hpp"
+#include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include <cstdint>
 #include <godot_cpp/classes/node3d.hpp>
@@ -10,6 +11,7 @@
 namespace godot {
 
 class Tile : public Object {
+  GDCLASS(Tile, Object);
 private:
 	Vector3 m_position;
 	int m_tile_row;

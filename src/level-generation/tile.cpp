@@ -7,7 +7,6 @@
 
 using namespace godot;
 
-
 /*
  * Default constructor for a tile; should almost never be called
  * Initializes tile to the origin of the room grid
@@ -24,7 +23,7 @@ Tile::Tile() {
 	m_tile_outer_size = 1.0f;
 	m_tile_inner_size = 0.0f;
 	m_tile_height = 1.0f;
-  m_tile_type = 0;
+	m_tile_type = 0;
 }
 
 /*
@@ -42,19 +41,20 @@ Tile::Tile() {
  *
  * Functions exactly the same as default constructor
  */
-Tile::Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
+Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
 	m_tile_row = r;
 	m_tile_column = c;
 	m_tile_is_flat_topped = flat_topped;
 	m_tile_outer_size = outer_size;
 	m_tile_inner_size = inner_size;
 	m_tile_height = height;
-  m_tile_type = type;
+	m_tile_type = type;
+  m_g_cost = 0;
+  m_h_cost = 0;
 }
 
 Tile::~Tile() {
 }
-
 
 /*
  * Test Function to output to a log
@@ -85,8 +85,8 @@ Vector2i Tile::GetLocation() {
 }
 
 void Tile::SetLocation(Vector2i new_location) {
-  m_tile_column = new_location[0];
-  m_tile_row = new_location[1];
+	m_tile_column = new_location[0];
+	m_tile_row = new_location[1];
 }
 /*
  * Return the column position of the tile
@@ -174,21 +174,20 @@ uint8_t Tile::GetTileType() {
 
 void Tile::_bind_methods() {
 	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
-  //godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
+	//godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
-  //godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
-  //godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
-  godot::ClassDB::bind_method(godot::D_METHOD("GetLocation"), &Tile::GetLocation);
-  godot::ClassDB::bind_method(godot::D_METHOD("SetLocation", "new_location"), &Tile::SetLocation);
+	//godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
+	//godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetLocation"), &Tile::GetLocation);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetLocation", "new_location"), &Tile::SetLocation);
 
-  ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");
 
-
-//	ADD_GROUP("Tile Properties", "m_tile_");
-//	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
-//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
-//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
-//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
-//  ADD_GROUP("Grid Properties", "m_grid_");
-//  ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
+	//	ADD_GROUP("Tile Properties", "m_tile_");
+	//	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
+	//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
+	//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
+	//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
+	//  ADD_GROUP("Grid Properties", "m_grid_");
+	//  ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
 }

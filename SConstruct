@@ -21,7 +21,7 @@ def install(package) :
 
 
 libname = "Scalad_Low_Level_Library"
-projectdir = "demo"
+projectdir = "project-gate"
 
 install("rapidyaml-devel")
 

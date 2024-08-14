@@ -26,7 +26,7 @@ public:
 	float m_tile_height = 3.0f;
 	bool m_tile_is_flat_topped;
   int m_grid_num_rooms = 15;
-	HashMap<String, Tile *> m_tile_grid;
+	HashMap<String, Tile *> *m_tile_grid;
 
 	TileGrid();
   TileGrid(Vector3 origin, int num_rooms);
