@@ -9,7 +9,7 @@
 
 namespace godot {
 
-class Tile {
+class Tile : public Object {
 private:
 	Vector3 m_position;
 	int m_tile_row;
@@ -55,7 +55,10 @@ public:
 	Tile *GetParent();
 	void SetParent(Tile *parent);
 
+
 	void NotifyLog();
+protected:
+  static void _bind_methods();
 };
 
 } //namespace godot

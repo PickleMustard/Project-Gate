@@ -1,5 +1,8 @@
 #include "tile.h"
+#include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/core/object.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/variant/variant.hpp"
 #include <cstdint>
 
 using namespace godot;
@@ -81,6 +84,10 @@ Vector2i Tile::GetLocation() {
 	return Vector2i(m_tile_column, m_tile_row);
 }
 
+void Tile::SetLocation(Vector2i new_location) {
+  m_tile_column = new_location[0];
+  m_tile_row = new_location[1];
+}
 /*
  * Return the column position of the tile
  *
@@ -163,4 +170,25 @@ Tile *Tile::GetParent() {
 
 uint8_t Tile::GetTileType() {
 	return m_tile_type;
+}
+
+void Tile::_bind_methods() {
+	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
+  //godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
+
+  //godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
+  //godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
+  godot::ClassDB::bind_method(godot::D_METHOD("GetLocation"), &Tile::GetLocation);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetLocation", "new_location"), &Tile::SetLocation);
+
+  ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");
+
+
+//	ADD_GROUP("Tile Properties", "m_tile_");
+//	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
+//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
+//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
+//	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
+//  ADD_GROUP("Grid Properties", "m_grid_");
+//  ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
 }

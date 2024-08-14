@@ -10,7 +10,7 @@ public partial class Camera_Projection : Node3D
 
   public override void _Ready()
   {
-    Callable notify = new Callable(this, "NotifyLog");
+    /*Callable notify = new Callable(this, "NotifyLog");
     //input_handler i_handle = GetNode<Node>("/root/true_parent/input_handler") as input_handler;
     //i_handle.PickTile += FindTileAtPosition;
     var test = Engine.GetSingleton("GlobalTileNotifier");
@@ -21,7 +21,7 @@ public partial class Camera_Projection : Node3D
     GD.Print(test.HasSignal("TileSelected"));
     GD.Print(test.GetType());
     GD.Print(testTimer.GetType());
-    GD.Print(signals);
+    GD.Print(signals);*/
 
   }
 
