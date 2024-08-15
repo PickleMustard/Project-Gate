@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://ccrv07q1oy36f"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
+[ext_resource type="Script" path="res://Assets/Scripts/unit_movement.cs" id="2_ggfwn"]
+[ext_resource type="Script" path="res://Assets/Scripts/input_handler.cs" id="3_2udfr"]
+[ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
+
+[node name="Top" type="Node3D"]
+
+[node name="pivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
+script = ExtResource("1_pyq38")
+
+[node name="Camera" type="Camera3D" parent="pivot"]
+
+[node name="unit_movement" type="Node3D" parent="pivot"]
+script = ExtResource("2_ggfwn")
+
+[node name="input_handler" type="Node" parent="."]
+script = ExtResource("3_2udfr")
+
+[node name="character" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
+material = ExtResource("4_u1xaw")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
+directional_shadow_mode = 0
+
+[node name="Level" type="Level" parent="."]

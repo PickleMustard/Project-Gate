@@ -75,7 +75,9 @@ HashMap<String, Tile *> *LevelGenerator::GenerateLevel(TileGrid *root) {
 	//UtilityFunctions::print(room_neighbors.size());
 	//m_ConnectTiles(tile_bit_map, room_neighbors);
 	//
+  UtilityFunctions::print("Generating Rooms");
 	m_Rooms_Graph *rooms_graph = m_GenerateRoomGraph(gridCenter);
+  UtilityFunctions::print("Generating Bitmap");
 	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
 	m_ConnectGraphNodes(tile_bit_map, rooms_graph);
 	m_GenerateRoom(tile_bit_map, tile_grid, root);
@@ -87,8 +89,10 @@ HashMap<String, Tile *> *LevelGenerator::GenerateLevel(TileGrid *root) {
 LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i starting_location) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	LevelGenerator::m_Rooms_Graph *rooms_graph = new m_Rooms_Graph{ HashMap<String, m_Room_Vertex *>{} };
-	String file = "res://Configuration/Testing/test.yaml";
+	String file = "res://Configuration/Testing/test.yml";
+  UtilityFunctions::print("Parsing File");
 	Dictionary graph_to_build = YamlParser::parse_file(file);
+  UtilityFunctions::print("Found the file to parse");
 	Array Nodes = graph_to_build["Nodes"];
 	Array Edges = graph_to_build["Edges"];
 	//Generate the vertices

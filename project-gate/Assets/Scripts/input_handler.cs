@@ -24,6 +24,12 @@ public partial class input_handler : Node
     [Signal]
     public delegate void ScrollCameraFurtherEventHandler();
 
+    [Signal]
+    public delegate void IncreaseScrollSpeedEventHandler();
+
+    [Signal]
+    public delegate void DecreaseScrollSpeedEventHandler();
+
     private Vector2 mouse_position;
     private Vector2 moved_mouse_position;
     private bool panning = false;
@@ -31,7 +37,7 @@ public partial class input_handler : Node
     private Godot.Collections.Dictionary RegenerateGrid;
 
     public override void _Ready() {
-      Level = GetNode<Node>("/root/true_parent/Level");
+      Level = GetNode<Node>("/root/Top/Level");
       GD.Print(Level.ToString());
       RegenerateGrid = Level.GetSignalList()[0];
       GD.Print(Level.GetSignalConnectionList(RegenerateGrid["name"].ToString()));
@@ -61,6 +67,10 @@ public partial class input_handler : Node
           EmitSignal(SignalName.ScrollCameraCloser);
         } else if(@event is InputEventMouseButton mouseEventScrollout && mouseEventScrollout.ButtonIndex == MouseButton.WheelDown ) {
           EmitSignal(SignalName.ScrollCameraFurther);
+        } else if(@event is InputEventKey upSpeed && upSpeed.Pressed && upSpeed.Keycode == Key.Shift) {
+          EmitSignal(SignalName.IncreaseScrollSpeed);
+        } else if(@event is InputEventKey downSpeed && !downSpeed.IsPressed() && downSpeed.Keycode == Key.Shift) {
+          EmitSignal(SignalName.DecreaseScrollSpeed);
         }
 
     }

@@ -6,8 +6,6 @@ public partial class unit_movement : Node3D
 {
   private int movementTime = 1;
   private int rotationDuration = 1;
-  private Vector2I location1 = new Vector2I(0, 0);
-  private Vector2I location2 = new Vector2I(0, 0);
 
   private Godot.Collections.Array path = new Godot.Collections.Array { };
   private Node tile;
@@ -17,7 +15,7 @@ public partial class unit_movement : Node3D
   public override void _Ready()
   {
     Callable notify = new Callable(this, "NotifyLog");
-    capsule = GetNode<Node3D>("/root/true_parent/character");
+    capsule = GetNode<Node3D>("/root/Top/character");
     test = Engine.GetSingleton("GlobalTileNotifier");
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
@@ -25,6 +23,7 @@ public partial class unit_movement : Node3D
 
   public void NotifyLog(Node tile_collider)
   {
+    Vector2I unit_location = new Vector2I(0,0);
     string tile_name = tile_collider.Name;
 
     int divider = tile_name.Find(",");
@@ -32,29 +31,17 @@ public partial class unit_movement : Node3D
     int r = tile_name.Substring(divider + 1).ToInt();
 
     tile = tile_collider.GetParent();
+    if (tile.HasMethod("GetCoordinateFromPosition"))
+    {
+      unit_location = (Vector2I)tile.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+    }
     if (tile.HasMethod("GetPositionForHexFromCoordinate"))
     {
       Vector3 location = (Vector3)tile.Call("GetPositionForHexFromCoordinate", new Vector2I(q, r), 3.0f, false);
-      if (location1 == Vector2I.Zero)
+      Vector2 desired_location = new Vector2I(q, r);
+      if (tile.HasMethod("CalculatePath"))
       {
-        location1 = new Vector2I(q, r);
-      }
-      else if (location2 == Vector2I.Zero)
-      {
-        location2 = new Vector2I(q, r);
-        if (tile.HasMethod("CalculatePath"))
-        {
-          path = (Godot.Collections.Array)tile.Call("CalculatePath", location1, location2);
-        }
-      }
-      else
-      {
-        location1 = location2;
-        location2 = new Vector2I(q, r);
-        if (tile.HasMethod("CalculatePath"))
-        {
-          path = (Godot.Collections.Array)tile.Call("CalculatePath", location1, location2);
-        }
+        path = (Godot.Collections.Array)tile.Call("CalculatePath", unit_location, desired_location);
       }
     }
     if (path.Count > 0)

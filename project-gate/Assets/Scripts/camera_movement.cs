@@ -5,19 +5,25 @@ using HCoroutines;
 public partial class camera_movement : Node3D
 {
   [Export]
-  public float camera_movement_speed { get; set; } = 1.0f;
+  public float camera_movement_speed { get; set; } = 1.2f;
 
   [Export]
-  public float camera_panning_speed { get; set; } = .01f;
+  public float camera_panning_speed { get; set; } = .03f;
 
   [Export]
-  public float rotation_duration { get; set; } = 1.0f;
+  public float rotation_duration { get; set; } = 0.8f;
+
+  [Export]
+  public float camera_movement_multiplier {get; set;} = 1.0f;
+
+  [Export]
+  public int current_camera_position = 0;
 
   private float angle = 121;
   private bool rotating = false;
   private bool scrolling = false;
   private Camera3D camera;
-  private int current_camera_position = 0;
+
 
   private Basis[] camera_angles = {new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.83867f, -0.544639f), new Vector3(0, 0.544639f, 0.83867f)),
                                      new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.707107f, -0.707107f), new Vector3(0, 0.707107f, 0.707107f)),
@@ -25,7 +31,7 @@ public partial class camera_movement : Node3D
   private Vector3[] camera_positions = { new Vector3(0, -15, 0), new Vector3(0, 0, 0), new Vector3(0, 10, 0)};
   public override void _Ready()
   {
-    input_handler i_handle = GetNode<Node>("/root/true_parent/input_handler") as input_handler;
+    input_handler i_handle = GetNode<Node>("/root/Top/input_handler") as input_handler;
     camera = GetNode<Camera3D>("Camera");
     //GD.Print("Test");
     //GD.Print(i_handle.GetSignalList());
@@ -36,8 +42,20 @@ public partial class camera_movement : Node3D
     i_handle.RotatedCameraRight += RotateCameraRight;
     i_handle.ScrollCameraFurther += ScrollCameraOut;
     i_handle.ScrollCameraCloser += ScrollCameraIn;
+    i_handle.IncreaseScrollSpeed += IncreaseCameraSpeed;
+    i_handle.DecreaseScrollSpeed += DecreaseCameraSpeed;
     camera.Position = camera_positions[current_camera_position];
     camera.Basis = camera_angles[current_camera_position];
+  }
+
+  private void IncreaseCameraSpeed() {
+    GD.Print("Increasing Speed");
+    camera_movement_multiplier *= 2;
+  }
+
+  private void DecreaseCameraSpeed() {
+    GD.Print("Decreasing");
+    camera_movement_multiplier /= 2;
   }
 
   private void ScrollCameraIn()
@@ -114,7 +132,7 @@ public partial class camera_movement : Node3D
   private void moveCamera(Vector3 direction)
   {
     Vector3 cameraMovement = new Vector3(direction[0], 0, direction[2]);
-    Translate(cameraMovement.Normalized() * camera_movement_speed);
+    Translate(cameraMovement.Normalized() * camera_movement_speed * camera_movement_multiplier);
   }
 
   private void panCamera(Vector2 original_mouse_location, Vector2 moved_mouse_location)

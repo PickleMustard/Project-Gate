@@ -75,6 +75,17 @@ Nodes:
         - "red"
         - "purple"
       purpose: 2
+  - node_6:
+      room_type: 1
+      room_size_extents:
+        - 10
+        - 12
+      room_bounding_zone:
+        - 10
+      color_possibilities:
+        - "red"
+        - "purple"
+      purpose: 2
 Edges:
   - edge_0:
       from: "node_0"
@@ -128,4 +139,10 @@ Edges:
       distance_constraint: 2
   - edge_5:
       from: "node_2"
+      to: "node_5"
+  - edge_6:
+      from: "node_3"
+      to: "node_5"
+  - edge_7:
+      from: "node_4"
       to: "node_5"

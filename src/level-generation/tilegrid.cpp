@@ -66,6 +66,12 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
 	return Vector3(xPosition, 0, yPosition);
 }
 
+Vector2i TileGrid::GetCoordinateFromPosition(Vector3 location, float size) {
+  float easy_sqrt = Math::sqrt(3.0f) * size;
+  float q = ((2.0f/3.0f) * location.x) / 3.0f;
+  float r = ((-1.0f / 3.0f) * location.x + (Math::sqrt(3.0f) / 3.0f) * (location.z + (easy_sqrt / 2.0f))) / 3.0f;
+  return AxialRound(Vector2i(q, r));
+}
 /*
  * _notification is an inbuilt Godot function for Nodes
  * Allows nodes to recieve and respond to engine signals
@@ -169,14 +175,14 @@ Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 	return neighbors;
 }
 
-/*
- * Given a position in axial notation, find the closest tile
 
-Vector2 axialRound(Vector2 hex) {
-	//return cubeToAxial(cubeRound(axialToCube(hex)));
+// * Given a position in axial notation, find the closest tile
+
+Vector2i TileGrid::AxialRound(Vector2i hex) {
+	return CubeToAxial(CubeRound(AxialToCube(hex)));
 	return Vector2(0, 0);
 }
-*/
+
 
 /*
  * Round a possible tile position in cube notation to the closest absolute location
@@ -187,7 +193,7 @@ Vector2 axialRound(Vector2 hex) {
  * Returns:
  * Vector3: Position of the closest tile to the point in cube notation
  */
-Vector3 cubeRound(Vector3 hex) {
+Vector3 TileGrid::CubeRound(Vector3 hex) {
 	float rounded_q = Math::round(hex.x);
 	float rounded_r = Math::round(hex.y);
 	float rounded_s = Math::round(hex.z);
@@ -216,7 +222,7 @@ Vector3 cubeRound(Vector3 hex) {
  * Returns:
  * Vector2: Tile position in axial notation q, r
  */
-Vector2 cubeToAxial(Vector3 hex) {
+Vector2i TileGrid::CubeToAxial(Vector3 hex) {
 	return Vector2(hex.x, hex.y);
 }
 
@@ -229,7 +235,7 @@ Vector2 cubeToAxial(Vector3 hex) {
  * Returns:
  * Vector3: tile position in cube notation q, r, s
  */
-Vector3 axialToCube(Vector2 hex) {
+Vector3 TileGrid::AxialToCube(Vector2i hex) {
 	float cube_q = hex.x;
 	float cube_r = hex.y;
 	float cube_s = -hex.x - hex.y;
@@ -245,7 +251,7 @@ Vector3 axialToCube(Vector2 hex) {
  * Returns;
  * Vector2: column, row offset notation position of tile
  */
-Vector2 axialToOffset(Vector2 hex) {
+Vector2i TileGrid::AxialToOffset(Vector2i hex) {
 	float column = hex.x;
 	float row = hex.y + (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
 
@@ -261,7 +267,7 @@ Vector2 axialToOffset(Vector2 hex) {
  * Returns:
  * Vector2: q, r axial notation tile position
  */
-Vector2 offsetToAxial(Vector2 hex) {
+Vector2i TileGrid::OffsetToAxial(Vector2i hex) {
 	float q = hex.x;
 	float r = hex.y - (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
 	return Vector2(q, r);
@@ -426,6 +432,7 @@ void TileGrid::SetNumRooms(int num_rooms) {
 
 void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
+  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
