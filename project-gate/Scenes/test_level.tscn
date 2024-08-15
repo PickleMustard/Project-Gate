@@ -7,14 +7,23 @@
 
 [node name="Top" type="Node3D"]
 
+[node name="Level" type="Level" parent="."]
+
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
 script = ExtResource("1_pyq38")
+current_camera_position = 1
 
 [node name="Camera" type="Camera3D" parent="pivot"]
+transform = Transform3D(1, 0, 0, 0, 0.173644, 0.984786, 0, -0.984786, 0.173644, 0, 24, 0)
+rotation_edit_mode = 2
+fov = 110.0
 
 [node name="unit_movement" type="Node3D" parent="pivot"]
 script = ExtResource("2_ggfwn")
+movementTime = 0.5
+rotationDuration = 0.3
+movement_radius = 7
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("3_2udfr")
@@ -28,3 +37,27 @@ material = ExtResource("4_u1xaw")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
 directional_shadow_mode = 0
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 135.0
+offset_bottom = 69.0
+
+[node name="Button" type="Button" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.013
+anchor_bottom = 0.006
+offset_right = 77.48
+offset_bottom = 30.76
+focus_mode = 1
+text = "Press Me
+"
+
+[node name="CodeEdit" type="CodeEdit" parent="Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 33.0
+offset_right = 100.0
+offset_bottom = 91.0

@@ -30,6 +30,9 @@ public partial class input_handler : Node
     [Signal]
     public delegate void DecreaseScrollSpeedEventHandler();
 
+    [Signal]
+    public delegate void DisplayDestinationsEventHandler();
+
     private Vector2 mouse_position;
     private Vector2 moved_mouse_position;
     private bool panning = false;
@@ -46,6 +49,10 @@ public partial class input_handler : Node
     }
 
     public override void _Input(InputEvent @event) {
+        if(Input.IsActionJustPressed("mouse_right")) {
+          GD.Print("Hello!");
+          EmitSignal(SignalName.DisplayDestinations);
+        }
         if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
             if(!panning && mouseEventMid.Pressed) {
             panning = true;

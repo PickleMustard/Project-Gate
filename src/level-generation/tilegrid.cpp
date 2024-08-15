@@ -67,10 +67,10 @@ Vector3 TileGrid::GetPositionForHexFromCoordinate(Vector2i coordinate, float siz
 }
 
 Vector2i TileGrid::GetCoordinateFromPosition(Vector3 location, float size) {
-  float easy_sqrt = Math::sqrt(3.0f) * size;
-  float q = ((2.0f/3.0f) * location.x) / 3.0f;
-  float r = ((-1.0f / 3.0f) * location.x + (Math::sqrt(3.0f) / 3.0f) * (location.z + (easy_sqrt / 2.0f))) / 3.0f;
-  return AxialRound(Vector2i(q, r));
+	float easy_sqrt = Math::sqrt(3.0f) * size;
+	float q = ((2.0f / 3.0f) * location.x) / 3.0f;
+	float r = ((-1.0f / 3.0f) * location.x + (Math::sqrt(3.0f) / 3.0f) * (location.z + (easy_sqrt / 2.0f))) / 3.0f;
+	return AxialRound(Vector2i(q, r));
 }
 /*
  * _notification is an inbuilt Godot function for Nodes
@@ -148,6 +148,21 @@ Tile *TileGrid::FindTileOnGrid(Vector2i location) {
 	return found_tile;
 }
 
+Vector<Tile *> TileGrid::GetRingToDist(Tile *center_tile, int radius) {
+	Vector<Tile *> tiles{};
+	tiles.push_back(center_tile);
+	for (int q = -radius; q <= radius; q++) {
+		int r1 = Math::max(-radius, -q - radius);
+		int r2 = Math::min(radius, -q + radius);
+		for (int r = r1; r <= r2; r++) {
+			String potential_name = vformat("hex %d,%d", center_tile->GetColumn() + q, center_tile->GetRow() + r);
+			if (m_tile_grid->has(potential_name)) {
+				tiles.push_back(m_tile_grid->get(potential_name));
+			}
+		}
+	}
+  return tiles;
+}
 /*
  * Given a tile reference, find any and all possible neighbors
  *
@@ -160,12 +175,13 @@ Tile *TileGrid::FindTileOnGrid(Vector2i location) {
 Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 	Vector<Tile *> neighbors{};
 	String locations[]{
-    vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() + 1),
-    vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow()),
-    vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow() - 1),
+		vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() + 1),
+		vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow()),
+		vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow() - 1),
 		vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() - 1),
-    vformat("hex %d,%d", tile->GetColumn() - 1, tile->GetRow()),
-    vformat("hex %d,%d", tile->GetColumn() - 1, tile->GetRow() + 1) };
+		vformat("hex %d,%d", tile->GetColumn() - 1, tile->GetRow()),
+		vformat("hex %d,%d", tile->GetColumn() - 1, tile->GetRow() + 1)
+	};
 
 	for (int i = 0; i < 6; i++) {
 		if (m_tile_grid->has(locations[i])) {
@@ -175,6 +191,9 @@ Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 	return neighbors;
 }
 
+Vector2i TileGrid::AxialScale(Vector2i hex, int scale) {
+	return Vector2i(hex.x * scale, hex.y * scale);
+}
 
 // * Given a position in axial notation, find the closest tile
 
@@ -182,7 +201,6 @@ Vector2i TileGrid::AxialRound(Vector2i hex) {
 	return CubeToAxial(CubeRound(AxialToCube(hex)));
 	return Vector2(0, 0);
 }
-
 
 /*
  * Round a possible tile position in cube notation to the closest absolute location
@@ -432,7 +450,7 @@ void TileGrid::SetNumRooms(int num_rooms) {
 
 void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
-  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
@@ -447,6 +465,7 @@ void TileGrid::_bind_methods() {
 
 	//godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
 	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetNeighbors", "tile"), &TileGrid::GetNeighbors);
 
 	ADD_GROUP("Tile Properties", "m_tile_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");

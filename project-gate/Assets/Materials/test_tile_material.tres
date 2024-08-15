@@ -5,4 +5,3 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_8efcr")
-shader_parameter/is_clickable = false

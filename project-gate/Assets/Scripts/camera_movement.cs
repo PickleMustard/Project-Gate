@@ -14,7 +14,7 @@ public partial class camera_movement : Node3D
   public float rotation_duration { get; set; } = 0.8f;
 
   [Export]
-  public float camera_movement_multiplier {get; set;} = 1.0f;
+  public float camera_movement_multiplier { get; set; } = 1.0f;
 
   [Export]
   public int current_camera_position = 0;
@@ -26,9 +26,13 @@ public partial class camera_movement : Node3D
 
 
   private Basis[] camera_angles = {new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.83867f, -0.544639f), new Vector3(0, 0.544639f, 0.83867f)),
+    new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.766044f, -0.642788f), new Vector3(0, 0.642788f, 0.76044f)),
                                      new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.707107f, -0.707107f), new Vector3(0, 0.707107f, 0.707107f)),
-                                      new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.5f, -0.866025f), new Vector3(0, 0.866025f, 0.5f))};
-  private Vector3[] camera_positions = { new Vector3(0, -15, 0), new Vector3(0, 0, 0), new Vector3(0, 10, 0)};
+                                      new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.5f, -0.866025f), new Vector3(0, 0.866025f, 0.5f)),
+   new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.375f, -0.927f), new Vector3(0, 0.927f, 0.375f)),
+   new Basis(new Vector3(1, 0, 0), new Vector3(0, 0.174f, -0.985f), new Vector3(0, 0.985f, 0.174f))};
+  private Vector3[] camera_positions = { new Vector3(0, -15, 0), new Vector3(0, -7, 0), new Vector3(0, 0, 0), new Vector3(0, 10, 0), new Vector3(0, 18, 0), new Vector3(0, 24, 0) };
+  private int[] camera_FOV = { 70, 70, 70, 80, 90, 110 };
   public override void _Ready()
   {
     input_handler i_handle = GetNode<Node>("/root/Top/input_handler") as input_handler;
@@ -46,14 +50,17 @@ public partial class camera_movement : Node3D
     i_handle.DecreaseScrollSpeed += DecreaseCameraSpeed;
     camera.Position = camera_positions[current_camera_position];
     camera.Basis = camera_angles[current_camera_position];
+    camera.Fov = camera_FOV[current_camera_position];
   }
 
-  private void IncreaseCameraSpeed() {
+  private void IncreaseCameraSpeed()
+  {
     GD.Print("Increasing Speed");
     camera_movement_multiplier *= 2;
   }
 
-  private void DecreaseCameraSpeed() {
+  private void DecreaseCameraSpeed()
+  {
     GD.Print("Decreasing");
     camera_movement_multiplier /= 2;
   }
@@ -82,7 +89,7 @@ public partial class camera_movement : Node3D
       {
         current_camera_position--;
         scrolling = true;
-        Co.Run(ScrollCameraAsync(camera_angles[current_camera_position], camera_positions[current_camera_position]));
+        Co.Run(ScrollCameraAsync(camera_angles[current_camera_position], camera_positions[current_camera_position], camera_FOV[current_camera_position]));
       }
     }
   }
@@ -96,11 +103,11 @@ public partial class camera_movement : Node3D
       {
         current_camera_position++;
         scrolling = true;
-        Co.Run(ScrollCameraAsync(camera_angles[current_camera_position], camera_positions[current_camera_position]));
+        Co.Run(ScrollCameraAsync(camera_angles[current_camera_position], camera_positions[current_camera_position], camera_FOV[current_camera_position]));
       }
     }
-   // camera.Basis = camera_angles[1];
-   // camera.Position = camera.Position + new Vector3(0, 15, 0);
+    // camera.Basis = camera_angles[1];
+    // camera.Position = camera.Position + new Vector3(0, 15, 0);
   }
 
   private void RotateCameraLeft()
@@ -163,23 +170,27 @@ public partial class camera_movement : Node3D
     rotating = false;
   }
 
-  IEnumerator ScrollCameraAsync(Basis end_rotation, Vector3 end_position)
+  IEnumerator ScrollCameraAsync(Basis end_rotation, Vector3 end_position, int end_fov)
   {
     float timeElapsed = 0.0f;
     Quaternion start_rotation = camera.Quaternion;
     Vector3 start_position = camera.Position;
+    camera.Basis = camera.Basis.Orthonormalized();
+    end_rotation = end_rotation.Orthonormalized();
     GD.Print("Starting scroll");
     do
     {
       float lerpStep = timeElapsed / rotation_duration;
       camera.Basis = camera.Basis.Slerp(end_rotation, lerpStep);
       camera.Position = camera.Position.Lerp(end_position, lerpStep);
+      camera.Fov = (1 - lerpStep) * camera.Fov + lerpStep * end_fov;
       timeElapsed += Co.DeltaTime;
       yield return null;
     } while (timeElapsed < rotation_duration && camera.Basis != end_rotation);
     GD.Print("Finished Rotation");
     camera.Basis = end_rotation;
     camera.Position = end_position;
+    camera.Fov = end_fov;
     scrolling = false;
   }
 

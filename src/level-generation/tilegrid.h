@@ -52,6 +52,7 @@ public:
 
 	Tile *FindTileOnGrid(Vector2i location);
 	Vector<Tile *> GetNeighbors(Tile *tile);
+  Vector<Tile *> GetRingToDist(Tile *center_tile, int radius);
 	Vector2 PositionToGrid(Vector3 location);
 
 	godot::Array CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
@@ -65,6 +66,7 @@ public:
 
 	static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
 	static Vector2i GetCoordinateFromPosition(Vector3 location, float size);
+  static Vector2i AxialScale(Vector2i hex, int scale);
 	static Vector2i AxialRound(Vector2i hex);
 	static Vector3 CubeRound(Vector3 hex);
 	static Vector2i CubeToAxial(Vector3 hex);

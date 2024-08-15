@@ -1,5 +1,6 @@
 shader_type spatial;
-uniform bool is_clickable = false;
+render_mode diffuse_burley;
+instance uniform bool is_clickable = false;
 
 void vertex() {
 	// Called for every vertex the material is visible on.
