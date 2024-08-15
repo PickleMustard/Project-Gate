@@ -1,9 +1,9 @@
 Adjacency:
   - node_0:
-    - "edge_0"
-    - "edge_1"
+      - "edge_0"
+      - "edge_1"
   - node_1:
-    - "edge_2"
+      - "edge_2"
 
 Nodes:
   - node_0:
@@ -21,7 +21,7 @@ Nodes:
       purpose: 0
   - node_1:
       room_type: 1 #Custom
-    #room_def: "Configuration/Testing/room_1.yaml"
+      #room_def: "Configuration/Testing/room_1.yaml"
       room_size_extents:
         - 7
         - 10
@@ -76,6 +76,17 @@ Nodes:
         - "purple"
       purpose: 2
   - node_6:
+      room_type: 1
+      room_size_extents:
+        - 10
+        - 12
+      room_bounding_zone:
+        - 10
+      color_possibilities:
+        - "red"
+        - "purple"
+      purpose: 2
+  - node_7:
       room_type: 1
       room_size_extents:
         - 10
@@ -146,3 +157,23 @@ Edges:
   - edge_7:
       from: "node_4"
       to: "node_5"
+  - edge_8:
+      from: "node_4"
+      to: "node_7"
+      direction:
+        - -1
+        - -1
+      distance_extents:
+        - 5
+        - 7
+      distance_constraint: 1
+  - edge_9:
+      from: "node_3"
+      to: "node_6"
+      direction:
+        - -1
+        - -1
+      distance_extents:
+        - 5
+        - 7
+      distance_constraint: 1

@@ -8,6 +8,7 @@ public partial class unit_movement : Node3D
   private int rotationDuration = 1;
 
   private Godot.Collections.Array path = new Godot.Collections.Array { };
+  private Node level;
   private Node tile;
   Godot.GodotObject test;
   Node3D capsule;
@@ -19,6 +20,35 @@ public partial class unit_movement : Node3D
     test = Engine.GetSingleton("GlobalTileNotifier");
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
+    level = GetNode<Node>("/root/Top/Level");
+    GD.Print("Level Children: ", level.GetChildCount());
+    var tile_grid = level.GetChildren()[0];
+    GD.Print("Tile Grid: ", tile_grid.Name);
+    Vector2I unit_location = new Vector2I(0,0);
+    if (tile_grid.HasMethod("GetCoordinateFromPosition"))
+    {
+      unit_location = (Vector2I)tile_grid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+    }
+    string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", tile_grid.Name, unit_location[0], unit_location[1]);
+    var find_tile = GetNode<Node>(formated_tile_name);
+    GD.Print("tile children: ", find_tile.GetChildren());
+    var mesh_inst = find_tile.GetChildren()[1];
+    var mesh = new Mesh();
+    var material = new Material();
+    if(mesh_inst.HasMethod("get_mesh")) {
+      mesh = (Mesh)mesh_inst.Call("get_mesh");
+      GD.Print(mesh.ToString());
+    }
+    if(mesh.HasMethod("surface_get_material")) {
+      material = (ShaderMaterial)mesh.Call("surface_get_material", 0);
+      GD.Print(material.ToString());
+    }
+    material.Call("set_shader_parameter", "is_clickable", true);
+  }
+
+
+  public override void _Process(double delta) {
+
   }
 
   public void NotifyLog(Node tile_collider)

@@ -28,5 +28,3 @@ material = ExtResource("4_u1xaw")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
 directional_shadow_mode = 0
-
-[node name="Level" type="Level" parent="."]
