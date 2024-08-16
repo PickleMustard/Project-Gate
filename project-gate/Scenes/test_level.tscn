@@ -1,18 +1,18 @@
-[gd_scene load_steps=5 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=6 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/unit_movement.cs" id="2_ggfwn"]
-[ext_resource type="Script" path="res://Assets/Scripts/input_handler.cs" id="3_2udfr"]
+[ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
+[ext_resource type="Script" path="res://Assets/Scripts/Character.cs" id="4_pefaa"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
 
 [node name="Top" type="Node3D"]
 
-[node name="Level" type="Level" parent="."]
-
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
 script = ExtResource("1_pyq38")
-current_camera_position = 1
+rotation_duration = 0.2
+current_camera_position = 3
 
 [node name="Camera" type="Camera3D" parent="pivot"]
 transform = Transform3D(1, 0, 0, 0, 0.173644, 0.984786, 0, -0.984786, 0.173644, 0, 24, 0)
@@ -23,13 +23,14 @@ fov = 110.0
 script = ExtResource("2_ggfwn")
 movementTime = 0.5
 rotationDuration = 0.3
-movement_radius = 7
 
 [node name="input_handler" type="Node" parent="."]
-script = ExtResource("3_2udfr")
+script = ExtResource("3_af0co")
 
 [node name="character" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
+script = ExtResource("4_pefaa")
+TotalDistance = 13
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
 material = ExtResource("4_u1xaw")

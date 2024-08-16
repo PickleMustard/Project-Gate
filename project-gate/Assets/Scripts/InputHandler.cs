@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class input_handler : Node
+public partial class InputHandler : Node
 {
     [Signal]
     public delegate void MovedCameraEventHandler(Vector3 direction);
@@ -33,6 +33,9 @@ public partial class input_handler : Node
     [Signal]
     public delegate void DisplayDestinationsEventHandler();
 
+    [Signal]
+    public delegate void UpdateCharacterEventHandler();
+
     private Vector2 mouse_position;
     private Vector2 moved_mouse_position;
     private bool panning = false;
@@ -52,6 +55,8 @@ public partial class input_handler : Node
         if(Input.IsActionJustPressed("mouse_right")) {
           GD.Print("Hello!");
           EmitSignal(SignalName.DisplayDestinations);
+        } else if(Input.IsActionJustPressed("update_character")) {
+          EmitSignal(SignalName.UpdateCharacter);
         }
         if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
             if(!panning && mouseEventMid.Pressed) {

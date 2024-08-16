@@ -52,7 +52,7 @@ public:
 
 	Tile *FindTileOnGrid(Vector2i location);
 	Vector<Tile *> GetNeighbors(Tile *tile);
-  Vector<Tile *> GetRingToDist(Tile *center_tile, int radius);
+  //Vector<Tile *> GetRingToDist(Tile *center_tile, int radius);
 	Vector2 PositionToGrid(Vector3 location);
 
 	godot::Array CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
