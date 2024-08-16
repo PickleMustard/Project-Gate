@@ -191,6 +191,26 @@ godot::Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 	return neighbors;
 }
 
+godot::Array TileGrid::GetNeighborsStatic(Tile tile, HashMap<String, Tile *> tile_grid) {
+  godot::Array neighbors {};
+
+	String locations[]{
+		vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() + 1),
+		vformat("hex %d,%d", tile.GetColumn() + 1, tile.GetRow()),
+		vformat("hex %d,%d", tile.GetColumn() + 1, tile.GetRow() - 1),
+		vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() - 1),
+		vformat("hex %d,%d", tile.GetColumn() - 1, tile.GetRow()),
+		vformat("hex %d,%d", tile.GetColumn() - 1, tile.GetRow() + 1)
+	};
+
+	for (int i = 0; i < 6; i++) {
+		if (tile_grid.has(locations[i])) {
+			neighbors.push_back(tile_grid.get(locations[i]));
+		}
+	}
+	return neighbors;
+}
+
 Vector2i TileGrid::AxialScale(Vector2i hex, int scale) {
 	return Vector2i(hex.x * scale, hex.y * scale);
 }
@@ -395,6 +415,10 @@ int TileGrid::CalculateDistance(Tile *location, Tile *destination) {
 	return DistanceHex(location->GetLocation(), destination->GetLocation());
 }
 
+int TileGrid::CalculateDistanceStatic(Vector2i location, Vector2i destination) {
+	return DistanceHex(location, destination);
+}
+
 Vector2i TileGrid::SubtractHex(Vector2i a, Vector2i b) {
 	return Vector2i(a.x - b.x, a.y - b.y);
 }
@@ -451,6 +475,7 @@ void TileGrid::SetNumRooms(int num_rooms) {
 void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
+  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("CalculateDistance", "a", "b"), &TileGrid::CalculateDistanceStatic);
   //godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
@@ -465,7 +490,7 @@ void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
-	godot::ClassDB::bind_method(godot::D_METHOD("GetNeighbors", "tile"), &TileGrid::GetNeighbors);
+	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetNeighbors", "tile", "tile_grid"), &TileGrid::GetNeighborsStatic);
 
 	ADD_GROUP("Tile Properties", "m_tile_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");

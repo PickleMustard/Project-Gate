@@ -17,6 +17,8 @@ public partial class unit_movement : Node3D
   private Node TileGrid;
   private Node level;
   private Node tile;
+  private int distance;
+  private Vector2I desired_location;
 
   private Callable UpdateCharacter;
   private Character CurrentCharacter;
@@ -142,11 +144,14 @@ public partial class unit_movement : Node3D
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))
       {
         Vector3 location = (Vector3)tile.Call("GetPositionForHexFromCoordinate", new Vector2I(q, r), 3.0f, false);
-        Vector2 desired_location = new Vector2I(q, r);
+        desired_location = new Vector2I(q, r);
         if (tile.HasMethod("CalculatePath"))
         {
           path = (Godot.Collections.Array)tile.Call("CalculatePath", unit_location, desired_location);
         }
+      }
+      if(TileGrid.HasMethod("CalculateDistance")) {
+        distance = (int)TileGrid.Call("CalculateDistance", new Vector2I(q, r), desired_location);
       }
       var outside_range = tile_collider.GetChildren()[1];
       if (MovementRange.Contains(outside_range))
@@ -162,6 +167,8 @@ public partial class unit_movement : Node3D
             GD.Print("Moving to location: ", location);
             Vector3 location_v3 = (Vector3)tile.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
             CurrentCharacter.isMoving = true;
+            CurrentCharacter.DecrementDistanceRemaining(distance);
+            GD.Print(CurrentCharacter.GetDistanceRemaining());
             Co.Run(PrepareMovement(location_v3));
           }
         }

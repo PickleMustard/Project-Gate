@@ -36,4 +36,8 @@ public partial class Character : Node3D
     return distanceRemaining;
   }
 
+  public void DecrementDistanceRemaining(int decrementor) {
+    distanceRemaining -= decrementor;
+  }
+
 }
