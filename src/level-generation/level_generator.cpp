@@ -57,8 +57,8 @@ LevelGenerator::~LevelGenerator() {
  * Returns:
  * tile_grid: HashMap<String, Tile *>: A HashMap of every instantiated tile object hashed to its q,r location
  */
-HashMap<String, Tile *> *LevelGenerator::GenerateLevel(TileGrid *root) {
-	HashMap<String, Tile *> *tile_grid = new HashMap<String, Tile *>{};
+HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root) {
+	HashMap<String, Ref<Tile>> *tile_grid = new HashMap<String, Ref<Tile>>{};
 	Vector<Vector2i> room_centers{};
 	m_Room_Tree_Node *rooms_kd_tree = nullptr;
 
@@ -94,6 +94,8 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 	UtilityFunctions::print("Parsing File");
 	Dictionary graph_to_build = YamlParser::parse_file(file);
 	UtilityFunctions::print("Found the file to parse");
+  Dictionary level_metadata = graph_to_build["Level"];
+  m_level_point_total = level_metadata["generation_point_total"];
 	Array Nodes = graph_to_build["Nodes"];
 	Array Edges = graph_to_build["Edges"];
 	//Generate the vertices
@@ -119,7 +121,7 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 				no_touchy_space[1] = room_bounding_zone[1];
 				break;
 		}
-		m_Room_Vertex *new_room = new m_Room_Vertex{ i, room_shape, rnd->GetInteger(size_constraints[0], size_constraints[1]), room_purpose, room_color[0], no_touchy_space, Vector2i{ 0, 0 }, HashMap<String, m_Room_Edge *>{} };
+		m_Room_Vertex *new_room = new m_Room_Vertex{ i, room_shape, rnd->GetInteger(size_constraints[0], size_constraints[1]), room_purpose, static_cast<int>(m_level_point_total / Nodes.size()), room_color[0], no_touchy_space, Vector2i{ 0, 0 }, HashMap<String, m_Room_Edge *>{} };
 		rooms_graph->vertices.insert(hash_name, new_room);
 	}
 
@@ -188,7 +190,7 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_
  * root: Tile objects are added as children of the root Godot Node
  * No direct returns
  */
-void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> *grid_of_tiles, TileGrid *root) {
+void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root) {
 	for (int i = 0; i < tile_map.size(); i++) {
 		if (tile_map.get(i) > 0) {
 			int q = i / m_maximum_grid_size[1];

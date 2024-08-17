@@ -1,5 +1,6 @@
 #ifndef TILEGRID_H
 #define TILEGRID_H
+#include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/variant/array.hpp"
 #pragma once
 
@@ -18,7 +19,7 @@ class TileGrid : public Node3D {
 public:
 	Vector3 m_grid_origin;
 	Vector2i m_grid_size;
-	Vector<Tile *> m_path;
+	Vector<Ref<Tile>> m_path;
 	float m_size = 3.0f;
 	int m_radius = 7;
 	float m_tile_outer_size = 3.0f;
@@ -26,7 +27,7 @@ public:
 	float m_tile_height = 3.0f;
 	bool m_tile_is_flat_topped;
 	int m_grid_num_rooms = 15;
-	HashMap<String, Tile *> *m_tile_grid;
+	HashMap<String, Ref<Tile>> *m_tile_grid;
 
 	TileGrid();
 	TileGrid(Vector3 origin, int num_rooms);
@@ -48,18 +49,18 @@ public:
 	int GetNumRooms();
 	void SetGridSize(Vector2i new_size);
 	Vector2i GetGridSize();
-	HashMap<String, Tile *> GetTileMap();
+	HashMap<String, Ref<Tile>> GetTileMap();
 
-	Tile *FindTileOnGrid(Vector2i location);
-	Vector<Tile *> GetNeighbors(Tile *tile);
-	static godot::Array GetNeighborsStatic(Tile tile, HashMap<String, Tile *> tile_grid);
+	Ref<Tile>FindTileOnGrid(Vector2i location);
+	Vector<Ref<Tile>> GetNeighbors(Ref<Tile> tile);
+	static godot::Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
 	//Vector<Tile *> GetRingToDist(Tile *center_tile, int radius);
 	Vector2 PositionToGrid(Vector3 location);
 
 	godot::Array CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
 	//void CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
-	godot::Vector<Tile *> RetracePath(Tile *start_tile, Tile *end_tile);
-	int CalculateDistance(Tile *location, Tile *destination);
+	godot::Vector<Ref<Tile>> RetracePath(Ref<Tile> start_tile, Ref<Tile> end_tile);
+	int CalculateDistance(Ref<Tile> location, Ref<Tile> destination);
 	static int CalculateDistanceStatic(Vector2i a, Vector2i b);
 	static Vector2i SubtractHex(Vector2i a, Vector2i b);
 	static int LengthHex(Vector2i hex);

@@ -1,3 +1,6 @@
+Level:
+  generation_point_total: 80
+
 Adjacency:
   - node_0:
       - "edge_0"

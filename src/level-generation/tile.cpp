@@ -161,11 +161,11 @@ void Tile::SetHCost(int new_h_cost) {
 	m_h_cost = new_h_cost;
 }
 
-void Tile::SetParent(Tile *new_parent) {
+void Tile::SetParent(Ref<Tile> new_parent) {
 	m_path_parent = new_parent;
 }
 
-Tile *Tile::GetParent() {
+Ref<Tile> Tile::GetParent() {
 	return m_path_parent;
 }
 

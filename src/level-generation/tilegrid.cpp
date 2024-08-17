@@ -116,12 +116,12 @@ void TileGrid::GenerateTileGrid() {
  */
 TileGrid::TileGrid() {
 	m_tile_is_flat_topped = true;
-	m_tile_grid = new HashMap<String, Tile *>{};
+	m_tile_grid = new HashMap<String, Ref<Tile>>{};
 }
 
 TileGrid::TileGrid(Vector3 origin, int num_rooms) {
 	m_tile_is_flat_topped = true;
-	m_tile_grid = new HashMap<String, Tile *>{};
+	m_tile_grid = new HashMap<String, Ref<Tile>>{};
 	m_grid_origin = origin;
 	m_grid_num_rooms = num_rooms;
 }
@@ -143,8 +143,8 @@ TileGrid::~TileGrid() {
  * Returns:
  * Tile *: Pointer to the tile, if it exists
  */
-Tile *TileGrid::FindTileOnGrid(Vector2i location) {
-	Tile *found_tile = m_tile_grid->get(vformat("hex %d,%d", location[0], location[1]));
+Ref<Tile> TileGrid::FindTileOnGrid(Vector2i location) {
+	Ref<Tile> found_tile = m_tile_grid->get(vformat("hex %d,%d", location[0], location[1]));
 	return found_tile;
 }
 
@@ -172,8 +172,8 @@ Tile *TileGrid::FindTileOnGrid(Vector2i location) {
  * Returns:
  * Vector<Tile *>: List of references to all neighbors that exist; size range is from 0 - 6 inclusive
  */
-godot::Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
-  godot::Vector<Tile *> neighbors{};
+godot::Vector<Ref<Tile>> TileGrid::GetNeighbors(Ref<Tile> tile) {
+  godot::Vector<Ref<Tile>> neighbors{};
 	String locations[]{
 		vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() + 1),
 		vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow()),
@@ -191,7 +191,7 @@ godot::Vector<Tile *> TileGrid::GetNeighbors(Tile *tile) {
 	return neighbors;
 }
 
-godot::Array TileGrid::GetNeighborsStatic(Tile tile, HashMap<String, Tile *> tile_grid) {
+godot::Array TileGrid::GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid) {
   godot::Array neighbors {};
 
 	String locations[]{
@@ -333,19 +333,19 @@ for(int i = 0; i < num_childs; i++) {
  * Empty Vector: Returns an empty vector if the path cannot be calculated (i.e. if tilegrid is split or does not connect)
  */
 godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_location) {
-	Tile *first_node, *wanted_node;
-	godot::Vector<Tile *> open_tiles;
-	godot::HashSet<Tile *> closed_tiles;
-	godot::Vector<Tile *> final_path;
+	Ref<Tile> first_node, wanted_node;
+	godot::Vector<Ref<Tile>> open_tiles;
+	godot::HashSet<Ref<Tile>> closed_tiles;
+	godot::Vector<Ref<Tile>> final_path;
 	godot::Array final_path_arr;
-	godot::Vector<Tile *> neighbors;
+	godot::Vector<Ref<Tile>> neighbors;
 
 	first_node = FindTileOnGrid(starting_location);
 	wanted_node = FindTileOnGrid(end_location);
 
 	open_tiles.push_back(first_node);
 	while (open_tiles.size() > 0) {
-		Tile *current_tile = open_tiles[0];
+		Ref<Tile> current_tile = open_tiles[0];
 		for (int i = 1; i < open_tiles.size(); i++) {
 			if (open_tiles[i]->GetFCost() < current_tile->GetFCost() || open_tiles[i]->GetFCost() == current_tile->GetFCost()) {
 				if (open_tiles[i]->GetHCost() < current_tile->GetHCost()) {
@@ -357,7 +357,7 @@ godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_lo
 		closed_tiles.insert(current_tile);
 		if (current_tile == wanted_node) {
 			final_path = RetracePath(first_node, wanted_node);
-			for (Tile *t : final_path) {
+			for (Ref<Tile> t : final_path) {
 				final_path_arr.append(t);
 			}
 
@@ -368,7 +368,7 @@ godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_lo
 		}
 
 		neighbors = GetNeighbors(current_tile);
-		for (Tile *neighbor : neighbors) {
+		for (Ref<Tile> neighbor : neighbors) {
 			if (neighbor->GetTileType() == 4 || closed_tiles.has(neighbor)) {
 				continue;
 			}
@@ -399,9 +399,9 @@ godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_lo
  * Returns:
  * retraced_path: Path of
  */
-godot::Vector<Tile *> TileGrid::RetracePath(Tile *start_tile, Tile *end_tile) {
-	Vector<Tile *> retraced_path{};
-	Tile *current_tile = end_tile;
+godot::Vector<Ref<Tile>> TileGrid::RetracePath(Ref<Tile> start_tile, Ref<Tile> end_tile) {
+	Vector<Ref<Tile>> retraced_path{};
+	Ref<Tile> current_tile = end_tile;
 
 	while (current_tile != start_tile) {
 		retraced_path.push_back(current_tile);
@@ -411,7 +411,7 @@ godot::Vector<Tile *> TileGrid::RetracePath(Tile *start_tile, Tile *end_tile) {
 	return retraced_path;
 }
 
-int TileGrid::CalculateDistance(Tile *location, Tile *destination) {
+int TileGrid::CalculateDistance(Ref<Tile> location, Ref<Tile> destination) {
 	return DistanceHex(location->GetLocation(), destination->GetLocation());
 }
 

@@ -151,7 +151,7 @@ public partial class unit_movement : Node3D
         }
       }
       if(TileGrid.HasMethod("CalculateDistance")) {
-        distance = (int)TileGrid.Call("CalculateDistance", new Vector2I(q, r), desired_location);
+        distance = (int)TileGrid.Call("CalculateDistance", unit_location, desired_location);
       }
       var outside_range = tile_collider.GetChildren()[1];
       if (MovementRange.Contains(outside_range))
@@ -167,6 +167,7 @@ public partial class unit_movement : Node3D
             GD.Print("Moving to location: ", location);
             Vector3 location_v3 = (Vector3)tile.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
             CurrentCharacter.isMoving = true;
+            GD.Print("Removing ", distance, " tiles");
             CurrentCharacter.DecrementDistanceRemaining(distance);
             GD.Print(CurrentCharacter.GetDistanceRemaining());
             Co.Run(PrepareMovement(location_v3));

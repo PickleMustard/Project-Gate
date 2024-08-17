@@ -24,6 +24,11 @@ SeededRandomAccess="*res://Assets/Scripts/RandomSingleton/SeededRandomAccess.cs"
 
 project/assembly_name="Gate Of Scalad"
 
+[editor]
+
+version_control/plugin_name="GitPlugin"
+version_control/autoload_on_startup=true
+
 [input]
 
 move_left={

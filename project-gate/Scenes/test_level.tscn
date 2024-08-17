@@ -1,14 +1,15 @@
-[gd_scene load_steps=6 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=8 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/unit_movement.cs" id="2_ggfwn"]
 [ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
 [ext_resource type="Script" path="res://Assets/Scripts/Character.cs" id="4_pefaa"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
+[ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
 [node name="Top" type="Node3D"]
-
-[node name="Level" type="Level" parent="."]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
@@ -64,3 +65,14 @@ offset_left = 2.0
 offset_top = 33.0
 offset_right = 100.0
 offset_bottom = 91.0
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.216902, 0)
+visible = false
+
+[node name="TileMeshGenerator" type="TileMeshGenerator" parent="Node3D"]
+mesh = SubResource("BoxMesh_yeooe")
+
+[node name="Sprite3D" type="Sprite3D" parent="Node3D"]
+transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 0.927824, -0.0434665)
+texture = ExtResource("6_1dwfk")

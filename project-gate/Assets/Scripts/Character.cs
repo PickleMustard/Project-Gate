@@ -40,4 +40,8 @@ public partial class Character : Node3D
     distanceRemaining -= decrementor;
   }
 
+  public void ResetDistanceRemaining() {
+    distanceRemaining = TotalDistance;
+  }
+
 }

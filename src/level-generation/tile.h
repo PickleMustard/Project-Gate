@@ -2,6 +2,7 @@
 #define TILE_H
 
 #include "godot_cpp/classes/collision_object3d.hpp"
+#include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include <cstdint>
@@ -10,8 +11,8 @@
 
 namespace godot {
 
-class Tile : public Object {
-  GDCLASS(Tile, Object);
+class Tile : public Resource {
+  GDCLASS(Tile, Resource);
 private:
 	Vector3 m_position;
 	int m_tile_row;
@@ -24,7 +25,7 @@ private:
 	float m_tile_height;
 	uint8_t m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
 	String m_tile_mesh_name;
-	Tile *m_path_parent;
+	Ref<Tile> m_path_parent;
 	void (*TileSelected)(Tile *);
 
 public:
@@ -54,8 +55,8 @@ public:
 	int GetHCost();
 	int GetFCost();
 	uint8_t GetTileType();
-	Tile *GetParent();
-	void SetParent(Tile *parent);
+	Ref<Tile> GetParent();
+	void SetParent(Ref<Tile> parent);
 
 
 	void NotifyLog();
