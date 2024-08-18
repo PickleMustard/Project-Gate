@@ -5,6 +5,7 @@
 #include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/string.hpp"
+#include "godot_cpp/variant/variant.hpp"
 #include <cstdint>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -24,6 +25,7 @@ private:
 	float m_tile_inner_size;
 	float m_tile_height;
 	uint8_t m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
+  Node3D *m_character_on_tile;
 	Ref<Tile> m_path_parent;
 	void (*TileSelected)(Tile *);
 
@@ -56,6 +58,8 @@ public:
 	uint8_t GetTileType();
 	Ref<Tile> GetParent();
 	void SetParent(Ref<Tile> parent);
+  void SetCharacterOnTile(Variant character);
+  Variant GetCharacterOnTile();
 
 
 	void NotifyLog();

@@ -1,5 +1,6 @@
 #include "tile.h"
 #include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/core/object.hpp"
 #include "godot_cpp/core/property_info.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
@@ -25,6 +26,7 @@ Tile::Tile() {
 	m_tile_inner_size = 0.0f;
 	m_tile_height = 1.0f;
 	m_tile_type = 0;
+  m_character_on_tile = nullptr;
 }
 
 /*
@@ -52,9 +54,11 @@ Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, f
 	m_tile_type = type;
   m_g_cost = 0;
   m_h_cost = 0;
+  m_character_on_tile = nullptr;
 }
 
 Tile::~Tile() {
+  delete m_character_on_tile;
 }
 
 /*
@@ -173,6 +177,17 @@ uint8_t Tile::GetTileType() {
 	return m_tile_type;
 }
 
+godot::Variant Tile::GetCharacterOnTile() {
+  Variant character_variant = Variant(m_character_on_tile);
+  return character_variant;
+}
+
+void Tile::SetCharacterOnTile(Variant character) {
+  if(character.can_convert_strict(character.get_type(), Variant::OBJECT)) {
+    m_character_on_tile = Object::cast_to<Node3D>(character);
+  }
+}
+
 void Tile::_bind_methods() {
 	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
 	//godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
@@ -181,8 +196,12 @@ void Tile::_bind_methods() {
 	//godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetLocation"), &Tile::GetLocation);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetLocation", "new_location"), &Tile::SetLocation);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetCharacterOnTile", "character"), &Tile::SetCharacterOnTile);
+  godot::ClassDB::bind_method(godot::D_METHOD("GetCharacterOnTile"), &Tile::GetCharacterOnTile);
 
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");
+
+  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "m_character_on_tile"), "SetCharacterOnTile", "GetCharacterOnTile");
 
 	//	ADD_GROUP("Tile Properties", "m_tile_");
 	//	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");

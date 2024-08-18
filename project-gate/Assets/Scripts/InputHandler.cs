@@ -36,6 +36,9 @@ public partial class InputHandler : Node
     [Signal]
     public delegate void UpdateCharacterEventHandler();
 
+    [Signal]
+    public delegate void ResetCharacterEventHandler();
+
     private Vector2 mouse_position;
     private Vector2 moved_mouse_position;
     private bool panning = false;
@@ -57,6 +60,8 @@ public partial class InputHandler : Node
           EmitSignal(SignalName.DisplayDestinations);
         } else if(Input.IsActionJustPressed("update_character")) {
           EmitSignal(SignalName.UpdateCharacter);
+        } else if(Input.IsActionJustPressed("reset_character")) {
+          EmitSignal(SignalName.ResetCharacter);
         }
         if(@event is InputEventMouseButton mouseEventMid && mouseEventMid.ButtonIndex == MouseButton.Middle) {
             if(!panning && mouseEventMid.Pressed) {

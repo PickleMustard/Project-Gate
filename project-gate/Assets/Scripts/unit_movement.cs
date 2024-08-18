@@ -39,7 +39,7 @@ public partial class unit_movement : Node3D
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
     level = GetNode<Node>("/root/Top/Level");
-    GD.Print("Level Children: ", level.GetChildCount());
+    //GD.Print("Level Children: ", level.GetChildCount());
     TileGrid = level.GetChildren()[0];
     GD.Print("Tile Grid: ", TileGrid.Name);
     unit_location = new Vector2I(0, 0);
@@ -53,7 +53,7 @@ public partial class unit_movement : Node3D
   public void UpdateCurrentCharacter(Character UpdateCharacter)
   {
     CurrentCharacter = UpdateCharacter;
-    GD.Print("The Signal works!");
+    GD.Print("Movement Character: ", CurrentCharacter.ToString());
   }
 
 
@@ -122,6 +122,7 @@ public partial class unit_movement : Node3D
 
   public void NotifyLog(Node tile_collider)
   {
+    GD.Print("Main Weapon:", CurrentCharacter.GetMainWeapon());
     if (!CurrentCharacter.isMoving)
     {
       unit_location = new Vector2I(0, 0);
@@ -236,6 +237,13 @@ public partial class unit_movement : Node3D
       if (tempObject.HasMethod("AddStepOnEvent"))
       {
         tempObject.Call("AddStepOnEvent", test_update);
+      }
+      if(tempObject.HasMethod("SetCharacterOnTile")) {
+        GD.Print("Setting character");
+        tempObject.Call("SetCharacterOnTile", capsule);
+      }
+      if(tempObject.HasMethod("GetCharacterOnTile")) {
+        //GD.Print(tempObject.Call("GetCharacterOnTile").AsGodotObject().GetMethodList());
       }
       if (tempObject.HasMethod("TileSteppedOnEvent"))
       {
