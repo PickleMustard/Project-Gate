@@ -35,7 +35,7 @@ TileCollision::~TileCollision() {
 */
 void TileCollision::_input_event(Camera3D *camera, const Ref<InputEvent> &event, const Vector3 &position, const Vector3 &normal, int32_t shape_idx) {
   //UtilityFunctions::print(event->as_text());
-  if(event->is_action_pressed("mouse_left")) {
+  if(event->is_action_released("mouse_right")) {
     TileCollision::NotifyLog();
   }
 }

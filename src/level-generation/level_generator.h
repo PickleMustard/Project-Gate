@@ -10,7 +10,7 @@
 #include <godot_cpp/variant/vector2i.hpp>
 
 #include <sys/types.h>
-#include "tile.h"
+#include "tiles/tile.h"
 
 namespace godot {
 
@@ -45,6 +45,9 @@ private:
     int position;
     int room_shape;
     int radius;
+    int purpose;
+    int interactable_points;
+    char32_t color;
     Vector2i bounding_zone;
     Vector2i location;
     godot::HashMap<String, m_Room_Edge *> edges;
@@ -73,6 +76,7 @@ private:
 	bool m_is_flat_topped;
 	Vector2i m_maximum_grid_size;
   int m_num_rooms;
+  int m_level_point_total; //Defines the # of points a level can use to generate interactable items
 
 protected:
 	static void _bind_methods();
@@ -83,11 +87,12 @@ public:
 	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size);
 	~LevelGenerator();
 
-	HashMap<String, Tile *> GenerateLevel(TileGrid *root);
+	HashMap<String, Ref<Tile>> *GenerateLevel(TileGrid *root);
 
 private:
-	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Tile *> grid_of_tiles, TileGrid *root);
+	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root);
   m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
+  void m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph);
   void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
   void m_ConnectGraphNodes(Vector<uint8_t> &tile_bilt_map, m_Rooms_Graph *graph);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);

@@ -1,0 +1,77 @@
+[gd_scene load_steps=8 format=3 uid="uid://ccrv07q1oy36f"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
+[ext_resource type="Script" path="res://Assets/Scripts/unit_movement.cs" id="2_ggfwn"]
+[ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
+[ext_resource type="Script" path="res://Assets/Scripts/Character.cs" id="4_pefaa"]
+[ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
+[ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
+
+[node name="Top" type="Node3D"]
+
+[node name="pivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
+script = ExtResource("1_pyq38")
+rotation_duration = 0.2
+current_camera_position = 3
+
+[node name="Camera" type="Camera3D" parent="pivot"]
+transform = Transform3D(1, 0, 0, 0, 0.173644, 0.984786, 0, -0.984786, 0.173644, 0, 24, 0)
+rotation_edit_mode = 2
+fov = 110.0
+
+[node name="unit_movement" type="Node3D" parent="pivot"]
+script = ExtResource("2_ggfwn")
+movementTime = 0.5
+rotationDuration = 0.3
+
+[node name="input_handler" type="Node" parent="."]
+script = ExtResource("3_af0co")
+
+[node name="character" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
+script = ExtResource("4_pefaa")
+TotalDistance = 13
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
+material = ExtResource("4_u1xaw")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
+directional_shadow_mode = 0
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 135.0
+offset_bottom = 69.0
+
+[node name="Button" type="Button" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.013
+anchor_bottom = 0.006
+offset_right = 77.48
+offset_bottom = 30.76
+focus_mode = 1
+text = "Press Me
+"
+
+[node name="CodeEdit" type="CodeEdit" parent="Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 33.0
+offset_right = 100.0
+offset_bottom = 91.0
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(-0.999377, 0, 0.0352833, 0, 1, 0, -0.0352833, 0, -0.999377, 1852.93, -0.216902, 3405.64)
+
+[node name="TileMeshGenerator" type="TileMeshGenerator" parent="Node3D"]
+mesh = SubResource("BoxMesh_yeooe")
+
+[node name="Sprite3D" type="Sprite3D" parent="Node3D"]
+transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 0.927824, -0.0434665)
+texture = ExtResource("6_1dwfk")
