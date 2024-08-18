@@ -11,7 +11,7 @@
 
 namespace godot {
 
-class Tile : public Resource {
+class Tile : public Resource{
   GDCLASS(Tile, Resource);
 private:
 	Vector3 m_position;
@@ -24,7 +24,6 @@ private:
 	float m_tile_inner_size;
 	float m_tile_height;
 	uint8_t m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
-	String m_tile_mesh_name;
 	Ref<Tile> m_path_parent;
 	void (*TileSelected)(Tile *);
 

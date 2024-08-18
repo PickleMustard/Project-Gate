@@ -6,7 +6,7 @@
 
 #include "godot_cpp/variant/vector2i.hpp"
 #include "level_generator.h"
-#include "tile.h"
+#include "tiles/tile.h"
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/core/math.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
@@ -51,7 +51,7 @@ public:
 	Vector2i GetGridSize();
 	HashMap<String, Ref<Tile>> GetTileMap();
 
-	Ref<Tile>FindTileOnGrid(Vector2i location);
+	Ref<Tile> FindTileOnGrid(Vector2i location);
 	Vector<Ref<Tile>> GetNeighbors(Ref<Tile> tile);
 	static godot::Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
 	//Vector<Tile *> GetRingToDist(Tile *center_tile, int radius);

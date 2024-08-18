@@ -10,7 +10,7 @@
 #include <godot_cpp/variant/vector2i.hpp>
 
 #include <sys/types.h>
-#include "tile.h"
+#include "tiles/tile.h"
 
 namespace godot {
 

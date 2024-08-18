@@ -20,6 +20,10 @@ config/icon="res://icon.svg"
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
 SeededRandomAccess="*res://Assets/Scripts/RandomSingleton/SeededRandomAccess.cs"
 
+[display]
+
+mouse_cursor/custom_image="res://Assets/Icons/target_round_b.png"
+
 [dotnet]
 
 project/assembly_name="Gate Of Scalad"
