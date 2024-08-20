@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=9 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/unit_movement.cs" id="2_ggfwn"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Character.cs" id="4_pefaa"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
+[ext_resource type="Script" path="res://Assets/Scripts/Enemy.cs" id="7_bf781"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
@@ -33,7 +34,7 @@ script = ExtResource("3_af0co")
 [node name="character" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
 script = ExtResource("4_pefaa")
-TotalDistance = 13
+TotalDistance = 40
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
 material = ExtResource("4_u1xaw")
@@ -75,3 +76,11 @@ mesh = SubResource("BoxMesh_yeooe")
 [node name="Sprite3D" type="Sprite3D" parent="Node3D"]
 transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 0.927824, -0.0434665)
 texture = ExtResource("6_1dwfk")
+
+[node name="enemy" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2096.4, 5, 3873.73)
+script = ExtResource("7_bf781")
+TotalDistance = 13
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="enemy"]
+material = ExtResource("4_u1xaw")

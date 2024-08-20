@@ -5,6 +5,7 @@
 #include "godot_cpp/core/property_info.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
+#include "godot_cpp/variant/vector3.hpp"
 #include <cstdint>
 
 using namespace godot;
@@ -19,6 +20,7 @@ using namespace godot;
  */
 Tile::Tile() {
 	UtilityFunctions::print("Unparametered Constructor");
+  m_position = Vector3(0,0,0);
 	m_tile_row = 0;
 	m_tile_column = 0;
 	m_tile_is_flat_topped = true;
@@ -45,6 +47,7 @@ Tile::Tile() {
  * Functions exactly the same as default constructor
  */
 Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
+  m_position = position;
 	m_tile_row = r;
 	m_tile_column = c;
 	m_tile_is_flat_topped = flat_topped;
@@ -68,16 +71,6 @@ void Tile::NotifyLog() {
 	UtilityFunctions::print("Moe Moe Kyun >-<");
 }
 
-/*
- * Move the tile to a new position in world space
- * Doesn't move the tile from its row, column position
- *
- * Parameters:
- * new_pos: Vector3 containing the new position in world space to move the tile to
- */
-void Tile::SetTilePosition(Vector3 new_pos) {
-	//this->set_position(new_pos);
-}
 
 /*
  * Returns the row, column location of the tile as a Vector2i
@@ -188,6 +181,25 @@ void Tile::SetCharacterOnTile(Variant character) {
   }
 }
 
+void Tile::ResetCharacterOnTile() {
+  m_character_on_tile = nullptr;
+}
+
+Vector3 Tile::GetTilePosition() {
+  return m_position;
+}
+
+/*
+ * Move the tile to a new position in world space
+ * Doesn't move the tile from its row, column position
+ *
+ * Parameters:
+ * new_pos: Vector3 containing the new position in world space to move the tile to
+ */
+void Tile::SetTilePosition(Vector3 new_pos) {
+  m_position = new_pos;
+}
+
 void Tile::_bind_methods() {
 	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
 	//godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
@@ -196,7 +208,12 @@ void Tile::_bind_methods() {
 	//godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetLocation"), &Tile::GetLocation);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetLocation", "new_location"), &Tile::SetLocation);
+  godot::ClassDB::bind_method(godot::D_METHOD("GetTilePosition"), &Tile::GetTilePosition);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetTilePosition"), &Tile::SetTilePosition);
+  godot::ClassDB::bind_method(godot::D_METHOD("GetSize"), &Tile::GetOuterSize);
+  godot::ClassDB::bind_method(godot::D_METHOD("SetSize"), &Tile::SetOuterSize);
   godot::ClassDB::bind_method(godot::D_METHOD("SetCharacterOnTile", "character"), &Tile::SetCharacterOnTile);
+  godot::ClassDB::bind_method(godot::D_METHOD("ResetCharacterOnTile"), &Tile::ResetCharacterOnTile);
   godot::ClassDB::bind_method(godot::D_METHOD("GetCharacterOnTile"), &Tile::GetCharacterOnTile);
 
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");

@@ -60,6 +60,7 @@ public:
 	void SetParent(Ref<Tile> parent);
   void SetCharacterOnTile(Variant character);
   Variant GetCharacterOnTile();
+  void ResetCharacterOnTile();
 
 
 	void NotifyLog();

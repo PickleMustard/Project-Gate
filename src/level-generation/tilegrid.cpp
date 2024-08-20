@@ -101,6 +101,17 @@ void TileGrid::_notification(int p_what) {
 	}
 }
 
+void TileGrid::AddEnemyCall(Callable addition) {
+	call_set_enemy_start_positions.push_back(addition);
+}
+
+void TileGrid::SetEnemiesOnGrid() {
+	UtilityFunctions::print("Setting enemies");
+	for (int i = 0; i < call_set_enemy_start_positions.size(); i++) {
+		call_set_enemy_start_positions[i].call(m_tile_grid->begin()->value);
+	}
+}
+
 /*
  * Devoted Function to generate the tile_grid
  */
@@ -110,6 +121,7 @@ void TileGrid::GenerateTileGrid() {
 	m_tile_grid = m_showrooms->GenerateLevel(this);
 	TileNotifier::getInstance()->GridCreationNotification(this);
 	UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
+  call_deferred("SetEnemiesOnGrid");
 	memdelete(m_showrooms);
 }
 
@@ -492,6 +504,9 @@ void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetNumRooms", "num_rooms"), &TileGrid::SetNumRooms);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
+
+	godot::ClassDB::bind_method(godot::D_METHOD("SetEnemiesOnGrid"), &TileGrid::SetEnemiesOnGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("AddEnemyCall", "addition"), &TileGrid::AddEnemyCall);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetNeighbors", "tile", "tile_grid"), &TileGrid::GetNeighborsStatic);

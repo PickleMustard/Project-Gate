@@ -122,6 +122,64 @@ public partial class unit_movement : Node3D
 
   public void NotifyLog(Node tile_collider)
   {
+    unit_location = new Vector2I(0, 0);
+    string tile_name = tile_collider.Name;
+    tile = tile_collider.GetParent();
+
+    int divider = tile_name.Find(",");
+    int q = tile_name.Substring(4, divider - 4).ToInt();
+    int r = tile_name.Substring(divider + 1).ToInt();
+    Vector2I DesiredTileLocation = new Vector2I(q, r);
+    Vector2I CurrentUnitLocation = new Vector2I(0, 0);
+    Variant temp;
+    GodotObject tempObject = new GodotObject();
+    Variant tempChar;
+    if (tile.HasMethod("GetCoordinateFromPosition"))
+    {
+      CurrentUnitLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+    }
+
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      temp = TileGrid.Call("FindTileOnGrid", DesiredTileLocation);
+      GD.Print("unit_location ", unit_location);
+      tempObject = temp.AsGodotObject();
+    }
+
+    if (tempObject.HasMethod("GetCharacterOnTile"))
+    {
+      tempChar = tempObject.Call("GetCharacterOnTile");
+      GD.Print(tempChar.AsGodotObject());
+      if (tempChar.AsGodotObject() != null)
+      {
+        AttackTile(DesiredTileLocation);
+      }
+      else
+      {
+        MoveCharacter(tile_collider);
+      }
+    }
+
+
+  }
+
+  public void AttackTile(Vector2I position)
+  {
+    GD.Print("Attacking Location");
+    GodotObject target = new GodotObject();
+    if(TileGrid.HasMethod("FindTileOnGrid")) {
+      GodotObject Tile = TileGrid.Call("FindTileOnGrid", position).AsGodotObject();
+      if(Tile.HasMethod("GetCharacterOnTile")) {
+        target = Tile.Call("GetCharacterOnTile").AsGodotObject();
+      }
+    }
+    if(target.HasMethod("AttackCharacter")) {
+      target.Call("AttackCharacter", 5);
+    }
+  }
+
+  public void MoveCharacter(Node tile_collider)
+  {
     GD.Print("Main Weapon:", CurrentCharacter.GetMainWeapon());
     if (!CurrentCharacter.isMoving)
     {
@@ -147,13 +205,8 @@ public partial class unit_movement : Node3D
         }
       }
       tile = tile_collider.GetParent();
-      if (tile.HasMethod("GetCoordinateFromPosition"))
-      {
-        unit_location = (Vector2I)tile.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
-      }
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))
       {
-        Vector3 location = (Vector3)tile.Call("GetPositionForHexFromCoordinate", new Vector2I(q, r), 3.0f, false);
         desired_location = new Vector2I(q, r);
         if (tile.HasMethod("CalculatePath"))
         {
@@ -196,6 +249,26 @@ public partial class unit_movement : Node3D
     Vector3 direction = endPosition - capsule.Position;
     Basis endRotation = Basis.LookingAt(direction);
     Quaternion endQuat = endRotation.GetRotationQuaternion();
+    if (TileGrid.HasMethod("GetCoordinateFromPosition"))
+    {
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+    }
+
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      var temp = TileGrid.Call("FindTileOnGrid", unit_location);
+      var tempObject = temp.AsGodotObject();
+      if (tempObject.HasMethod("AddStepOnEvent"))
+      {
+        tempObject.Call("AddStepOnEvent", test_update);
+      }
+      if (tempObject.HasMethod("SetCharacterOnTile"))
+      {
+        GD.Print("Resetting character");
+        tempObject.Call("ResetCharacterOnTile");
+      }
+    }
+
     if (Mathf.IsEqualApprox(Mathf.Abs(startRotation.Dot(endQuat)), 1.0f) == false)
     {
       float timeElapsed = 0.0f;
@@ -213,6 +286,7 @@ public partial class unit_movement : Node3D
 
   private IEnumerator MoveUnitAlongTile(Vector3 endPosition)
   {
+    GD.Print("End Position: ", endPosition);
     Vector3 startPosition = capsule.Position;
     float timeElapsed = 0.0f;
 
@@ -226,9 +300,9 @@ public partial class unit_movement : Node3D
 
     capsule.Position = endPosition;
     if (TileGrid.HasMethod("GetCoordinateFromPosition"))
-      {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
-      }
+    {
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+    }
 
     if (TileGrid.HasMethod("FindTileOnGrid"))
     {
@@ -238,11 +312,13 @@ public partial class unit_movement : Node3D
       {
         tempObject.Call("AddStepOnEvent", test_update);
       }
-      if(tempObject.HasMethod("SetCharacterOnTile")) {
+      if (tempObject.HasMethod("SetCharacterOnTile"))
+      {
         GD.Print("Setting character");
         tempObject.Call("SetCharacterOnTile", capsule);
       }
-      if(tempObject.HasMethod("GetCharacterOnTile")) {
+      if (tempObject.HasMethod("GetCharacterOnTile"))
+      {
         //GD.Print(tempObject.Call("GetCharacterOnTile").AsGodotObject().GetMethodList());
       }
       if (tempObject.HasMethod("TileSteppedOnEvent"))

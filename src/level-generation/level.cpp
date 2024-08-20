@@ -1,5 +1,6 @@
 #include "level.h"
 #include "godot_cpp/classes/engine.hpp"
+#include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/core/object.hpp"
@@ -67,6 +68,12 @@ godot::Vector3 godot::Level::GetGridDefinitionOrigin() {
 
 void godot::Level::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
+    if(get_child_count() > 0) {
+      TypedArray<Node> children = get_children();
+      for(int i = 0; i < children.size(); i++) {
+        cast_to<Node>(children[i])->queue_free();
+      }
+    }
 		add_child(m_tile_grid);
 		m_tile_grid->set_owner(this->get_owner());
 		m_tile_grid->GenerateTileGrid();

@@ -206,22 +206,22 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 			int tile_type = tile_map.get(i);
 			switch (tile_type) {
 				case 1:
-					new_tile = Ref<Ordinary>(memnew(Ordinary(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
+					new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
 					break;
 				case 2:
-					new_tile = Ref<Interactable>(memnew(Interactable(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 2)));
+					new_tile = Ref<Interactable>(memnew(Interactable(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 2)));
 					if (test) {
 						new_tile->call("AddStepOnEvent", test->call("GetGenerateItemSignal"));
 					}
 					break;
         case 3:
-					new_tile = Ref<Interactable>(memnew(Interactable(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 4)));
+					new_tile = Ref<Interactable>(memnew(Interactable(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 4)));
 					if (test) {
 						new_tile->call("AddStepOnEvent", test->call("GetGenerateItemSignal"));
 					}
 					break;
 				default:
-					new_tile = Ref<Ordinary>(memnew(Ordinary(Vector3(0, 0, 0), q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
+					new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
 					break;
 			}
 			//

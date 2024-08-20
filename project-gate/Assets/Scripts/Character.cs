@@ -8,6 +8,10 @@ public partial class Character : Node3D
   [Export]
   public int TotalDistance = 8;
 
+  [Export]
+  public int TotalHealth = 10;
+  public int currentHealth {get; private set;}
+
   private Weapon main_weapon;
   private Grenade grenade;
   private Godot.Collections.Array items;
@@ -29,6 +33,20 @@ public partial class Character : Node3D
     }
     Connect(SignalName.UpdateMainCharacter, ItemGeneratorSingleton.Instance.GetUpdateCharacterSignal());
     EmitSignal(SignalName.UpdateMainCharacter, this);
+    currentHealth = TotalHealth;
+  }
+
+  public void AttackCharacter(int damageAmount) {
+    GD.Print("Current Health ", currentHealth);
+    currentHealth -= damageAmount;
+    if(currentHealth <= 0) {
+      Visible = false;
+    }
+  }
+
+  public void HealCharacter(int healAmount) {
+    GD.Print("Healing ", healAmount);
+    currentHealth += healAmount;
   }
 
 
