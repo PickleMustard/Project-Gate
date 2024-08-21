@@ -15,7 +15,9 @@
 #include "tile_mesh_generator.h"
 #include "tilegrid.h"
 #include "tiles/interactable.h"
+#include "tiles/obstacle.h"
 #include "tiles/ordinary.h"
+#include "tiles/unit_spawner.h"
 #include "yaml/yaml_parser.h"
 #include <sys/types.h>
 #include <cstdint>
@@ -194,7 +196,7 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_
  * No direct returns
  */
 void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root) {
-  Object *test = Engine::get_singleton()->get_singleton("ItemGeneratorSingleton");
+	Object *test = Engine::get_singleton()->get_singleton("GenerationCommunicatorSingleton");
 	for (int i = 0; i < tile_map.size(); i++) {
 		if (tile_map.get(i) > 0) {
 			int q = i / m_maximum_grid_size[1];
@@ -214,11 +216,18 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 						new_tile->call("AddStepOnEvent", test->call("GetGenerateItemSignal"));
 					}
 					break;
-        case 3:
+				case 3:
 					new_tile = Ref<Interactable>(memnew(Interactable(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 4)));
 					if (test) {
 						new_tile->call("AddStepOnEvent", test->call("GetGenerateItemSignal"));
 					}
+					break;
+				case 4:
+					new_tile = Ref<Obstacle>(memnew(Obstacle(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
+					break;
+				case 5:
+					new_tile = Ref<UnitSpawner>(memnew(Obstacle(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
+					new_tile->call("SetSpawnerCallable", test->call("GetSpawnEnemySignal"));
 					break;
 				default:
 					new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
@@ -234,6 +243,8 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 			String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), m_is_flat_topped, tile_map.get(i));
 			String m_ordinary_tile_mesh_material_name = "res://Assets/Materials/test_tile_material.tres";
 			String m_interactable_tile_mesh_material_name = "res://Assets/Materials/test_interactable_tile_material.tres";
+      String m_obstacle_tile_mesh_material_name = "res://Assets/Materials/test_obstacle_tile_material.tres";
+      String m_spawner_tile_mesh_material_name = "res://Assets/Materials/test_spawner_tile_material.tres";
 			ResourceLoader *m_rl = memnew(ResourceLoader);
 			Ref<Mesh> m_mesh;
 			Ref<ShaderMaterial> m_mesh_material;
@@ -271,8 +282,27 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 					}
 					break;
 				case 2:
+        case 3:
 					if (m_rl->exists(m_interactable_tile_mesh_material_name)) {
 						m_mesh_material = m_rl->load(m_interactable_tile_mesh_material_name);
+						int surface_count = m_mesh->get_surface_count();
+						for (int i = 0; i < surface_count; i++) {
+							m_mesh->surface_set_material(i, m_mesh_material);
+						}
+					}
+					break;
+        case 4:
+					if (m_rl->exists(m_obstacle_tile_mesh_material_name)) {
+						m_mesh_material = m_rl->load(m_obstacle_tile_mesh_material_name);
+						int surface_count = m_mesh->get_surface_count();
+						for (int i = 0; i < surface_count; i++) {
+							m_mesh->surface_set_material(i, m_mesh_material);
+						}
+					}
+					break;
+        case 5:
+					if (m_rl->exists(m_spawner_tile_mesh_material_name)) {
+						m_mesh_material = m_rl->load(m_spawner_tile_mesh_material_name);
 						int surface_count = m_mesh->get_surface_count();
 						for (int i = 0; i < surface_count; i++) {
 							m_mesh->surface_set_material(i, m_mesh_material);

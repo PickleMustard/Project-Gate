@@ -1,10 +1,12 @@
 using Godot;
+using System;
 
 public partial class Enemy : Character
 {
   Node TileGrid;
   Node level;
 
+  Func<Node> test;
   public override void _Ready()
   {
     Callable SetPositionCall = new Callable(this, "SetPosition");
@@ -17,6 +19,8 @@ public partial class Enemy : Character
     HealCharacter(TotalHealth);
     GD.Print("Health at beninging ", currentHealth);
   }
+
+
 
   public void SetPosition(Resource Tile)
   {

@@ -12,8 +12,10 @@ public partial class Character : Node3D
   public int TotalHealth = 10;
   public int currentHealth {get; private set;}
 
-  private Weapon main_weapon;
-  private Grenade grenade;
+  [Export]
+  public Weapon main_weapon {get; private set;}
+  [Export]
+  public Grenade grenade {get; private set;}
   private Godot.Collections.Array items;
 
   private int distanceRemaining {get; set;}
@@ -26,7 +28,7 @@ public partial class Character : Node3D
     InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
     i_handle.UpdateCharacter += MakeMainCharacter;
     i_handle.ResetCharacter += ResetDistanceRemaining;
-    Node3D UnitMovement = GetNodeOrNull<Node3D>("/root/Top/pivot/unit_movement");
+    Node3D UnitMovement = GetNodeOrNull<Node3D>("/root/Top/pivot/UnitControl");
     if (UnitMovement.HasMethod("GetUpdateCharacterSignal"))
     {
       Connect(SignalName.UpdateMainCharacter, (Callable)UnitMovement.Call("GetUpdateCharacterSignal"));
@@ -34,6 +36,11 @@ public partial class Character : Node3D
     Connect(SignalName.UpdateMainCharacter, ItemGeneratorSingleton.Instance.GetUpdateCharacterSignal());
     EmitSignal(SignalName.UpdateMainCharacter, this);
     currentHealth = TotalHealth;
+    if(main_weapon == null) {
+      main_weapon = new Weapon();
+      main_weapon.SetWeaponName("Pistol");
+      main_weapon.SetMaxRange(10);
+    }
   }
 
   public void AttackCharacter(int damageAmount) {

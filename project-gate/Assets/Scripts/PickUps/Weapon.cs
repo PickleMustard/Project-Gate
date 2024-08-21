@@ -1,18 +1,32 @@
 using Godot;
 
 public partial class Weapon : Resource {
-  private string weapon_name;
+  [Export]
+  public string WeaponName {get; private set;}
+  [Export]
+  public int MaxRange {get; private set;}
+  [Export]
+  public bool IgnoresLineSight {get; private set;}
 
   public void SetWeaponName(string name) {
-    weapon_name = name;
+    WeaponName = name;
   }
 
  public string GetWeaponName() {
-   return weapon_name;
+   return WeaponName;
  }
 
+ public int GetMaxRange() {
+   return MaxRange;
+ }
+
+ public void SetMaxRange(int range) {
+   MaxRange = range;
+ }
+
+
  public override string ToString() {
-   return "Weapon of name" + weapon_name;
+   return "Weapon of name" + WeaponName;
 
  }
 

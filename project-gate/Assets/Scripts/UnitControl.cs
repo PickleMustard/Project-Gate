@@ -2,7 +2,7 @@ using System.Collections;
 using Godot;
 using HCoroutines;
 
-public partial class unit_movement : Node3D
+public partial class UnitControl : Node3D
 {
   [Signal]
   public delegate void UpdateSelectedCharacterEventHandler();
@@ -152,7 +152,7 @@ public partial class unit_movement : Node3D
       GD.Print(tempChar.AsGodotObject());
       if (tempChar.AsGodotObject() != null)
       {
-        AttackTile(DesiredTileLocation);
+        AttackTile(DesiredTileLocation, CurrentUnitLocation, tempChar.AsGodotObject());
       }
       else
       {
@@ -163,18 +163,34 @@ public partial class unit_movement : Node3D
 
   }
 
-  public void AttackTile(Vector2I position)
+  public void AttackTile(Vector2I TargetPosition, Vector2I ShooterLocation, GodotObject attacker)
   {
     GD.Print("Attacking Location");
     GodotObject target = new GodotObject();
-    if(TileGrid.HasMethod("FindTileOnGrid")) {
-      GodotObject Tile = TileGrid.Call("FindTileOnGrid", position).AsGodotObject();
-      if(Tile.HasMethod("GetCharacterOnTile")) {
-        target = Tile.Call("GetCharacterOnTile").AsGodotObject();
+    Resource TargetTile = new Resource();
+    Resource ShooterTile = new Resource();
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      ShooterTile = (Resource)TileGrid.Call("FindTileOnGrid", ShooterLocation).AsGodotObject();
+      TargetTile = (Resource)TileGrid.Call("FindTileOnGrid", TargetPosition).AsGodotObject();
+      if (TargetTile.HasMethod("GetCharacterOnTile"))
+      {
+        target = TargetTile.Call("GetCharacterOnTile").AsGodotObject();
       }
     }
-    if(target.HasMethod("AttackCharacter")) {
-      target.Call("AttackCharacter", 5);
+
+    if (TileGrid.HasMethod("CalculateDistance"))
+    {
+      int distance = (int)TileGrid.Call("CalculateDistance", ShooterLocation, TargetPosition);
+      GD.Print("Distance between attacker and target: ", distance);
+      GD.Print(attacker.Call("GetMainWeapon"));
+      if (distance <= (int)(attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange"))
+      {
+        if (target.HasMethod("AttackCharacter"))
+        {
+          target.Call("AttackCharacter", 5);
+        }
+      }
     }
   }
 

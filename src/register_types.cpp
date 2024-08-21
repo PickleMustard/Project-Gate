@@ -8,7 +8,9 @@
 #include "level-generation/level.h"
 #include "level-generation/level_generator.h"
 #include "tiles/interactable.h"
+#include "tiles/obstacle.h"
 #include "tiles/ordinary.h"
+#include "tiles/unit_spawner.h"
 #include "yaml/yaml_parser.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -26,6 +28,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<Tile>();
   ClassDB::register_class<Interactable>();
   ClassDB::register_class<Ordinary>();
+  ClassDB::register_class<Obstacle>();
+  ClassDB::register_class<UnitSpawner>();
 
   //Physical Tile Objects
   ClassDB::register_class<TileCollision>();

@@ -19,7 +19,7 @@ config/icon="res://icon.svg"
 
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
 SeededRandomAccess="*res://Assets/Scripts/RandomSingleton/SeededRandomAccess.cs"
-ItemGeneratorSingleton="*res://Assets/Scripts/ItemGeneration/ItemGeneratorSingleton.cs"
+GenerationCommunicatorSingleton="*res://Assets/Scripts/GenerationCommunicator/GenerationCommunicatorSingleton.cs"
 
 [dotnet]
 

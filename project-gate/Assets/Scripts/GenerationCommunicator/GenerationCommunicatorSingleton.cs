@@ -1,12 +1,14 @@
 using Godot;
 
-public partial class ItemGeneratorSingleton : Node
+public partial class GenerationCommunicatorSingleton : Node
 {
-  public static ItemGeneratorSingleton Instance { get; private set; }
+  public static GenerationCommunicatorSingleton Instance { get; private set; }
 
   public Character CurrentCharacter { get; set; }
 
-  private Callable UpdateCharacter;
+  private Callable SpawnEnemyCall;
+  private Callable SpawnCharacterCall;
+  private Callable UpdateCharacterCall;
   private Callable GenerateItemCall;
 
   private Node TileGrid;
@@ -14,8 +16,8 @@ public partial class ItemGeneratorSingleton : Node
   public override void _Ready()
   {
     Instance = this;
-    Engine.RegisterSingleton("ItemGeneratorSingleton", this);
-    UpdateCharacter = new Callable(this, "UpdateCurrentCharacter");
+    Engine.RegisterSingleton("GenerationCommunicatorSingleton", this);
+    UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
     GenerateItemCall = new Callable(this, "GenerateItem");
   }
 
@@ -31,9 +33,25 @@ public partial class ItemGeneratorSingleton : Node
     CurrentCharacter.SetMainWeapon(weapon);
     GD.Print("Generated Weapon: ", CurrentCharacter.GetMainWeapon().ToString());
   }
+
+  public Callable GetSpawnCharacterSignal(){
+    return SpawnCharacterCall;
+  }
+  public Callable GetSpawnEnemySignal() {
+    return SpawnEnemyCall;
+  }
+  public void SpawnCharacter(Resource Tile) {
+    GD.Print("Spawning Character");
+    Character new_character = new Character();
+  }
+
+  public void SpawnEnemy(Resource Tile) {
+    GD.Print("Spawning Enemy");
+    Enemy new_enemy = new Enemy();
+  }
   public Callable GetUpdateCharacterSignal()
   {
-    return UpdateCharacter;
+    return UpdateCharacterCall;
   }
 
   public void UpdateCurrentCharacter(Character UpdateCharacter)
