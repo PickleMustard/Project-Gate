@@ -13,12 +13,24 @@ public partial class GenerationCommunicatorSingleton : Node
 
   private Node TileGrid;
 
-  public override void _Ready()
+  public override void _EnterTree()
   {
     Instance = this;
     Engine.RegisterSingleton("GenerationCommunicatorSingleton", this);
     UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
     GenerateItemCall = new Callable(this, "GenerateItem");
+    SpawnEnemyCall = new Callable(this, "SpawnEnemy");
+    SpawnCharacterCall = new Callable(this, "SpawnCharacter");
+  }
+
+  public override void _Ready()
+  {
+    //Instance = this;
+    //Engine.RegisterSingleton("GenerationCommunicatorSingleton", this);
+    UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
+    GenerateItemCall = new Callable(this, "GenerateItem");
+    SpawnEnemyCall = new Callable(this, "SpawnEnemy");
+    SpawnCharacterCall = new Callable(this, "SpawnCharacter");
   }
 
   public Callable GetGenerateItemSignal()
@@ -34,18 +46,22 @@ public partial class GenerationCommunicatorSingleton : Node
     GD.Print("Generated Weapon: ", CurrentCharacter.GetMainWeapon().ToString());
   }
 
-  public Callable GetSpawnCharacterSignal(){
+  public Callable GetSpawnCharacterSignal()
+  {
     return SpawnCharacterCall;
   }
-  public Callable GetSpawnEnemySignal() {
+  public Callable GetSpawnEnemySignal()
+  {
     return SpawnEnemyCall;
   }
-  public void SpawnCharacter(Resource Tile) {
+  public void SpawnCharacter(Resource Tile)
+  {
     GD.Print("Spawning Character");
     Character new_character = new Character();
   }
 
-  public void SpawnEnemy(Resource Tile) {
+  public void SpawnEnemy(Resource Tile)
+  {
     GD.Print("Spawning Enemy");
     Enemy new_enemy = new Enemy();
   }

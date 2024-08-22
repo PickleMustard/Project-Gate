@@ -33,7 +33,7 @@ public partial class Character : Node3D
     {
       Connect(SignalName.UpdateMainCharacter, (Callable)UnitMovement.Call("GetUpdateCharacterSignal"));
     }
-    Connect(SignalName.UpdateMainCharacter, ItemGeneratorSingleton.Instance.GetUpdateCharacterSignal());
+    Connect(SignalName.UpdateMainCharacter, GenerationCommunicatorSingleton.Instance.GetUpdateCharacterSignal());
     EmitSignal(SignalName.UpdateMainCharacter, this);
     currentHealth = TotalHealth;
     if(main_weapon == null) {

@@ -84,8 +84,9 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root) {
 	UtilityFunctions::print("Generating Rooms");
 	m_Rooms_Graph *rooms_graph = m_GenerateRoomGraph(gridCenter);
 	UtilityFunctions::print("Generating Bitmap");
-	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
 	m_ConnectGraphNodes(tile_bit_map, rooms_graph);
+	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
+	UtilityFunctions::print("Generated Bitmap");
 	m_GenerateRoom(tile_bit_map, tile_grid, root);
 	UtilityFunctions::print("Tile Grid Before Return: ", tile_grid->size());
 
@@ -197,6 +198,12 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_
  */
 void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root) {
 	Object *test = Engine::get_singleton()->get_singleton("GenerationCommunicatorSingleton");
+	if (test) {
+		UtilityFunctions::print("Got Singleton ", test->to_string(), " ready");
+	} else {
+    UtilityFunctions::print("Couldnt get it");
+  }
+
 	for (int i = 0; i < tile_map.size(); i++) {
 		if (tile_map.get(i) > 0) {
 			int q = i / m_maximum_grid_size[1];
@@ -226,8 +233,12 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 					new_tile = Ref<Obstacle>(memnew(Obstacle(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
 					break;
 				case 5:
-					new_tile = Ref<UnitSpawner>(memnew(Obstacle(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
-					new_tile->call("SetSpawnerCallable", test->call("GetSpawnEnemySignal"));
+					new_tile = Ref<UnitSpawner>(memnew(UnitSpawner(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
+					if (test) {
+            Callable signal = test->call("GetSpawnEnemySignal");
+            UtilityFunctions::print("Signal: ", signal);
+            new_tile->call("SetSpawnerCallable", signal);
+					}
 					break;
 				default:
 					new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
@@ -243,8 +254,8 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 			String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), m_is_flat_topped, tile_map.get(i));
 			String m_ordinary_tile_mesh_material_name = "res://Assets/Materials/test_tile_material.tres";
 			String m_interactable_tile_mesh_material_name = "res://Assets/Materials/test_interactable_tile_material.tres";
-      String m_obstacle_tile_mesh_material_name = "res://Assets/Materials/test_obstacle_tile_material.tres";
-      String m_spawner_tile_mesh_material_name = "res://Assets/Materials/test_spawner_tile_material.tres";
+			String m_obstacle_tile_mesh_material_name = "res://Assets/Materials/test_obstacle_tile_material.tres";
+			String m_spawner_tile_mesh_material_name = "res://Assets/Materials/test_spawner_tile_material.tres";
 			ResourceLoader *m_rl = memnew(ResourceLoader);
 			Ref<Mesh> m_mesh;
 			Ref<ShaderMaterial> m_mesh_material;
@@ -282,7 +293,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 					}
 					break;
 				case 2:
-        case 3:
+				case 3:
 					if (m_rl->exists(m_interactable_tile_mesh_material_name)) {
 						m_mesh_material = m_rl->load(m_interactable_tile_mesh_material_name);
 						int surface_count = m_mesh->get_surface_count();
@@ -291,7 +302,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 						}
 					}
 					break;
-        case 4:
+				case 4:
 					if (m_rl->exists(m_obstacle_tile_mesh_material_name)) {
 						m_mesh_material = m_rl->load(m_obstacle_tile_mesh_material_name);
 						int surface_count = m_mesh->get_surface_count();
@@ -300,7 +311,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 						}
 					}
 					break;
-        case 5:
+				case 5:
 					if (m_rl->exists(m_spawner_tile_mesh_material_name)) {
 						m_mesh_material = m_rl->load(m_spawner_tile_mesh_material_name);
 						int surface_count = m_mesh->get_surface_count();
@@ -502,6 +513,7 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 		UtilityFunctions::print("Current Room Purpose: ", graph->vertices[node_hash]->purpose);
 		UtilityFunctions::print(vformat("Room location: %d, %d", room_location[0], room_location[1]));
 		Vector<int> interactables = m_GenerateInteractableType(interactable_points);
+		UtilityFunctions::print("Generated Interactables");
 		int radius = graph->vertices[node_hash]->radius;
 		switch (room_shape) {
 				//Pure Hexagon Room
@@ -513,9 +525,22 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
 					}
 				}
+				for (int i = 0; i < 5; i++) {
+					q = rnd->GetInteger(-radius, radius);
+					r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
+					while ((tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)) > 1)) {
+						q = rnd->GetInteger(-radius, radius);
+						r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
+					}
+					tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 5);
+				}
 				for (int i = 0; i < interactables.size(); i++) {
 					q = rnd->GetInteger(-radius, radius);
 					r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
+					while ((tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)) > 1)) {
+						q = rnd->GetInteger(-radius, radius);
+						r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
+					}
 					tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1 + interactables[i]);
 				}
 				break;

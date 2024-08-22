@@ -1,5 +1,6 @@
 #include "unit_spawner.h"
 #include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
 
 
@@ -19,6 +20,7 @@ void godot::UnitSpawner::SpawnCharacter() {
 }
 
 void godot::UnitSpawner::SetSpawnerCallable(Callable func){
+  UtilityFunctions::print("called set spawner: ", func);
   m_spawn_entity = func;
 }
 

@@ -18,8 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
-SeededRandomAccess="*res://Assets/Scripts/RandomSingleton/SeededRandomAccess.cs"
 GenerationCommunicatorSingleton="*res://Assets/Scripts/GenerationCommunicator/GenerationCommunicatorSingleton.cs"
+SeededRandomAccess="*res://Assets/Scripts/RandomSingleton/SeededRandomAccess.cs"
 
 [dotnet]
 
