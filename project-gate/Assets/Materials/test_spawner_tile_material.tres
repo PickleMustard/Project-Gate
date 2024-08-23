@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bfvbi6svtdjve"]
 
-[ext_resource type="Shader" path="res://Assets/Materials/spawner_shader.gdshader" id="1_imrd8"]
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/spawner_shader.gdshader" id="1_imrd8"]
 
 [resource]
 render_priority = 0

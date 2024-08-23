@@ -10,6 +10,7 @@
 #include "tiles/interactable.h"
 #include "tiles/obstacle.h"
 #include "tiles/ordinary.h"
+#include "tiles/starting_tile.h"
 #include "tiles/unit_spawner.h"
 #include "yaml/yaml_parser.h"
 #include <gdextension_interface.h>
@@ -30,6 +31,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<Ordinary>();
   ClassDB::register_class<Obstacle>();
   ClassDB::register_class<UnitSpawner>();
+  ClassDB::register_class<StartingTile>();
 
   //Physical Tile Objects
   ClassDB::register_class<TileCollision>();

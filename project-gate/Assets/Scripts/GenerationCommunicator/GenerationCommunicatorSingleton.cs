@@ -12,6 +12,7 @@ public partial class GenerationCommunicatorSingleton : Node
   private Callable GenerateItemCall;
 
   private Node TileGrid;
+  private Node3D Top;
 
   public override void _EnterTree()
   {
@@ -31,6 +32,7 @@ public partial class GenerationCommunicatorSingleton : Node
     GenerateItemCall = new Callable(this, "GenerateItem");
     SpawnEnemyCall = new Callable(this, "SpawnEnemy");
     SpawnCharacterCall = new Callable(this, "SpawnCharacter");
+    Top = GetNodeOrNull<Node3D>("/root/Top");
   }
 
   public Callable GetGenerateItemSignal()
@@ -63,7 +65,12 @@ public partial class GenerationCommunicatorSingleton : Node
   public void SpawnEnemy(Resource Tile)
   {
     GD.Print("Spawning Enemy");
-    Enemy new_enemy = new Enemy();
+    Node enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate();
+    Top.AddChild(enemy);
+    enemy.Call("SetPosition", Tile);
+    if(Tile.HasMethod("SetCharacterOnTile")) {
+      Tile.Call("SetCharacterOnTile", Tile);
+    }
   }
   public Callable GetUpdateCharacterSignal()
   {
