@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=9 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/UnitControl.cs" id="2_ggfwn"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Character.cs" id="4_pefaa"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
+[ext_resource type="PackedScene" uid="uid://2bswkiikpwx4" path="res://Assets/Units/enemy.tscn" id="6_q8vmb"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
@@ -65,6 +66,9 @@ offset_left = 2.0
 offset_top = 33.0
 offset_right = 100.0
 offset_bottom = 91.0
+
+[node name="Enemy" parent="." instance=ExtResource("6_q8vmb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2219.85, 2.33574, 3949.5)
 
 [node name="Node3D" type="Node3D" parent="."]
 transform = Transform3D(-0.999377, 0, 0.0352833, 0, 1, 0, -0.0352833, 0, -0.999377, 1852.93, -0.216902, 3405.64)

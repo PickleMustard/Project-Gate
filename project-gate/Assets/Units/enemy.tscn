@@ -1,29 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://2bswkiikpwx4"]
+[gd_scene load_steps=3 format=3 uid="uid://2bswkiikpwx4"]
 
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
 [ext_resource type="Script" path="res://Assets/Scripts/Enemy.cs" id="1_k8ecc"]
-
-[sub_resource type="BlackboardPlan" id="BlackboardPlan_8q10g"]
-var/var/name = &"var"
-var/var/type = 3
-var/var/value = 0.0
-var/var/hint = 0
-var/var/hint_string = ""
-
-[sub_resource type="BTCheckTrigger" id="BTCheckTrigger_627a8"]
-
-[sub_resource type="BehaviorTree" id="BehaviorTree_o8p0o"]
-blackboard_plan = SubResource("BlackboardPlan_8q10g")
-root_task = SubResource("BTCheckTrigger_627a8")
-
-[sub_resource type="BlackboardPlan" id="BlackboardPlan_fh345"]
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material_override = ExtResource("1_b2i4i")
-
-[node name="BTPlayer" type="BTPlayer" parent="."]
-behavior_tree = SubResource("BehaviorTree_o8p0o")
-blackboard_plan = SubResource("BlackboardPlan_fh345")
