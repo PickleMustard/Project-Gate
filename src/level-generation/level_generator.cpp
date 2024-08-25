@@ -93,6 +93,15 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 	return tile_grid;
 }
 
+/* Generates the Directed Graph of rooms to create the TileGrid from
+*
+* Arguments:
+* starting_location: Vector2i for the position of the origin on the grid
+*
+* Returns:
+* m_Rooms_Graph Pointer: The pointer to the starting room node within the directed graph 
+* 			Will spawn the player units on this tile
+*/
 LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i starting_location) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	LevelGenerator::m_Rooms_Graph *rooms_graph = new m_Rooms_Graph{ HashMap<String, m_Room_Vertex *>{} };
@@ -167,6 +176,19 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 void LevelGenerator::m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph) {
 }
 
+/* Connects the room centers defined on an edge to each other with a line of tiles
+* 	FOR FUTURE: have an argument to vary the width of the connection
+*
+* Arguments: 
+*   tile_bit_map: Reference to the List of tile positions and the Tile type defined for that position
+*    m_Rooms_Graph: Pointer to the starting node of the directed graph of rooms
+*
+* Returns:
+*   No Direct Returns
+* 
+* Out variables:
+*    tile_bit_map: Updates the connecting tiles between rooms as ordinary tiles
+*/
 void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph) {
 	int nums_rooms = graph->vertices.size();
 	for (int i = 0; i < nums_rooms; i++) {
@@ -238,6 +260,22 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 	}
 }
 
+/*  Tile Creation Factory Method to instantiate a Reference to a Tile Resource given a certain set of criteria
+*
+* Arguments:
+*    GenerationCommnicator: Singleton object that controls connection between low-level Tile objects in C++ and character controls in C#
+*    spawnable_locations: Reference to the list of Tile Resources that can spawn enemies
+*    location: Vector3 position of the tile within World Space
+*    q: column location of the tile; q in axial representation
+*    r: row location of the tile; r in axial represntation
+*    tile_type: int representation of the desired type of tile to be instantiated
+*
+* Returns:
+*    Ref<Tile>: Returns an instantiated reference to the Tile Resource with the provided characteristics
+*
+* Out Variables:
+*    spawnable_locations: If the instantiated tile has the ability to spawn enemies, it is added to the list of spawnable locations
+*/
 Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, int tile_type) {
 	Ref<Tile> new_tile;
 	switch (tile_type) {
@@ -277,6 +315,18 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 	return new_tile;
 }
 
+/* For a given tile, set the mesh and material
+*
+* Arguments:
+*    mesh_generator: Pointer to the Mesh Generator object that either loads the saved mesh or creates the new mesh type if it is not saved
+*    ResourceLoader: Pointer to the ResourceLoader Resource that loads a saved mesh
+*    mesh_material_name: String containing the absoluate path to the Material for the given mesh
+*    tile_mesh_name: String containing the absolute path to the Tile Mesh for the given tile
+*    tile_type: int representation of the type of tile
+*
+* Returns:
+*    No Direct Returns
+*/
 void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, int tile_type) {
 	Ref<Mesh> m_mesh;
 	Ref<ShaderMaterial> m_mesh_material;
@@ -511,6 +561,19 @@ LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<ui
 	//
 }
 
+/* For a given graph of room nodes, fill the tile bit map with the corresponding tiles and types in the rooms
+*
+* Arguments:
+*    tile_bit_map: Reference to the vector of tile positions and the corresponding type
+*    graph: Pointer to the starting node of the graph of rooms
+*    grid_origin: Vector2i location of the tile situated at the origin of the grid in axial notation
+*
+* Returns:
+*    No Direct Returns
+*
+* Out Variables:
+*    tile_bit_map: Tile positions corresponding to the locations within rooms in the graph are filled out with their tile types
+*/
 void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	int num_of_rooms = graph->vertices.size();
@@ -620,6 +683,14 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 	}
 }
 
+/* Generates the interactable types for a room given a certain point allocation
+*
+* Arguments:
+*    num_points: Point allocation for the total sum of interactables to be spawned
+*
+* Returns:
+*     Vector<int>: Vector containing the int representation of interactables to be placed within a room
+*/
 Vector<int> LevelGenerator::m_GenerateInteractableType(int num_points) {
 	Vector<int> generated_interactables{};
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
