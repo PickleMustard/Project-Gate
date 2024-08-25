@@ -27,11 +27,27 @@ TileNotifier *TileNotifier::getInstance() {
 	}
 }
 
+/* Emits a signal when the TileGrid has finished creation
+*
+* Arguments:
+*    grid: Pointer to the TileGrid object that was created
+*
+* Returns:
+*    No Direct Returns
+*/
 void TileNotifier::GridCreationNotification(TileGrid* grid) {
   UtilityFunctions::print("Emiting Grid Created Signal");
   emit_signal("GridCreated", grid);
 }
 
+/* When a tile is clicked on, emits the "TileSelected" Signal
+*
+* Arguments:
+*    selected_tile: Pointer to the TileCollision object that was clicked on
+*
+* Returns:
+*    No Direct Returns
+*/
 void TileNotifier::TileSelected(TileCollision* selected_tile){
   emit_signal("TileSelected", selected_tile);
 
