@@ -102,10 +102,25 @@ void TileGrid::_notification(int p_what) {
 	}
 }
 
+/* For a Tile that has the ability to spawn an enemy, add its spawn method to the list of possible enemy start positions
+*
+* Arguments:
+*    addition: Callable representation of the method to spawn an enemy on the tile
+*
+* Returns:
+*    No Direct Returns
+*/
 void TileGrid::AddEnemyCall(Callable addition) {
 	call_set_enemy_start_positions.push_back(addition);
 }
 
+/* When the level has finished creation, spawn the given number of enemies at random spawnable locations across the TileGrid
+*
+* Arguments:
+*
+* Returns:
+*     No Direct Returns
+*/
 void TileGrid::SetEnemiesOnGrid() {
 	Vector<int> used_locations{};
 	int location;
