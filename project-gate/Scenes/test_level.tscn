@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=10 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/UnitControl.cs" id="2_ggfwn"]
 [ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
-[ext_resource type="Script" path="res://Assets/Scripts/Character.cs" id="4_pefaa"]
+[ext_resource type="Script" path="res://Assets/Scripts/Characters/CharacterTurnController.cs" id="4_do7ow"]
+[ext_resource type="Script" path="res://Assets/Scripts/Characters/Character.cs" id="4_pefaa"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
 [ext_resource type="PackedScene" uid="uid://2bswkiikpwx4" path="res://Assets/Units/enemy.tscn" id="6_q8vmb"]
@@ -11,6 +12,8 @@
 [sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
 [node name="Top" type="Node3D"]
+
+[node name="Level" type="Level" parent="."]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
@@ -27,6 +30,9 @@ fov = 110.0
 script = ExtResource("2_ggfwn")
 movementTime = 0.5
 rotationDuration = 0.3
+
+[node name="CharacterTurnController" type="Node" parent="."]
+script = ExtResource("4_do7ow")
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("3_af0co")
@@ -57,7 +63,7 @@ anchor_bottom = 0.006
 offset_right = 77.48
 offset_bottom = 30.76
 focus_mode = 1
-text = "Press Me
+text = "End Turn
 "
 
 [node name="CodeEdit" type="CodeEdit" parent="Control"]
@@ -79,3 +85,5 @@ mesh = SubResource("BoxMesh_yeooe")
 [node name="Sprite3D" type="Sprite3D" parent="Node3D"]
 transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 0.927824, -0.0434665)
 texture = ExtResource("6_1dwfk")
+
+[connection signal="button_up" from="Control/Button" to="CharacterTurnController" method="EndTurn"]

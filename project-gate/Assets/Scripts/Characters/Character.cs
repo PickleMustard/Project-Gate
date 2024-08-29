@@ -10,6 +10,13 @@ public partial class Character : Node3D
 
   [Export]
   public int TotalHealth = 10;
+
+  [Export]
+  public float SpeedAccumulator = .1f;
+
+  [Export]
+  public float SpeedNeededToRequeue = 2.0f;
+
   public int currentHealth {get; private set;}
 
   [Export]
@@ -17,13 +24,16 @@ public partial class Character : Node3D
   [Export]
   public Grenade grenade {get; private set;}
   private Godot.Collections.Array items;
+  private float CurrentSpeed;
 
   private int distanceRemaining {get; set;}
 
   public bool isMoving {get; set;} = false;
+  private Callable updateMovementCalcs;
 
   public override void _Ready()
   {
+    CurrentSpeed = 0f;
     distanceRemaining = TotalDistance;
     InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
     i_handle.UpdateCharacter += MakeMainCharacter;
@@ -35,6 +45,7 @@ public partial class Character : Node3D
     }
     Connect(SignalName.UpdateMainCharacter, GenerationCommunicatorSingleton.Instance.GetUpdateCharacterSignal());
     EmitSignal(SignalName.UpdateMainCharacter, this);
+    CharacterTurnController.Instance.AddUpdateCharacterMovementCallable(updateMovementCalcs);
     currentHealth = TotalHealth;
     if(main_weapon == null) {
       main_weapon = new Weapon();
@@ -47,8 +58,14 @@ public partial class Character : Node3D
     GD.Print("Current Health ", currentHealth);
     currentHealth -= damageAmount;
     if(currentHealth <= 0) {
-      Visible = false;
     }
+  }
+
+  private void KillCharacter() {
+    CharacterTurnController.Instance.RemoveCharacterFromMovementQueue(this);
+    CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);
+    Visible = false;
+
   }
 
   public void HealCharacter(int healAmount) {
@@ -69,6 +86,13 @@ public partial class Character : Node3D
 
   public void DecrementDistanceRemaining(int decrementor) {
     distanceRemaining -= decrementor;
+  }
+
+  private void UpdateMovementCalcs() {
+    CurrentSpeed += SpeedAccumulator;
+    if(CurrentSpeed >= SpeedNeededToRequeue) {
+      CharacterTurnController.Instance.AddCharacterToMovementQueue(this);
+    }
   }
 
   public void SetMainWeapon(Weapon UpdatedWeapon) {
