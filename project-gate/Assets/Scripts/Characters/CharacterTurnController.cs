@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Collections;
 
 public partial class CharacterTurnController : Node
 {
@@ -9,6 +10,7 @@ public partial class CharacterTurnController : Node
   public delegate void EndTurnSignalEventHandler();
 
   List<Character> MovementQueue;
+  PriorityQueue<Character, float> PriorityUpdateHeap;
   List<Callable> UpdateMovementCalcs;
   Character CurrentCharacter;
   UnitControl unitControl;
@@ -20,6 +22,10 @@ public partial class CharacterTurnController : Node
     unitControl = GetNodeOrNull<UnitControl>("/root/Top/pivot/UnitControl");
 
     Instance = this;
+  }
+
+  public void StartLevel() {
+
   }
 
   public Character NextCharacter()
@@ -38,20 +44,22 @@ public partial class CharacterTurnController : Node
 
   }
 
+  /* At the end of a characters turn, it returns control back to the Turn CharacterTurnController
+   * The Turn Controller calls for the next character in the movement queue if it exists
+   * If it doesn't exist, all characters for the Global turn have moved
+   * Thus, all movement stats should be rerolled
+   */
   public void EndTurn()
   {
     GD.Print("Ending ", CurrentCharacter.ToString(), "'s turn");
-    UpdateCharacterMovement();
     CurrentCharacter = NextCharacter();
     if (CurrentCharacter != null)
     {
       CurrentCharacter.ResetDistanceRemaining();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
     } else {
-      while(CurrentCharacter == null) {
-        UpdateCharacterMovement();
-        CurrentCharacter = NextCharacter();
-      }
+      EndGlobalTurn();
+      CurrentCharacter = NextCharacter();
       CurrentCharacter.ResetDistanceRemaining();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
     }
@@ -62,6 +70,10 @@ public partial class CharacterTurnController : Node
     MovementQueue.Add(SpawnedCharacter);
   }
 
+  public void AddCharacterToMovementHeap(Character character) {
+    PriorityUpdateHeap.Enqueue(character, character.HeapPriority);
+  }
+
   public void RemoveCharacterFromMovementQueue(Character DeaddedCharacter)
   {
     if (MovementQueue.Contains(DeaddedCharacter))
@@ -70,7 +82,7 @@ public partial class CharacterTurnController : Node
     }
   }
 
-  public void UpdateCharacterMovement()
+  public void EndGlobalTurn()
   {
     for (int i = 0; i < UpdateMovementCalcs.Count; i++)
     {

@@ -17,6 +17,12 @@ public partial class Character : Node3D
   [Export]
   public float SpeedNeededToRequeue = 2.0f;
 
+  [Export]
+  public float StartingSpeed = 1.5f;
+
+  [Export]
+  public float HeapPriority = 1.0f;
+
   public int currentHealth {get; private set;}
 
   [Export]
