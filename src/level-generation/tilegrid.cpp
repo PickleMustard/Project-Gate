@@ -153,6 +153,7 @@ void TileGrid::GenerateTileGrid() {
 	TileNotifier::getInstance()->GridCreationNotification(this);
 	UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
 	call_deferred("SetEnemiesOnGrid");
+  //SetEnemiesOnGrid();
 	memdelete(m_showrooms);
 }
 

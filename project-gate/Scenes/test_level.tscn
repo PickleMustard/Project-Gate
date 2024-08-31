@@ -13,6 +13,11 @@
 
 [node name="Top" type="Node3D"]
 
+[node name="CharacterTurnController" type="Node" parent="."]
+script = ExtResource("4_do7ow")
+
+[node name="Level" type="Level" parent="."]
+
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
 script = ExtResource("1_pyq38")
@@ -29,9 +34,6 @@ script = ExtResource("2_ggfwn")
 movementTime = 0.5
 rotationDuration = 0.3
 
-[node name="CharacterTurnController" type="Node" parent="."]
-script = ExtResource("4_do7ow")
-
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("3_af0co")
 
@@ -39,6 +41,9 @@ script = ExtResource("3_af0co")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
 script = ExtResource("4_pefaa")
 TotalDistance = 40
+BaseSpeedAccumulator = 4.0
+SpeedNeededToRequeue = 3.0
+HeapPriority = 3.0
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
 material = ExtResource("4_u1xaw")

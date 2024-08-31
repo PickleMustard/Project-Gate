@@ -9,6 +9,7 @@ public partial class Enemy : Character
   Func<Node> test;
   public override void _Ready()
   {
+    SetupCharacter();
     Callable SetPositionCall = new Callable(this, "SetPosition");
     level = GetNode<Node>("/root/Top/Level");
     TileGrid = level.GetChildren()[0];
