@@ -70,7 +70,7 @@ public partial class UnitControl : Node3D
       unit_location = new Vector2I(0, 0);
       if (TileGrid.HasMethod("GetCoordinateFromPosition"))
       {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
       }
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       for (int i = 0; i < MovementRange.Count; i++)
@@ -136,7 +136,7 @@ public partial class UnitControl : Node3D
     Variant tempChar;
     if (tile.HasMethod("GetCoordinateFromPosition"))
     {
-      CurrentUnitLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+      CurrentUnitLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
     }
 
     if (TileGrid.HasMethod("FindTileOnGrid"))
@@ -209,7 +209,7 @@ public partial class UnitControl : Node3D
 
       if (TileGrid.HasMethod("GetCoordinateFromPosition"))
       {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
       }
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       for (int i = 0; i < MovementRange.Count; i++)
@@ -260,14 +260,14 @@ public partial class UnitControl : Node3D
   private IEnumerator PrepareMovement(Vector3 endPosition)
   {
 
-    Quaternion startRotation = capsule.Quaternion;
-    endPosition.Y = capsule.Position.Y;
-    Vector3 direction = endPosition - capsule.Position;
+    Quaternion startRotation = CurrentCharacter.Quaternion;
+    endPosition.Y = CurrentCharacter.Position.Y;
+    Vector3 direction = endPosition - CurrentCharacter.Position;
     Basis endRotation = Basis.LookingAt(direction);
     Quaternion endQuat = endRotation.GetRotationQuaternion();
     if (TileGrid.HasMethod("GetCoordinateFromPosition"))
     {
-      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
     }
 
     if (TileGrid.HasMethod("FindTileOnGrid"))
@@ -292,10 +292,10 @@ public partial class UnitControl : Node3D
       {
         timeElapsed += Co.DeltaTime;
         float lerpStep = timeElapsed / rotationDuration;
-        capsule.Quaternion = Quaternion.Slerp(endQuat, lerpStep);
+        CurrentCharacter.Quaternion = Quaternion.Slerp(endQuat, lerpStep);
         yield return null;
       }
-      capsule.Quaternion = endQuat;
+      CurrentCharacter.Quaternion = endQuat;
     }
     Co.Run(MoveUnitAlongTile(endPosition));
   }
@@ -303,21 +303,21 @@ public partial class UnitControl : Node3D
   private IEnumerator MoveUnitAlongTile(Vector3 endPosition)
   {
     GD.Print("End Position: ", endPosition);
-    Vector3 startPosition = capsule.Position;
+    Vector3 startPosition = CurrentCharacter.Position;
     float timeElapsed = 0.0f;
 
     while (timeElapsed < movementTime)
     {
       timeElapsed += Co.DeltaTime;
       float lerpStep = timeElapsed / movementTime;
-      capsule.Position = capsule.Position.Lerp(endPosition, lerpStep);
+      CurrentCharacter.Position = CurrentCharacter.Position.Lerp(endPosition, lerpStep);
       yield return null;
     }
 
-    capsule.Position = endPosition;
+    CurrentCharacter.Position = endPosition;
     if (TileGrid.HasMethod("GetCoordinateFromPosition"))
     {
-      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
     }
 
     if (TileGrid.HasMethod("FindTileOnGrid"))
@@ -331,7 +331,7 @@ public partial class UnitControl : Node3D
       if (tempObject.HasMethod("SetCharacterOnTile"))
       {
         GD.Print("Setting character");
-        tempObject.Call("SetCharacterOnTile", capsule);
+        tempObject.Call("SetCharacterOnTile", CurrentCharacter);
       }
       if (tempObject.HasMethod("GetCharacterOnTile"))
       {
@@ -349,6 +349,7 @@ public partial class UnitControl : Node3D
       Variant current_tile_var = path[0];
       path.Remove(current_tile_var);
       GodotObject current_tile = current_tile_var.AsGodotObject();
+      GD.Print("Location has character on it: ", current_tile.Call("HasCharacterOnTile"));
       if (current_tile.HasMethod("GetLocation"))
       {
         Vector2I location = (Vector2I)current_tile.Call("GetLocation");

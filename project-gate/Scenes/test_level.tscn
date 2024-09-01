@@ -16,8 +16,6 @@
 [node name="CharacterTurnController" type="Node" parent="."]
 script = ExtResource("4_do7ow")
 
-[node name="Level" type="Level" parent="."]
-
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
 script = ExtResource("1_pyq38")

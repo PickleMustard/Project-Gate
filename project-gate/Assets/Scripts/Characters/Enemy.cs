@@ -21,8 +21,6 @@ public partial class Enemy : Character
     GD.Print("Health at beninging ", currentHealth);
   }
 
-
-
   public void SetPosition(Resource Tile)
   {
     Vector2I location = new Vector2I();

@@ -416,7 +416,7 @@ godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_lo
 
 		neighbors = GetNeighbors(current_tile);
 		for (Ref<Tile> neighbor : neighbors) {
-			if (neighbor->GetTileType() == 4 || closed_tiles.has(neighbor)) {
+			if (neighbor->GetTileType() == 4 || neighbor->HasCharacterOnTile() || closed_tiles.has(neighbor)) {
 				continue;
 			}
 

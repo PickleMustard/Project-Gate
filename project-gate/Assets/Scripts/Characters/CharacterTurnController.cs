@@ -56,6 +56,7 @@ public partial class CharacterTurnController : Node
     {
       Character next_character = MovementQueue.Dequeue();
       next_character.ResetDistanceRemaining();
+      next_character.MakeMainCharacter();
       return next_character;
     }
     else
@@ -77,7 +78,6 @@ public partial class CharacterTurnController : Node
     if (CurrentCharacter != null)
     {
       GD.Print("Another Character Available");
-      CurrentCharacter.ResetDistanceRemaining();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
     }
     else
@@ -85,7 +85,6 @@ public partial class CharacterTurnController : Node
       GD.Print("End of global turn");
       EndGlobalTurn();
       CurrentCharacter = NextCharacter();
-      CurrentCharacter.ResetDistanceRemaining();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
     }
   }

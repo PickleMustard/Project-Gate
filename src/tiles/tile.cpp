@@ -175,7 +175,13 @@ godot::Variant Tile::GetCharacterOnTile() {
   return character_variant;
 }
 
+bool Tile::HasCharacterOnTile() {
+  UtilityFunctions::print("Tile has character: ", m_character_on_tile != nullptr);
+  return m_character_on_tile != nullptr;
+}
+
 void Tile::SetCharacterOnTile(Variant character) {
+  UtilityFunctions::print("Can Convert Character Variant: ",character.can_convert_strict(character.get_type(), Variant::OBJECT) );
   if(character.can_convert_strict(character.get_type(), Variant::OBJECT)) {
     m_character_on_tile = Object::cast_to<Node3D>(character);
   }
@@ -215,6 +221,7 @@ void Tile::_bind_methods() {
   godot::ClassDB::bind_method(godot::D_METHOD("SetCharacterOnTile", "character"), &Tile::SetCharacterOnTile);
   godot::ClassDB::bind_method(godot::D_METHOD("ResetCharacterOnTile"), &Tile::ResetCharacterOnTile);
   godot::ClassDB::bind_method(godot::D_METHOD("GetCharacterOnTile"), &Tile::GetCharacterOnTile);
+  godot::ClassDB::bind_method(godot::D_METHOD("HasCharacterOnTile"), &Tile::HasCharacterOnTile);
 
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");
 

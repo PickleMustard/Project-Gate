@@ -68,9 +68,9 @@ public partial class GenerationCommunicatorSingleton : Node
     Node enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate();
     Top.AddChild(enemy);
     enemy.Call("SetPosition", Tile);
-    if(Tile.HasMethod("SetCharacterOnTile")) {
-      Tile.Call("SetCharacterOnTile", Tile);
-    }
+    //if(Tile.HasMethod("SetCharacterOnTile")) {
+      //Tile.Call("SetCharacterOnTile", Tile);
+    //}
   }
   public Callable GetUpdateCharacterSignal()
   {
