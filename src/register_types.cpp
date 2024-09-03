@@ -1,4 +1,5 @@
 #include "register_types.h"
+#include "autonomous-agents/finite_state_machine_base.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "seeded_random_access.h"
 #include "level-generation/tile_collision.h"
@@ -40,6 +41,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   //Level Objects
   ClassDB::register_class<Level>();
   ClassDB::register_class<LevelGenerator>();
+
+  ClassDB::register_class<FiniteStateMachineBase>();
 
 
   //Singletons

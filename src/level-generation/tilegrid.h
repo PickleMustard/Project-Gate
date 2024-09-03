@@ -67,6 +67,7 @@ public:
 
   void AddEnemyCall(Callable addition);
   void SetEnemiesOnGrid();
+  void SetPlayerTeamOnGrid();
 
 	static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
 	static Vector2i GetCoordinateFromPosition(Vector3 location, float size);

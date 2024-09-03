@@ -142,6 +142,11 @@ void TileGrid::SetEnemiesOnGrid() {
  // }
 }
 
+void TileGrid::SetPlayerTeamOnGrid() {
+  Vector<int> used_locations{};
+  int location;
+}
+
 /*
  * Devoted Function to generate the tile_grid
  */
