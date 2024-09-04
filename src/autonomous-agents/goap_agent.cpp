@@ -59,20 +59,73 @@ bool godot::GoapAgent::HasActionPlan() {
  *
  */
 void godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm, GodotObject *gd) {
-	HashMap<String, Variant> world_state = data_provider.GetWorldState();
-	HashMap<String, Variant> goal = data_provider.CreateGoalState();
+	HashMap<String, Variant> world_state = data_provider->GetWorldState();
+	HashMap<String, Variant> goal = data_provider->CreateGoalState();
 
 	//Plan
 	Vector<Ref<GoapAction>> plan = planner.plan(gd, available_actions, world_state, goal);
 	if (plan.size() > 0) {
 		current_actions = plan;
-		data_provider.PlanFound(goal, plan);
+		data_provider->PlanFound(goal, plan);
 
 		fsm->PopState();
 		fsm->PushState(perform_action_state);
 	} else {
-		data_provider.PlanFailed(goal);
+		data_provider->PlanFailed(goal);
 		fsm->PopState();
 		fsm->PushState(idle_state);
 	}
+}
+
+void godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm, GodotObject *gd) {
+	Ref<GoapAction> action = current_actions[0];
+	if (action->RequiresInRange() && action->target == nullptr) {
+		fsm->PopState();
+		fsm->PopState();
+		fsm->PushState(idle_state);
+		return;
+	}
+
+	if (data_provider->MoveAgent(action)) {
+		fsm->PopState();
+	}
+}
+
+void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, GodotObject *gd) {
+	if (!HasActionPlan()) {
+		fsm->PopState();
+		fsm->PushState(idle_state);
+		data_provider->ActionsFinished();
+		return;
+	}
+
+	Ref<GoapAction> action = current_actions[0];
+	if (action->IsDone()) {
+		current_actions.remove_at(0);
+	}
+
+	if (HasActionPlan()) {
+		action = current_actions[0];
+		bool in_range = action->RequiresInRange() ? action->GetInRange() : true;
+
+		if (in_range) {
+			bool success = action->Perform(gd);
+
+			if (!success) {
+				fsm->PopState();
+				fsm->PushState(idle_state);
+				data_provider->PlanAborted(action);
+			}
+		} else {
+      fsm->PushState(move_to_state);
+    }
+	} else {
+    fsm->PopState();
+    fsm->PushState(idle_state);
+    data_provider->ActionsFinished();
+  }
+}
+
+void godot::GoapAgent::FindDataProvider() {
+  get_parent();
 }

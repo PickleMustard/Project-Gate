@@ -22,7 +22,7 @@ private:
 	HashSet<Ref<GoapAction>> available_actions;
 	Vector<Ref<GoapAction>> current_actions;
 
-	IGoap data_provider;
+	Ref<IGoap> data_provider;
   Ref<GoapPlanner> planner;
 
 public:
