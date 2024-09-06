@@ -10,6 +10,8 @@
 #include <godot_cpp/variant/vector2i.hpp>
 
 #include <sys/types.h>
+#include "godot_cpp/classes/resource_loader.hpp"
+#include "level-generation/tile_mesh_generator.h"
 #include "tiles/tile.h"
 
 namespace godot {
@@ -87,14 +89,18 @@ public:
 	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size);
 	~LevelGenerator();
 
-	HashMap<String, Ref<Tile>> *GenerateLevel(TileGrid *root);
+	HashMap<String, Ref<Tile>> *GenerateLevel(TileGrid *root, Vector<Ref<Tile>> &spawnable_locations);
+  int GetNumRooms();
 
 private:
-	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root);
+	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations);
   m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
   void m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph);
   void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
   void m_ConnectGraphNodes(Vector<uint8_t> &tile_bilt_map, m_Rooms_Graph *graph);
+  Ref<Tile> m_InstantiateTile(Object* GenerationComunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, int tile_type);
+  void m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, int tile_type);
+  Vector<int> m_GenerateInteractableType(int num_points);
 	Vector<Vector2i> m_GenerateMST(const Vector<Vector2i> &room_centers, m_Room_Tree_Node *root, u_int8_t size);
 	void m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, m_Room_Tree_Node *root, Vector<Vector2i> &neighbor_list, int level);
 	m_Best_Neighbors m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbor, int level);

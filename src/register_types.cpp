@@ -1,4 +1,9 @@
 #include "register_types.h"
+#include "autonomous-agents/finite_state_machine_base.h"
+#include "autonomous-agents/goap_action.h"
+#include "autonomous-agents/goap_agent.h"
+#include "autonomous-agents/goap_planner.h"
+#include "autonomous-agents/igoap.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "seeded_random_access.h"
 #include "level-generation/tile_collision.h"
@@ -8,7 +13,10 @@
 #include "level-generation/level.h"
 #include "level-generation/level_generator.h"
 #include "tiles/interactable.h"
+#include "tiles/obstacle.h"
 #include "tiles/ordinary.h"
+#include "tiles/starting_tile.h"
+#include "tiles/unit_spawner.h"
 #include "yaml/yaml_parser.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -26,6 +34,9 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<Tile>();
   ClassDB::register_class<Interactable>();
   ClassDB::register_class<Ordinary>();
+  ClassDB::register_class<Obstacle>();
+  ClassDB::register_class<UnitSpawner>();
+  ClassDB::register_class<StartingTile>();
 
   //Physical Tile Objects
   ClassDB::register_class<TileCollision>();
@@ -34,6 +45,12 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   //Level Objects
   ClassDB::register_class<Level>();
   ClassDB::register_class<LevelGenerator>();
+
+  ClassDB::register_class<FiniteStateMachineBase>();
+  ClassDB::register_class<IGoap>();
+  ClassDB::register_class<GoapAction>();
+  ClassDB::register_class<GoapAgent>();
+  ClassDB::register_class<GoapPlanner>();
 
 
   //Singletons

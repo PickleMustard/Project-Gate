@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bj5p24q127uox"]
 
-[ext_resource type="Shader" path="res://Assets/Materials/test_tile_shader.gdshader" id="1_8efcr"]
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/test_tile_shader.gdshader" id="1_8efcr"]
 
 [resource]
 render_priority = 0

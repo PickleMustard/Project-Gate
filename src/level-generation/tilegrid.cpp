@@ -1,4 +1,5 @@
 #include "tilegrid.h"
+#include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/math.hpp"
@@ -9,7 +10,9 @@
 #include "godot_cpp/templates/vector.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
+#include "level-generation/tile_notifier.h"
 #include "level_generator.h"
+#include "seeded_random_access.h"
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -99,14 +102,63 @@ void TileGrid::_notification(int p_what) {
 	}
 }
 
+/* For a Tile that has the ability to spawn an enemy, add its spawn method to the list of possible enemy start positions
+*
+* Arguments:
+*    addition: Callable representation of the method to spawn an enemy on the tile
+*
+* Returns:
+*    No Direct Returns
+*/
+void TileGrid::AddEnemyCall(Callable addition) {
+	call_set_enemy_start_positions.push_back(addition);
+}
+
+/* When the level has finished creation, spawn the given number of enemies at random spawnable locations across the TileGrid
+*
+* Arguments:
+*
+* Returns:
+*     No Direct Returns
+*/
+void TileGrid::SetEnemiesOnGrid() {
+	Vector<int> used_locations{};
+	int location;
+	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
+  UtilityFunctions::print("spawnable_locations size: ", spawnable_locations.size());
+	for (int i = 0; i < 5; i++) {
+		location = rnd->GetInteger(0, spawnable_locations.size() - 1);
+		while (used_locations.has(location)) {
+			location = rnd->GetInteger(0, spawnable_locations.size() - 1);
+		}
+    UtilityFunctions::print("Attempting to spawn something at ", location);
+		spawnable_locations[location]->call("SpawnCharacter");
+    used_locations.push_back(location);
+	}
+  spawnable_locations[50]->call("SpawnCharacter");
+  UtilityFunctions::print("Setting enemies on list of size: ", call_set_enemy_start_positions.size());
+ // for (int i = 0; i < call_set_enemy_start_positions.size(); i++) {
+ //   call_set_enemy_start_positions[i].call(m_tile_grid->begin()->value);
+ // }
+}
+
+void TileGrid::SetPlayerTeamOnGrid() {
+  Vector<int> used_locations{};
+  int location;
+}
+
 /*
  * Devoted Function to generate the tile_grid
  */
 void TileGrid::GenerateTileGrid() {
 	UtilityFunctions::print(vformat("Constructing New Grid with %d num rooms", m_grid_num_rooms));
 	m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
-	m_tile_grid = m_showrooms->GenerateLevel(this);
+  m_grid_num_rooms = m_showrooms->GetNumRooms();
+	m_tile_grid = m_showrooms->GenerateLevel(this, spawnable_locations);
+	TileNotifier::getInstance()->GridCreationNotification(this);
 	UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
+	call_deferred("SetEnemiesOnGrid");
+  //SetEnemiesOnGrid();
 	memdelete(m_showrooms);
 }
 
@@ -173,7 +225,7 @@ Ref<Tile> TileGrid::FindTileOnGrid(Vector2i location) {
  * Vector<Tile *>: List of references to all neighbors that exist; size range is from 0 - 6 inclusive
  */
 godot::Vector<Ref<Tile>> TileGrid::GetNeighbors(Ref<Tile> tile) {
-  godot::Vector<Ref<Tile>> neighbors{};
+	godot::Vector<Ref<Tile>> neighbors{};
 	String locations[]{
 		vformat("hex %d,%d", tile->GetColumn(), tile->GetRow() + 1),
 		vformat("hex %d,%d", tile->GetColumn() + 1, tile->GetRow()),
@@ -192,7 +244,7 @@ godot::Vector<Ref<Tile>> TileGrid::GetNeighbors(Ref<Tile> tile) {
 }
 
 godot::Array TileGrid::GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid) {
-  godot::Array neighbors {};
+	godot::Array neighbors{};
 
 	String locations[]{
 		vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() + 1),
@@ -369,7 +421,7 @@ godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_lo
 
 		neighbors = GetNeighbors(current_tile);
 		for (Ref<Tile> neighbor : neighbors) {
-			if (neighbor->GetTileType() == 4 || closed_tiles.has(neighbor)) {
+			if (neighbor->GetTileType() == 4 || neighbor->HasCharacterOnTile() || closed_tiles.has(neighbor)) {
 				continue;
 			}
 
@@ -475,9 +527,9 @@ void TileGrid::SetNumRooms(int num_rooms) {
 void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
 	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
-  godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("CalculateDistance", "a", "b"), &TileGrid::CalculateDistanceStatic);
-  godot::ClassDB::bind_method(godot::D_METHOD("FindTileOnGrid", "position"), &TileGrid::FindTileOnGrid);
-  //godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("CalculateDistance", "a", "b"), &TileGrid::CalculateDistanceStatic);
+	godot::ClassDB::bind_method(godot::D_METHOD("FindTileOnGrid", "position"), &TileGrid::FindTileOnGrid);
+	//godot::ClassDB::bind_method(godot::D_METHOD("CalculateDistance", "Location", "Destination"), &TileGrid::CalculateDistance);
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
@@ -489,6 +541,9 @@ void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetNumRooms", "num_rooms"), &TileGrid::SetNumRooms);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
+
+	godot::ClassDB::bind_method(godot::D_METHOD("SetEnemiesOnGrid"), &TileGrid::SetEnemiesOnGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("AddEnemyCall", "addition"), &TileGrid::AddEnemyCall);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetNeighbors", "tile", "tile_grid"), &TileGrid::GetNeighborsStatic);

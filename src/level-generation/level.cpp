@@ -1,5 +1,7 @@
 #include "level.h"
 #include "godot_cpp/classes/engine.hpp"
+#include "godot_cpp/classes/global_constants.hpp"
+#include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/core/object.hpp"
@@ -20,7 +22,6 @@ godot::Level::Level() {
 			get_child(i)->queue_free();
 		}
 	}
-	m_tile_grid = memnew(TileGrid);
   m_level_grid_def["origin"] = Vector3(0,0,0);
   m_level_grid_def["num_rooms"] = 5;
   //YamlParser::test_yaml_caller();
@@ -34,6 +35,7 @@ godot::Level::~Level() {
 
 void godot::Level::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("RegenerateGrid", PropertyInfo(Variant::OBJECT, "engine", godot::PROPERTY_HINT_NONE, "", godot::PROPERTY_USAGE_DEFAULT, "Engine")));
+  ADD_SIGNAL(MethodInfo("LevelGenerated"));
 	godot::ClassDB::bind_method(godot::D_METHOD("GenerateLevel"), &Level::GenerateLevel);
 
 	ADD_GROUP("Level Properties", "m_level_");
@@ -46,12 +48,17 @@ void godot::Level::GenerateLevel() {
 			get_child(i)->queue_free();
 		}
 	}
-	UtilityFunctions::print(m_tile_grid);
+	UtilityFunctions::print("here");
 
 	m_tile_grid = memnew(TileGrid);
+	UtilityFunctions::print("here 2");
 	add_child(m_tile_grid);
 	m_tile_grid->set_owner(this->get_owner());
+	UtilityFunctions::print("here 3");
 	m_tile_grid->GenerateTileGrid();
+
+  UtilityFunctions::print("Emitting Signal: LevelGenerated");
+  emit_signal("LevelGenerated");
 
 
 //m_tile_grid->GenerateTileGrid();
@@ -67,9 +74,13 @@ godot::Vector3 godot::Level::GetGridDefinitionOrigin() {
 
 void godot::Level::_notification(int p_what) {
 	if (p_what == NOTIFICATION_READY) {
-		add_child(m_tile_grid);
-		m_tile_grid->set_owner(this->get_owner());
-		m_tile_grid->GenerateTileGrid();
+    if(get_child_count() > 0) {
+      TypedArray<Node> children = get_children();
+      for(int i = 0; i < children.size(); i++) {
+        cast_to<Node>(children[i])->queue_free();
+      }
+    }
+    GenerateLevel();
 		connect("RegenerateGrid", callable_mp(this, &godot::Level::GenerateLevel));
 	}
 }

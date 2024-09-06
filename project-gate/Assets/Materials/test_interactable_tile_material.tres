@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bruqv1xgby401"]
 
-[ext_resource type="Shader" path="res://Assets/Materials/interactable_shader.gdshader" id="1_n4sw5"]
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/interactable_shader.gdshader" id="1_n4sw5"]
 
 [resource]
 render_priority = 0

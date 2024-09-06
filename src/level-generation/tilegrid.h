@@ -54,11 +54,9 @@ public:
 	Ref<Tile> FindTileOnGrid(Vector2i location);
 	Vector<Ref<Tile>> GetNeighbors(Ref<Tile> tile);
 	static godot::Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
-	//Vector<Tile *> GetRingToDist(Tile *center_tile, int radius);
 	Vector2 PositionToGrid(Vector3 location);
 
 	godot::Array CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
-	//void CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
 	godot::Vector<Ref<Tile>> RetracePath(Ref<Tile> start_tile, Ref<Tile> end_tile);
 	int CalculateDistance(Ref<Tile> location, Ref<Tile> destination);
 	static int CalculateDistanceStatic(Vector2i a, Vector2i b);
@@ -66,6 +64,10 @@ public:
 	static int LengthHex(Vector2i hex);
 	static int DistanceHex(Vector2i a, Vector2i b);
 	void GenerateTileGrid();
+
+  void AddEnemyCall(Callable addition);
+  void SetEnemiesOnGrid();
+  void SetPlayerTeamOnGrid();
 
 	static Vector3 GetPositionForHexFromCoordinate(Vector2i coordinate, float size, bool is_flat_topped);
 	static Vector2i GetCoordinateFromPosition(Vector3 location, float size);
@@ -79,10 +81,13 @@ public:
 
 protected:
 	void _notification(int p_what);
+
 	static void _bind_methods();
 
 private:
 	LevelGenerator *m_showrooms = nullptr;
+  Vector<Ref<Tile>> spawnable_locations {};
+  Vector<Callable> call_set_enemy_start_positions;
 	//void LayoutGrid();
 };
 

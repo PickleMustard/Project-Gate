@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://2bswkiikpwx4"]
+
+[ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
+[ext_resource type="Script" path="res://Assets/Scripts/Characters/Enemy.cs" id="1_k8ecc"]
+
+[node name="Enemy" type="Node3D"]
+script = ExtResource("1_k8ecc")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+material_override = ExtResource("1_b2i4i")

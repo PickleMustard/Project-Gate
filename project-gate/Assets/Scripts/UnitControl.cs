@@ -2,7 +2,7 @@ using System.Collections;
 using Godot;
 using HCoroutines;
 
-public partial class unit_movement : Node3D
+public partial class UnitControl : Node3D
 {
   [Signal]
   public delegate void UpdateSelectedCharacterEventHandler();
@@ -39,7 +39,7 @@ public partial class unit_movement : Node3D
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
     level = GetNode<Node>("/root/Top/Level");
-    GD.Print("Level Children: ", level.GetChildCount());
+    //GD.Print("Level Children: ", level.GetChildCount());
     TileGrid = level.GetChildren()[0];
     GD.Print("Tile Grid: ", TileGrid.Name);
     unit_location = new Vector2I(0, 0);
@@ -53,7 +53,7 @@ public partial class unit_movement : Node3D
   public void UpdateCurrentCharacter(Character UpdateCharacter)
   {
     CurrentCharacter = UpdateCharacter;
-    GD.Print("The Signal works!");
+    GD.Print("Movement Character: ", CurrentCharacter.ToString());
   }
 
 
@@ -70,7 +70,7 @@ public partial class unit_movement : Node3D
       unit_location = new Vector2I(0, 0);
       if (TileGrid.HasMethod("GetCoordinateFromPosition"))
       {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
       }
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       for (int i = 0; i < MovementRange.Count; i++)
@@ -122,6 +122,81 @@ public partial class unit_movement : Node3D
 
   public void NotifyLog(Node tile_collider)
   {
+    unit_location = new Vector2I(0, 0);
+    string tile_name = tile_collider.Name;
+    tile = tile_collider.GetParent();
+
+    int divider = tile_name.Find(",");
+    int q = tile_name.Substring(4, divider - 4).ToInt();
+    int r = tile_name.Substring(divider + 1).ToInt();
+    Vector2I DesiredTileLocation = new Vector2I(q, r);
+    Vector2I CurrentUnitLocation = new Vector2I(0, 0);
+    Variant temp;
+    GodotObject tempObject = new GodotObject();
+    Variant tempChar;
+    if (tile.HasMethod("GetCoordinateFromPosition"))
+    {
+      CurrentUnitLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
+    }
+
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      temp = TileGrid.Call("FindTileOnGrid", DesiredTileLocation);
+      GD.Print("unit_location ", unit_location);
+      tempObject = temp.AsGodotObject();
+    }
+
+    if (tempObject.HasMethod("GetCharacterOnTile"))
+    {
+      tempChar = tempObject.Call("GetCharacterOnTile");
+      GD.Print(tempChar.AsGodotObject());
+      if (tempChar.AsGodotObject() != null)
+      {
+        AttackTile(DesiredTileLocation, CurrentUnitLocation, tempChar.AsGodotObject());
+      }
+      else
+      {
+        MoveCharacter(tile_collider);
+      }
+    }
+
+
+  }
+
+  public void AttackTile(Vector2I TargetPosition, Vector2I ShooterLocation, GodotObject attacker)
+  {
+    GD.Print("Attacking Location");
+    GodotObject target = new GodotObject();
+    Resource TargetTile = new Resource();
+    Resource ShooterTile = new Resource();
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      ShooterTile = (Resource)TileGrid.Call("FindTileOnGrid", ShooterLocation).AsGodotObject();
+      TargetTile = (Resource)TileGrid.Call("FindTileOnGrid", TargetPosition).AsGodotObject();
+      if (TargetTile.HasMethod("GetCharacterOnTile"))
+      {
+        target = TargetTile.Call("GetCharacterOnTile").AsGodotObject();
+      }
+    }
+
+    if (TileGrid.HasMethod("CalculateDistance"))
+    {
+      int distance = (int)TileGrid.Call("CalculateDistance", ShooterLocation, TargetPosition);
+      GD.Print("Distance between attacker and target: ", distance);
+      GD.Print(attacker.Call("GetMainWeapon"));
+      if (distance <= (int)(attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange"))
+      {
+        if (target.HasMethod("AttackCharacter"))
+        {
+          target.Call("AttackCharacter", 5);
+        }
+      }
+    }
+  }
+
+  public void MoveCharacter(Node tile_collider)
+  {
+    GD.Print("Main Weapon:", CurrentCharacter.GetMainWeapon());
     if (!CurrentCharacter.isMoving)
     {
       unit_location = new Vector2I(0, 0);
@@ -134,7 +209,7 @@ public partial class unit_movement : Node3D
 
       if (TileGrid.HasMethod("GetCoordinateFromPosition"))
       {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
+        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
       }
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       for (int i = 0; i < MovementRange.Count; i++)
@@ -146,13 +221,8 @@ public partial class unit_movement : Node3D
         }
       }
       tile = tile_collider.GetParent();
-      if (tile.HasMethod("GetCoordinateFromPosition"))
-      {
-        unit_location = (Vector2I)tile.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
-      }
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))
       {
-        Vector3 location = (Vector3)tile.Call("GetPositionForHexFromCoordinate", new Vector2I(q, r), 3.0f, false);
         desired_location = new Vector2I(q, r);
         if (tile.HasMethod("CalculatePath"))
         {
@@ -190,44 +260,15 @@ public partial class unit_movement : Node3D
   private IEnumerator PrepareMovement(Vector3 endPosition)
   {
 
-    Quaternion startRotation = capsule.Quaternion;
-    endPosition.Y = capsule.Position.Y;
-    Vector3 direction = endPosition - capsule.Position;
+    Quaternion startRotation = CurrentCharacter.Quaternion;
+    endPosition.Y = CurrentCharacter.Position.Y;
+    Vector3 direction = endPosition - CurrentCharacter.Position;
     Basis endRotation = Basis.LookingAt(direction);
     Quaternion endQuat = endRotation.GetRotationQuaternion();
-    if (Mathf.IsEqualApprox(Mathf.Abs(startRotation.Dot(endQuat)), 1.0f) == false)
-    {
-      float timeElapsed = 0.0f;
-      while (timeElapsed < rotationDuration)
-      {
-        timeElapsed += Co.DeltaTime;
-        float lerpStep = timeElapsed / rotationDuration;
-        capsule.Quaternion = Quaternion.Slerp(endQuat, lerpStep);
-        yield return null;
-      }
-      capsule.Quaternion = endQuat;
-    }
-    Co.Run(MoveUnitAlongTile(endPosition));
-  }
-
-  private IEnumerator MoveUnitAlongTile(Vector3 endPosition)
-  {
-    Vector3 startPosition = capsule.Position;
-    float timeElapsed = 0.0f;
-
-    while (timeElapsed < movementTime)
-    {
-      timeElapsed += Co.DeltaTime;
-      float lerpStep = timeElapsed / movementTime;
-      capsule.Position = capsule.Position.Lerp(endPosition, lerpStep);
-      yield return null;
-    }
-
-    capsule.Position = endPosition;
     if (TileGrid.HasMethod("GetCoordinateFromPosition"))
-      {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", capsule.Position, 3.0f);
-      }
+    {
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
+    }
 
     if (TileGrid.HasMethod("FindTileOnGrid"))
     {
@@ -236,6 +277,65 @@ public partial class unit_movement : Node3D
       if (tempObject.HasMethod("AddStepOnEvent"))
       {
         tempObject.Call("AddStepOnEvent", test_update);
+      }
+      if (tempObject.HasMethod("SetCharacterOnTile"))
+      {
+        GD.Print("Resetting character");
+        tempObject.Call("ResetCharacterOnTile");
+      }
+    }
+
+    if (Mathf.IsEqualApprox(Mathf.Abs(startRotation.Dot(endQuat)), 1.0f) == false)
+    {
+      float timeElapsed = 0.0f;
+      while (timeElapsed < rotationDuration)
+      {
+        timeElapsed += Co.DeltaTime;
+        float lerpStep = timeElapsed / rotationDuration;
+        CurrentCharacter.Quaternion = Quaternion.Slerp(endQuat, lerpStep);
+        yield return null;
+      }
+      CurrentCharacter.Quaternion = endQuat;
+    }
+    Co.Run(MoveUnitAlongTile(endPosition));
+  }
+
+  private IEnumerator MoveUnitAlongTile(Vector3 endPosition)
+  {
+    GD.Print("End Position: ", endPosition);
+    Vector3 startPosition = CurrentCharacter.Position;
+    float timeElapsed = 0.0f;
+
+    while (timeElapsed < movementTime)
+    {
+      timeElapsed += Co.DeltaTime;
+      float lerpStep = timeElapsed / movementTime;
+      CurrentCharacter.Position = CurrentCharacter.Position.Lerp(endPosition, lerpStep);
+      yield return null;
+    }
+
+    CurrentCharacter.Position = endPosition;
+    if (TileGrid.HasMethod("GetCoordinateFromPosition"))
+    {
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
+    }
+
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      var temp = TileGrid.Call("FindTileOnGrid", unit_location);
+      var tempObject = temp.AsGodotObject();
+      if (tempObject.HasMethod("AddStepOnEvent"))
+      {
+        tempObject.Call("AddStepOnEvent", test_update);
+      }
+      if (tempObject.HasMethod("SetCharacterOnTile"))
+      {
+        GD.Print("Setting character");
+        tempObject.Call("SetCharacterOnTile", CurrentCharacter);
+      }
+      if (tempObject.HasMethod("GetCharacterOnTile"))
+      {
+        //GD.Print(tempObject.Call("GetCharacterOnTile").AsGodotObject().GetMethodList());
       }
       if (tempObject.HasMethod("TileSteppedOnEvent"))
       {
@@ -249,6 +349,7 @@ public partial class unit_movement : Node3D
       Variant current_tile_var = path[0];
       path.Remove(current_tile_var);
       GodotObject current_tile = current_tile_var.AsGodotObject();
+      GD.Print("Location has character on it: ", current_tile.Call("HasCharacterOnTile"));
       if (current_tile.HasMethod("GetLocation"))
       {
         Vector2I location = (Vector2I)current_tile.Call("GetLocation");

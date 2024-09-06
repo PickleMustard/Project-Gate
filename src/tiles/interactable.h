@@ -13,7 +13,7 @@ class Interactable : public Tile, public IStepOnTile{
 
 public:
   Interactable();
-	Interactable(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type);
+	Interactable(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t tile_type, int interactable_type);
   ~Interactable();
 
   void TileSteppedOnEvent() override;
@@ -30,6 +30,8 @@ public:
 private:
   TypedArray<Callable> SteppedOnTileCallables;
   TypedArray<Callable> SteppedOffTileCallables;
+
+  int m_interactable_type;
 
 };
 }
