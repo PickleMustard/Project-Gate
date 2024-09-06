@@ -37,6 +37,9 @@ public:
   virtual bool Perform(GodotObject *agent);
   virtual bool RequiresInRange();
 
+  protected:
+  static void _bind_methods();
+
 };
 
 } //namespace godot

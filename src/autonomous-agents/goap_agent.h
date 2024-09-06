@@ -9,8 +9,9 @@
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/hash_set.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 namespace godot {
-class GoapAgent : Node {
+class GoapAgent : public Node {
 	GDCLASS(GoapAgent, Node);
 
 private:
@@ -19,20 +20,25 @@ private:
 	Callable move_to_state;
 	Callable perform_action_state;
 
-	HashSet<Ref<GoapAction>> available_actions;
 	Vector<Ref<GoapAction>> current_actions;
 
-	Ref<IGoap> data_provider;
+	IGoap *data_provider;
   Ref<GoapPlanner> planner;
 
 public:
+  HashSet<Ref<GoapAction>> m_available_actions;
+
   GoapAgent();
   ~GoapAgent();
   void AddAction(Ref<GoapAction> action);
   Ref<GoapAction> GetAction(String type);
   void RemoveAction(Ref<GoapAction> action);
+  void Update();
   void _ready() override;
   void _process(double p_delta) override;
+
+  void SetAvailableActions(Dictionary actions);
+  Dictionary GetAvailableActions();
 protected:
   static void _bind_methods();
 private:

@@ -4,15 +4,15 @@
 #include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/vector.hpp"
-#include "godot_cpp/variant/callable_custom.hpp"
+
 namespace godot {
 
 class FiniteStateMachineBase : public Resource {
-  GDCLASS(FiniteStateMachineBase, Resource);
+  GDCLASS(FiniteStateMachineBase, Resource)
 public:
 	FiniteStateMachineBase();
 	~FiniteStateMachineBase();
-	typedef void (*FSMState)(FiniteStateMachineBase *, GodotObject *);
+	//typedef void (*FSMState)(FiniteStateMachineBase *, GodotObject *);
 
 	void Update(GodotObject *gd);
 	void PushState(Callable state);
@@ -23,7 +23,7 @@ protected:
 
 private:
   Callable test;
-	Vector<Callable> state_stack;
+	Vector<Callable> state_stack {};
 	int stack_location = -1;
 };
 } //namespace godot

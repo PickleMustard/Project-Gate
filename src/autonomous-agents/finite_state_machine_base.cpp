@@ -1,31 +1,35 @@
 #include "finite_state_machine_base.h"
 #include "godot_cpp/classes/wrapped.hpp"
+#include "godot_cpp/variant/utility_functions.hpp"
 
-void godot::FiniteStateMachineBase::Update(godot::GodotObject *gd) {
+using namespace godot;
+
+void FiniteStateMachineBase::Update(GodotObject *gd) {
+  UtilityFunctions::print("Stack Location: ", stack_location);
 	if (stack_location > -1) {
 		(state_stack[stack_location]).call(this, gd);
 	}
 }
 
-void godot::FiniteStateMachineBase::PushState(Callable state) {
+void FiniteStateMachineBase::PushState(Callable state) {
 	state_stack.push_back(state);
 	stack_location++;
 }
 
-void godot::FiniteStateMachineBase::PopState() {
+void FiniteStateMachineBase::PopState() {
 	if (stack_location > -1) {
 		state_stack.remove_at(stack_location);
 		stack_location--;
 	}
 }
 
-godot::FiniteStateMachineBase::FiniteStateMachineBase() {
+FiniteStateMachineBase::FiniteStateMachineBase() {
 }
 
-godot::FiniteStateMachineBase::~FiniteStateMachineBase() {
+FiniteStateMachineBase::~FiniteStateMachineBase() {
 
 }
 
-void godot::FiniteStateMachineBase::_bind_methods() {
+void FiniteStateMachineBase::_bind_methods() {
 
 }

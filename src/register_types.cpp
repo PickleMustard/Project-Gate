@@ -1,5 +1,9 @@
 #include "register_types.h"
 #include "autonomous-agents/finite_state_machine_base.h"
+#include "autonomous-agents/goap_action.h"
+#include "autonomous-agents/goap_agent.h"
+#include "autonomous-agents/goap_planner.h"
+#include "autonomous-agents/igoap.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "seeded_random_access.h"
 #include "level-generation/tile_collision.h"
@@ -43,6 +47,10 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<LevelGenerator>();
 
   ClassDB::register_class<FiniteStateMachineBase>();
+  ClassDB::register_class<IGoap>();
+  ClassDB::register_class<GoapAction>();
+  ClassDB::register_class<GoapAgent>();
+  ClassDB::register_class<GoapPlanner>();
 
 
   //Singletons
