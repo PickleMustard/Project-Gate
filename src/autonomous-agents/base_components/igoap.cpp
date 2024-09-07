@@ -1,16 +1,16 @@
 #include "igoap.h"
-#include "autonomous-agents/goap_action.h"
+#include "autonomous-agents/base_components/goap_action.h"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/templates/vector.hpp"
 
 using namespace godot;
-godot::IGoap::IGoap() {
+IGoap::IGoap() {
 }
 
-godot::IGoap::~IGoap() {
+IGoap::~IGoap() {
 }
 
-void godot::IGoap::_bind_methods() {
+void IGoap::_bind_methods() {
 }
 
 HashMap<String, Variant> IGoap::GetWorldState() { return HashMap<String, Variant>{}; }

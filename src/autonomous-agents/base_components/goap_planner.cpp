@@ -1,5 +1,5 @@
 #include "goap_planner.h"
-#include "autonomous-agents/goap_action.h"
+#include "autonomous-agents/base_components/goap_action.h"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/hash_map.hpp"

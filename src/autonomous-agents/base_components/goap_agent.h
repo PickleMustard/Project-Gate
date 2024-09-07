@@ -1,10 +1,10 @@
 #ifndef GOAP_AGENT_H
 #define GOAP_AGENT_H
 
-#include "autonomous-agents/finite_state_machine_base.h"
-#include "autonomous-agents/goap_action.h"
-#include "autonomous-agents/goap_planner.h"
-#include "autonomous-agents/igoap.h"
+#include "autonomous-agents/base_components/finite_state_machine_base.h"
+#include "autonomous-agents/base_components/goap_action.h"
+#include "autonomous-agents/base_components/goap_planner.h"
+#include "autonomous-agents/base_components/igoap.h"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/wrapped.hpp"

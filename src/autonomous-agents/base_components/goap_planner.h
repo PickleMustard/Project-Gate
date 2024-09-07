@@ -1,6 +1,6 @@
 #ifndef GOAP_PLANNER_H
 #define GOAP_PLANNER_H
-#include "autonomous-agents/goap_action.h"
+#include "autonomous-agents/base_components/goap_action.h"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
