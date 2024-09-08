@@ -5,9 +5,15 @@
 #include "autonomous-agents/base_components/igoap.h"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/hash_map.hpp"
+#include "godot_cpp/templates/vector.hpp"
+#include "godot_cpp/variant/variant.hpp"
 namespace godot {
 class BaseEnemy : public IGoap {
   GDCLASS(BaseEnemy, IGoap);
+
+private:
+  Vector<Variant> known_enemies;
+
 public:
   BaseEnemy();
   ~BaseEnemy();
@@ -21,6 +27,10 @@ public:
 
 protected:
   static void _bind_methods();
+
+private:
+  void CheckForEnemies();
+  void AreEnemiesWithinRange();
 };
 
 } //namespace godot

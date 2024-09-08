@@ -2,6 +2,7 @@
 #define TILEGRID_H
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/typed_array.hpp"
 #pragma once
 
 #include "godot_cpp/variant/vector2i.hpp"
@@ -52,8 +53,9 @@ public:
 	HashMap<String, Ref<Tile>> GetTileMap();
 
 	Ref<Tile> FindTileOnGrid(Vector2i location);
-	Vector<Ref<Tile>> GetNeighbors(Ref<Tile> tile);
-	static godot::Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
+  Array GetNeighbors(Ref<Tile> tile);
+  Array GetNeighborsInRadius(Ref<Tile> tile, int radius);
+	static Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
 	Vector2 PositionToGrid(Vector3 location);
 
 	godot::Array CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
@@ -88,7 +90,6 @@ private:
 	LevelGenerator *m_showrooms = nullptr;
   Vector<Ref<Tile>> spawnable_locations {};
   Vector<Callable> call_set_enemy_start_positions;
-	//void LayoutGrid();
 };
 
 } //namespace godot
