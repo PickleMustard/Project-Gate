@@ -2,7 +2,6 @@
 #define TILEGRID_H
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/variant/array.hpp"
-#include "godot_cpp/variant/typed_array.hpp"
 #pragma once
 
 #include "godot_cpp/variant/vector2i.hpp"
@@ -65,7 +64,7 @@ public:
 	static Vector2i SubtractHex(Vector2i a, Vector2i b);
 	static int LengthHex(Vector2i hex);
 	static int DistanceHex(Vector2i a, Vector2i b);
-	void GenerateTileGrid();
+	void GenerateTileGrid(bool test_flag);
 
   void AddEnemyCall(Callable addition);
   void SetEnemiesOnGrid();

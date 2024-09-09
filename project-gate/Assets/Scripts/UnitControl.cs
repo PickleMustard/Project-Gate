@@ -39,9 +39,6 @@ public partial class UnitControl : Node3D
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
     level = GetNode<Node>("/root/Top/Level");
-    //GD.Print("Level Children: ", level.GetChildCount());
-    TileGrid = level.GetChildren()[0];
-    GD.Print("Tile Grid: ", TileGrid.Name);
     unit_location = new Vector2I(0, 0);
   }
 
@@ -65,6 +62,7 @@ public partial class UnitControl : Node3D
 
   public void DisplayPotentialDestinations()
   {
+    TileGrid = GetTree().GetNodesInGroup("Tilegrid")[0];
     if (!CurrentCharacter.isMoving)
     {
       unit_location = new Vector2I(0, 0);

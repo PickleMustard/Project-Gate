@@ -6,13 +6,16 @@
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/hash_map.hpp"
 #include "godot_cpp/templates/vector.hpp"
+#include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/variant.hpp"
 namespace godot {
 class BaseEnemy : public IGoap {
   GDCLASS(BaseEnemy, IGoap);
 
 private:
-  Vector<Variant> known_enemies;
+  Array known_enemies;
+  Dictionary past_enemies;
 
 public:
   BaseEnemy();

@@ -99,7 +99,7 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 * starting_location: Vector2i for the position of the origin on the grid
 *
 * Returns:
-* m_Rooms_Graph Pointer: The pointer to the starting room node within the directed graph 
+* m_Rooms_Graph Pointer: The pointer to the starting room node within the directed graph
 * 			Will spawn the player units on this tile
 */
 LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i starting_location) {
@@ -179,13 +179,13 @@ void LevelGenerator::m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph) {
 /* Connects the room centers defined on an edge to each other with a line of tiles
 * 	FOR FUTURE: have an argument to vary the width of the connection
 *
-* Arguments: 
+* Arguments:
 *   tile_bit_map: Reference to the List of tile positions and the Tile type defined for that position
 *    m_Rooms_Graph: Pointer to the starting node of the directed graph of rooms
 *
 * Returns:
 *   No Direct Returns
-* 
+*
 * Out variables:
 *    tile_bit_map: Updates the connecting tiles between rooms as ordinary tiles
 */
@@ -347,45 +347,6 @@ void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator,
 			m_mesh->surface_set_material(i, m_mesh_material);
 		}
 	}
-//	switch (tile_type) {
-//		case 1:
-//			if (rl->exists(mesh_material_name)) {
-//				m_mesh_material = rl->load(mesh_material_name);
-//				int surface_count = m_mesh->get_surface_count();
-//				for (int i = 0; i < surface_count; i++) {
-//					m_mesh->surface_set_material(i, m_mesh_material);
-//				}
-//			}
-//			break;
-//		case 2:
-//		case 3:
-//			if (rl->exists(mesh_material_name)) {
-//				m_mesh_material = rl->load(mesh_material_name);
-//				int surface_count = m_mesh->get_surface_count();
-//				for (int i = 0; i < surface_count; i++) {
-//					m_mesh->surface_set_material(i, m_mesh_material);
-//				}
-//			}
-//			break;
-//		case 4:
-//			if (rl->exists(mesh_material_name)) {
-//				m_mesh_material = rl->load(mesh_material_name);
-//				int surface_count = m_mesh->get_surface_count();
-//				for (int i = 0; i < surface_count; i++) {
-//					m_mesh->surface_set_material(i, m_mesh_material);
-//				}
-//			}
-//			break;
-//		case 5:
-//			if (rl->exists(mesh_material_name)) {
-//				m_mesh_material = rl->load(mesh_material_name);
-//				int surface_count = m_mesh->get_surface_count();
-//				for (int i = 0; i < surface_count; i++) {
-//					m_mesh->surface_set_material(i, m_mesh_material);
-//				}
-//			}
-//			break;
-//	}
 }
 
 LevelGenerator::m_Best_Neighbors LevelGenerator::m_FindNearest(m_Room_Tree_Node *node, Vector2i goal_room, m_Best_Neighbors best_neighbors, int level) {

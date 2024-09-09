@@ -14,6 +14,8 @@ private:
 	HashMap<String, Variant> preconditions;
 	HashMap<String, Variant> effects;
 	bool in_range = false;
+  Variant target_enemy;
+  Variant target_tile;
 
 public:
 	float cost = 1.0f;

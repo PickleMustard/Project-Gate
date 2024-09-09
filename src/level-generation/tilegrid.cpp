@@ -84,22 +84,15 @@ Vector2i TileGrid::GetCoordinateFromPosition(Vector3 location, float size) {
  * This signals the grid to either reform its current grid or generate a new one
  */
 void TileGrid::_notification(int p_what) {
-	if (p_what == NOTIFICATION_READY) {
-		if (this->get_child_count() > 0) {
-			UtilityFunctions::print("Children Exist; Erasing and regenerating");
-			m_tile_grid->clear();
-			int num_childs = get_child_count();
-			TypedArray<Node> children = get_children();
-
-			//for (int i = 0; i < num_childs; i++) {
-			//UtilityFunctions::print(children[0].stringify());
-			//}
-		}
-		//if (m_showrooms == nullptr) {
-		//UtilityFunctions::print("Nullptr: Constructing new level");
-		//m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, Vector2i(1000, 1000)));
-		//m_tile_grid = m_showrooms->GenerateLevel(this);
-		//}
+	switch (p_what) {
+    case NOTIFICATION_EXIT_TREE: {
+			if (this->get_child_count() > 0) {
+				UtilityFunctions::print("Deleting Children");
+				m_tile_grid->clear();
+				int num_childs = get_child_count();
+				TypedArray<Node> children = get_children();
+			}
+    }
 	}
 }
 
@@ -151,17 +144,18 @@ void TileGrid::SetPlayerTeamOnGrid() {
 /*
  * Devoted Function to generate the tile_grid
  */
-void TileGrid::GenerateTileGrid() {
-	UtilityFunctions::print(vformat("Constructing New Grid with %d num rooms", m_grid_num_rooms));
-	m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
-	m_grid_num_rooms = m_showrooms->GetNumRooms();
-	m_tile_grid = m_showrooms->GenerateLevel(this, spawnable_locations);
-	TileNotifier::getInstance()->GridCreationNotification(this);
-	UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
-  add_to_group("Tilegrid");
-	call_deferred("SetEnemiesOnGrid");
-	//SetEnemiesOnGrid();
-	memdelete(m_showrooms);
+void TileGrid::GenerateTileGrid(bool test_flag) {
+	if (test_flag) {
+		UtilityFunctions::print(vformat("Constructing New Grid with %d num rooms", m_grid_num_rooms));
+		m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
+		m_grid_num_rooms = m_showrooms->GetNumRooms();
+		m_tile_grid = m_showrooms->GenerateLevel(this, spawnable_locations);
+		TileNotifier::getInstance()->GridCreationNotification(this);
+		UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
+		add_to_group("Tilegrid");
+		call_deferred("SetEnemiesOnGrid");
+		memdelete(m_showrooms);
+	}
 }
 
 /*
@@ -258,319 +252,319 @@ Array TileGrid::GetNeighborsInRadius(Ref<Tile> tile, int radius) {
 			}
 		}
 	}
-  return tile_in_radius;
+	return tile_in_radius;
 }
 
-	godot::Array TileGrid::GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid) {
-		godot::Array neighbors{};
+godot::Array TileGrid::GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid) {
+	godot::Array neighbors{};
 
-		String locations[]{
-			vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() + 1),
-			vformat("hex %d,%d", tile.GetColumn() + 1, tile.GetRow()),
-			vformat("hex %d,%d", tile.GetColumn() + 1, tile.GetRow() - 1),
-			vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() - 1),
-			vformat("hex %d,%d", tile.GetColumn() - 1, tile.GetRow()),
-			vformat("hex %d,%d", tile.GetColumn() - 1, tile.GetRow() + 1)
-		};
+	String locations[]{
+		vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() + 1),
+		vformat("hex %d,%d", tile.GetColumn() + 1, tile.GetRow()),
+		vformat("hex %d,%d", tile.GetColumn() + 1, tile.GetRow() - 1),
+		vformat("hex %d,%d", tile.GetColumn(), tile.GetRow() - 1),
+		vformat("hex %d,%d", tile.GetColumn() - 1, tile.GetRow()),
+		vformat("hex %d,%d", tile.GetColumn() - 1, tile.GetRow() + 1)
+	};
 
-		for (int i = 0; i < 6; i++) {
-			if (tile_grid.has(locations[i])) {
-				neighbors.push_back(tile_grid.get(locations[i]));
-			}
+	for (int i = 0; i < 6; i++) {
+		if (tile_grid.has(locations[i])) {
+			neighbors.push_back(tile_grid.get(locations[i]));
 		}
-		return neighbors;
+	}
+	return neighbors;
+}
+
+Vector2i TileGrid::AxialScale(Vector2i hex, int scale) {
+	return Vector2i(hex.x * scale, hex.y * scale);
+}
+
+// * Given a position in axial notation, find the closest tile
+
+Vector2i TileGrid::AxialRound(Vector2i hex) {
+	return CubeToAxial(CubeRound(AxialToCube(hex)));
+	return Vector2(0, 0);
+}
+
+/*
+ * Round a possible tile position in cube notation to the closest absolute location
+ *
+ * Parameters:
+ * hex: Position of a point in cube notation
+ *
+ * Returns:
+ * Vector3: Position of the closest tile to the point in cube notation
+ */
+Vector3 TileGrid::CubeRound(Vector3 hex) {
+	float rounded_q = Math::round(hex.x);
+	float rounded_r = Math::round(hex.y);
+	float rounded_s = Math::round(hex.z);
+
+	float q_diff = Math::abs(rounded_q - hex.x);
+	float r_diff = Math::abs(rounded_r - hex.y);
+	float s_diff = Math::abs(rounded_s - hex.z);
+
+	if (q_diff > r_diff && q_diff > s_diff) {
+		rounded_q = -rounded_r - rounded_s;
+	} else if (r_diff >= s_diff) {
+		rounded_r = -rounded_q - rounded_s;
+	} else {
+		rounded_s = -rounded_q - rounded_r;
 	}
 
-	Vector2i TileGrid::AxialScale(Vector2i hex, int scale) {
-		return Vector2i(hex.x * scale, hex.y * scale);
-	}
+	return Vector3(rounded_q, rounded_r, rounded_s);
+}
 
-	// * Given a position in axial notation, find the closest tile
+/*
+ * Convert a tile position from cube notation to axial notation
+ *
+ * Parameters:
+ * hex: Vector3 tile position in cube notation, q, r, s
+ *
+ * Returns:
+ * Vector2: Tile position in axial notation q, r
+ */
+Vector2i TileGrid::CubeToAxial(Vector3 hex) {
+	return Vector2(hex.x, hex.y);
+}
 
-	Vector2i TileGrid::AxialRound(Vector2i hex) {
-		return CubeToAxial(CubeRound(AxialToCube(hex)));
-		return Vector2(0, 0);
-	}
+/*
+ * Convert a tile position from axial notation to cube notation
+ *
+ * Parameters:
+ * hex: Vector2 tile position in axial notation q, r
+ *
+ * Returns:
+ * Vector3: tile position in cube notation q, r, s
+ */
+Vector3 TileGrid::AxialToCube(Vector2i hex) {
+	float cube_q = hex.x;
+	float cube_r = hex.y;
+	float cube_s = -hex.x - hex.y;
+	return Vector3(cube_q, cube_r, cube_s);
+}
 
-	/*
-	 * Round a possible tile position in cube notation to the closest absolute location
-	 *
-	 * Parameters:
-	 * hex: Position of a point in cube notation
-	 *
-	 * Returns:
-	 * Vector3: Position of the closest tile to the point in cube notation
-	 */
-	Vector3 TileGrid::CubeRound(Vector3 hex) {
-		float rounded_q = Math::round(hex.x);
-		float rounded_r = Math::round(hex.y);
-		float rounded_s = Math::round(hex.z);
+/*
+ * Convert tile position from axial q, r notation to column, row notation
+ *
+ * Parameters:
+ * hex: Vector2 axial notation q, r position of tile
+ *
+ * Returns;
+ * Vector2: column, row offset notation position of tile
+ */
+Vector2i TileGrid::AxialToOffset(Vector2i hex) {
+	float column = hex.x;
+	float row = hex.y + (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
 
-		float q_diff = Math::abs(rounded_q - hex.x);
-		float r_diff = Math::abs(rounded_r - hex.y);
-		float s_diff = Math::abs(rounded_s - hex.z);
+	return Vector2(column, row);
+}
 
-		if (q_diff > r_diff && q_diff > s_diff) {
-			rounded_q = -rounded_r - rounded_s;
-		} else if (r_diff >= s_diff) {
-			rounded_r = -rounded_q - rounded_s;
-		} else {
-			rounded_s = -rounded_q - rounded_r;
-		}
+/*
+ * Convert tile position from column, row offset notation to axial q, r notation
+ *
+ * Parameters:
+ * hex: Vector2 row, column offset notation of tile position
+ *
+ * Returns:
+ * Vector2: q, r axial notation tile position
+ */
+Vector2i TileGrid::OffsetToAxial(Vector2i hex) {
+	float q = hex.x;
+	float r = hex.y - (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
+	return Vector2(q, r);
+}
 
-		return Vector3(rounded_q, rounded_r, rounded_s);
-	}
+/*
+void godot::TileGrid::LayoutGrid() {
+	int num_childs = this->get_child_count();
+	if(num_childs > 0) {
+TypedArray<Node> children = this->get_children();
+for(int i = 0; i < num_childs; i++) {
+	children[i].
+}*/
 
-	/*
-	 * Convert a tile position from cube notation to axial notation
-	 *
-	 * Parameters:
-	 * hex: Vector3 tile position in cube notation, q, r, s
-	 *
-	 * Returns:
-	 * Vector2: Tile position in axial notation q, r
-	 */
-	Vector2i TileGrid::CubeToAxial(Vector3 hex) {
-		return Vector2(hex.x, hex.y);
-	}
+/*
+ * Calculate the path a unit should take from its current tile to the desired tile
+ * Arguments:
+ * starting_location: Vector2i column, row representation of the tile unit is currently on
+ * end_location: Vector2i column, row representation of the desired tile to end on
+ *
+ * Returns:
+ * path: Vector of Tile* describing the optimal path to travel for a unit
+ *
+ * Errors:
+ * Empty Vector: Returns an empty vector if the path cannot be calculated (i.e. if tilegrid is split or does not connect)
+ */
+godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_location) {
+	Ref<Tile> first_node, wanted_node;
+	godot::Vector<Ref<Tile>> open_tiles;
+	godot::HashSet<Ref<Tile>> closed_tiles;
+	godot::Vector<Ref<Tile>> final_path;
+	godot::Array final_path_arr;
+	Array neighbors;
 
-	/*
-	 * Convert a tile position from axial notation to cube notation
-	 *
-	 * Parameters:
-	 * hex: Vector2 tile position in axial notation q, r
-	 *
-	 * Returns:
-	 * Vector3: tile position in cube notation q, r, s
-	 */
-	Vector3 TileGrid::AxialToCube(Vector2i hex) {
-		float cube_q = hex.x;
-		float cube_r = hex.y;
-		float cube_s = -hex.x - hex.y;
-		return Vector3(cube_q, cube_r, cube_s);
-	}
+	first_node = FindTileOnGrid(starting_location);
+	wanted_node = FindTileOnGrid(end_location);
 
-	/*
-	 * Convert tile position from axial q, r notation to column, row notation
-	 *
-	 * Parameters:
-	 * hex: Vector2 axial notation q, r position of tile
-	 *
-	 * Returns;
-	 * Vector2: column, row offset notation position of tile
-	 */
-	Vector2i TileGrid::AxialToOffset(Vector2i hex) {
-		float column = hex.x;
-		float row = hex.y + (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
-
-		return Vector2(column, row);
-	}
-
-	/*
-	 * Convert tile position from column, row offset notation to axial q, r notation
-	 *
-	 * Parameters:
-	 * hex: Vector2 row, column offset notation of tile position
-	 *
-	 * Returns:
-	 * Vector2: q, r axial notation tile position
-	 */
-	Vector2i TileGrid::OffsetToAxial(Vector2i hex) {
-		float q = hex.x;
-		float r = hex.y - (hex.x - Math::fmod(Math::absf(hex.x), 2.0f)) / 2.0f;
-		return Vector2(q, r);
-	}
-
-	/*
-	void godot::TileGrid::LayoutGrid() {
-		int num_childs = this->get_child_count();
-		if(num_childs > 0) {
-	TypedArray<Node> children = this->get_children();
-	for(int i = 0; i < num_childs; i++) {
-		children[i].
-	}*/
-
-	/*
-	 * Calculate the path a unit should take from its current tile to the desired tile
-	 * Arguments:
-	 * starting_location: Vector2i column, row representation of the tile unit is currently on
-	 * end_location: Vector2i column, row representation of the desired tile to end on
-	 *
-	 * Returns:
-	 * path: Vector of Tile* describing the optimal path to travel for a unit
-	 *
-	 * Errors:
-	 * Empty Vector: Returns an empty vector if the path cannot be calculated (i.e. if tilegrid is split or does not connect)
-	 */
-	godot::Array TileGrid::CalculatePath(Vector2i starting_location, Vector2i end_location) {
-		Ref<Tile> first_node, wanted_node;
-		godot::Vector<Ref<Tile>> open_tiles;
-		godot::HashSet<Ref<Tile>> closed_tiles;
-		godot::Vector<Ref<Tile>> final_path;
-		godot::Array final_path_arr;
-		Array neighbors;
-
-		first_node = FindTileOnGrid(starting_location);
-		wanted_node = FindTileOnGrid(end_location);
-
-		open_tiles.push_back(first_node);
-		while (open_tiles.size() > 0) {
-			Ref<Tile> current_tile = open_tiles[0];
-			for (int i = 1; i < open_tiles.size(); i++) {
-				if (open_tiles[i]->GetFCost() < current_tile->GetFCost() || open_tiles[i]->GetFCost() == current_tile->GetFCost()) {
-					if (open_tiles[i]->GetHCost() < current_tile->GetHCost()) {
-						current_tile = open_tiles[i];
-					}
-				}
-			}
-			open_tiles.erase(current_tile);
-			closed_tiles.insert(current_tile);
-			if (current_tile == wanted_node) {
-				final_path = RetracePath(first_node, wanted_node);
-				for (Ref<Tile> t : final_path) {
-					final_path_arr.append(t);
-				}
-
-				open_tiles.clear();
-				closed_tiles.clear();
-				neighbors.clear();
-				return final_path_arr;
-			}
-
-			neighbors = GetNeighbors(current_tile);
-			for (int i = 0; i < neighbors.size(); i++) {
-        Ref<Tile> neighbor = neighbors[i];
-				if (neighbor->GetTileType() == 4 || neighbor->HasCharacterOnTile() || closed_tiles.has(neighbor)) {
-					continue;
-				}
-
-				int new_cost_to_neighbor = current_tile->GetGCost() + TileGrid::CalculateDistance(current_tile, neighbor);
-				if (new_cost_to_neighbor < neighbor->GetGCost() || !open_tiles.has(neighbor)) {
-					neighbor->SetGCost(new_cost_to_neighbor);
-					neighbor->SetHCost(TileGrid::CalculateDistance(neighbor, wanted_node));
-					neighbor->SetParent(current_tile);
-				}
-				if (!open_tiles.has(neighbor)) {
-					open_tiles.push_back(neighbor);
+	open_tiles.push_back(first_node);
+	while (open_tiles.size() > 0) {
+		Ref<Tile> current_tile = open_tiles[0];
+		for (int i = 1; i < open_tiles.size(); i++) {
+			if (open_tiles[i]->GetFCost() < current_tile->GetFCost() || open_tiles[i]->GetFCost() == current_tile->GetFCost()) {
+				if (open_tiles[i]->GetHCost() < current_tile->GetHCost()) {
+					current_tile = open_tiles[i];
 				}
 			}
 		}
-		open_tiles.clear();
-		closed_tiles.clear();
-		neighbors.clear();
-		return final_path_arr;
-	}
+		open_tiles.erase(current_tile);
+		closed_tiles.insert(current_tile);
+		if (current_tile == wanted_node) {
+			final_path = RetracePath(first_node, wanted_node);
+			for (Ref<Tile> t : final_path) {
+				final_path_arr.append(t);
+			}
 
-	/*
-	 * Retraces the optimal path into a vector from an end location to the start location
-	 * Arguments:
-	 * start_tile: Starting tile that the path should originate from
-	 * end_tile: Ending tile that path should end on
-	 *
-	 * Returns:
-	 * retraced_path: Path of
-	 */
-	godot::Vector<Ref<Tile>> TileGrid::RetracePath(Ref<Tile> start_tile, Ref<Tile> end_tile) {
-		Vector<Ref<Tile>> retraced_path{};
-		Ref<Tile> current_tile = end_tile;
-
-		while (current_tile != start_tile) {
-			retraced_path.push_back(current_tile);
-			current_tile = current_tile->GetParent();
+			open_tiles.clear();
+			closed_tiles.clear();
+			neighbors.clear();
+			return final_path_arr;
 		}
-		retraced_path.reverse();
-		return retraced_path;
+
+		neighbors = GetNeighbors(current_tile);
+		for (int i = 0; i < neighbors.size(); i++) {
+			Ref<Tile> neighbor = neighbors[i];
+			if (neighbor->GetTileType() == 4 || neighbor->HasCharacterOnTile() || closed_tiles.has(neighbor)) {
+				continue;
+			}
+
+			int new_cost_to_neighbor = current_tile->GetGCost() + TileGrid::CalculateDistance(current_tile, neighbor);
+			if (new_cost_to_neighbor < neighbor->GetGCost() || !open_tiles.has(neighbor)) {
+				neighbor->SetGCost(new_cost_to_neighbor);
+				neighbor->SetHCost(TileGrid::CalculateDistance(neighbor, wanted_node));
+				neighbor->SetParent(current_tile);
+			}
+			if (!open_tiles.has(neighbor)) {
+				open_tiles.push_back(neighbor);
+			}
+		}
 	}
+	open_tiles.clear();
+	closed_tiles.clear();
+	neighbors.clear();
+	return final_path_arr;
+}
 
-	int TileGrid::CalculateDistance(Ref<Tile> location, Ref<Tile> destination) {
-		return DistanceHex(location->GetLocation(), destination->GetLocation());
+/*
+ * Retraces the optimal path into a vector from an end location to the start location
+ * Arguments:
+ * start_tile: Starting tile that the path should originate from
+ * end_tile: Ending tile that path should end on
+ *
+ * Returns:
+ * retraced_path: Path of
+ */
+godot::Vector<Ref<Tile>> TileGrid::RetracePath(Ref<Tile> start_tile, Ref<Tile> end_tile) {
+	Vector<Ref<Tile>> retraced_path{};
+	Ref<Tile> current_tile = end_tile;
+
+	while (current_tile != start_tile) {
+		retraced_path.push_back(current_tile);
+		current_tile = current_tile->GetParent();
 	}
+	retraced_path.reverse();
+	return retraced_path;
+}
 
-	int TileGrid::CalculateDistanceStatic(Vector2i location, Vector2i destination) {
-		return DistanceHex(location, destination);
-	}
+int TileGrid::CalculateDistance(Ref<Tile> location, Ref<Tile> destination) {
+	return DistanceHex(location->GetLocation(), destination->GetLocation());
+}
 
-	Vector2i TileGrid::SubtractHex(Vector2i a, Vector2i b) {
-		return Vector2i(a.x - b.x, a.y - b.y);
-	}
+int TileGrid::CalculateDistanceStatic(Vector2i location, Vector2i destination) {
+	return DistanceHex(location, destination);
+}
 
-	int TileGrid::LengthHex(Vector2i hex) {
-		return Math::round((Math::abs(hex.x) + Math::abs(hex.y) + Math::abs(hex.x + hex.y)) / 2.0f);
-	}
+Vector2i TileGrid::SubtractHex(Vector2i a, Vector2i b) {
+	return Vector2i(a.x - b.x, a.y - b.y);
+}
 
-	int TileGrid::DistanceHex(Vector2i a, Vector2i b) {
-		return LengthHex(SubtractHex(a, b));
-	}
+int TileGrid::LengthHex(Vector2i hex) {
+	return Math::round((Math::abs(hex.x) + Math::abs(hex.y) + Math::abs(hex.x + hex.y)) / 2.0f);
+}
 
-	void TileGrid::SetOuterSize(float new_size) {
-		m_tile_outer_size = new_size;
-	}
+int TileGrid::DistanceHex(Vector2i a, Vector2i b) {
+	return LengthHex(SubtractHex(a, b));
+}
 
-	float TileGrid::GetOuterSize() {
-		return m_tile_outer_size;
-	}
+void TileGrid::SetOuterSize(float new_size) {
+	m_tile_outer_size = new_size;
+}
 
-	void TileGrid::SetInnerSize(float new_size) {
-		m_tile_inner_size = new_size;
-	}
+float TileGrid::GetOuterSize() {
+	return m_tile_outer_size;
+}
 
-	float TileGrid::GetInnerSize() {
-		return m_tile_inner_size;
-	}
+void TileGrid::SetInnerSize(float new_size) {
+	m_tile_inner_size = new_size;
+}
 
-	void TileGrid::SetFlatTopped(bool is_flat) {
-		m_tile_is_flat_topped = is_flat;
-	}
+float TileGrid::GetInnerSize() {
+	return m_tile_inner_size;
+}
 
-	bool TileGrid::GetFlatTopped() {
-		return m_tile_is_flat_topped;
-	}
+void TileGrid::SetFlatTopped(bool is_flat) {
+	m_tile_is_flat_topped = is_flat;
+}
 
-	void TileGrid::SetTileHeight(float new_height) {
-		m_tile_height = new_height;
-	}
+bool TileGrid::GetFlatTopped() {
+	return m_tile_is_flat_topped;
+}
 
-	float TileGrid::GetTileHeight() {
-		return m_tile_height;
-	}
+void TileGrid::SetTileHeight(float new_height) {
+	m_tile_height = new_height;
+}
 
-	int TileGrid::GetNumRooms() {
-		return m_grid_num_rooms;
-	}
+float TileGrid::GetTileHeight() {
+	return m_tile_height;
+}
 
-	void TileGrid::SetNumRooms(int num_rooms) {
-		m_grid_num_rooms = num_rooms;
-		GenerateTileGrid();
-	}
+int TileGrid::GetNumRooms() {
+	return m_grid_num_rooms;
+}
 
-	void TileGrid::_bind_methods() {
-		godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
-		godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
-		godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("CalculateDistance", "a", "b"), &TileGrid::CalculateDistanceStatic);
-		godot::ClassDB::bind_method(godot::D_METHOD("FindTileOnGrid", "position"), &TileGrid::FindTileOnGrid);
-		godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
-		godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
-		godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
-		godot::ClassDB::bind_method(godot::D_METHOD("SetInnerSize", "new_size"), &TileGrid::SetInnerSize);
-		godot::ClassDB::bind_method(godot::D_METHOD("GetInnerSize"), &TileGrid::GetInnerSize);
-		godot::ClassDB::bind_method(godot::D_METHOD("SetFlatTopped", "is_flat"), &TileGrid::SetFlatTopped);
-		godot::ClassDB::bind_method(godot::D_METHOD("GetFlatTopped"), &TileGrid::GetFlatTopped);
-		godot::ClassDB::bind_method(godot::D_METHOD("SetTileHeight", "new_height"), &TileGrid::SetTileHeight);
-		godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
-		godot::ClassDB::bind_method(godot::D_METHOD("SetNumRooms", "num_rooms"), &TileGrid::SetNumRooms);
-		godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
+void TileGrid::SetNumRooms(int num_rooms) {
+	m_grid_num_rooms = num_rooms;
+	GenerateTileGrid(false);
+}
 
-		godot::ClassDB::bind_method(godot::D_METHOD("SetEnemiesOnGrid"), &TileGrid::SetEnemiesOnGrid);
-		godot::ClassDB::bind_method(godot::D_METHOD("AddEnemyCall", "addition"), &TileGrid::AddEnemyCall);
+void TileGrid::_bind_methods() {
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForHexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetCoordinateFromPosition", "position", "size"), &TileGrid::GetCoordinateFromPosition);
+	godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("CalculateDistance", "a", "b"), &TileGrid::CalculateDistanceStatic);
+	godot::ClassDB::bind_method(godot::D_METHOD("FindTileOnGrid", "position"), &TileGrid::FindTileOnGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("GenerateTileGrid"), &TileGrid::GenerateTileGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetOuterSize", "new_size"), &TileGrid::SetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetOuterSize"), &TileGrid::GetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetInnerSize", "new_size"), &TileGrid::SetInnerSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetInnerSize"), &TileGrid::GetInnerSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetFlatTopped", "is_flat"), &TileGrid::SetFlatTopped);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetFlatTopped"), &TileGrid::GetFlatTopped);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetTileHeight", "new_height"), &TileGrid::SetTileHeight);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetTileHeight"), &TileGrid::GetTileHeight);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetNumRooms", "num_rooms"), &TileGrid::SetNumRooms);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
-		godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
-    godot::ClassDB::bind_method(godot::D_METHOD("GetNeighborsInRadius", "starting_tile", "radius"), &TileGrid::GetNeighborsInRadius);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetEnemiesOnGrid"), &TileGrid::SetEnemiesOnGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("AddEnemyCall", "addition"), &TileGrid::AddEnemyCall);
 
-		ADD_GROUP("Tile Properties", "m_tile_");
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
-		ADD_GROUP("Grid Properties", "m_grid_");
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
-	}
+	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetNeighborsInRadius", "starting_tile", "radius"), &TileGrid::GetNeighborsInRadius);
+
+	ADD_GROUP("Tile Properties", "m_tile_");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_outer_size"), "SetOuterSize", "GetOuterSize");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_inner_size"), "SetInnerSize", "GetInnerSize");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "m_tile_height"), "SetTileHeight", "GetTileHeight");
+	ADD_GROUP("Grid Properties", "m_grid_");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "m_grid_num_rooms"), "SetNumRooms", "GetNumRooms");
+}
