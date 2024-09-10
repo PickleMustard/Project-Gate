@@ -45,6 +45,13 @@ void godot::GoapAgent::_process(double p_delta) {
 	UtilityFunctions::print("State machine updated");*/
 }
 
+void godot::GoapAgent::RunAI() {
+  //Create a plan, then run through the plan while action / movement points remain
+  Node *enemy = get_parent();
+  Update();
+
+}
+
 void godot::GoapAgent::AddAction(Ref<GoapAction> action) {
 	m_available_actions.insert(action);
 }

@@ -32,6 +32,7 @@ public:
   ~GoapAgent();
   void AddAction(Ref<GoapAction> action);
   Ref<GoapAction> GetAction(String type);
+  void RunAI();
   void RemoveAction(Ref<GoapAction> action);
   void Update();
   void _ready() override;

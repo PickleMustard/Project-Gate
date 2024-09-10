@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 
 public partial class Enemy : Character
@@ -25,11 +26,13 @@ public partial class Enemy : Character
   {
     Vector2I location = new Vector2I();
     GD.Print("Finished Awaiting");
-    if(Tile.HasMethod("GetLocation")) {
+    if (Tile.HasMethod("GetLocation"))
+    {
       GD.Print("Location ", Tile.Call("GetLocation"));
       location = (Vector2I)Tile.Call("GetLocation");
     }
-    if(TileGrid.HasMethod("GetPositionForHexFromCoordinate")) {
+    if (TileGrid.HasMethod("GetPositionForHexFromCoordinate"))
+    {
       GD.Print("Position: ", TileGrid.Call("GetPositionForHexFromCoordinate", location, (int)Tile.Call("GetSize"), true));
       Position = (Vector3)TileGrid.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
     }
@@ -37,6 +40,15 @@ public partial class Enemy : Character
     {
       Tile.Call("SetCharacterOnTile", this);
       GD.Print("Setting object");
+    }
+  }
+
+  public void RunAI()
+  {
+    Array<Node> children = GetChildren();
+    if (children[1].HasMethod("RunAI"))
+    {
+      children[1].Call("RunAI");
     }
   }
 }
