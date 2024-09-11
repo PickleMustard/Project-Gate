@@ -1,11 +1,12 @@
 #include "goap_planner.h"
 #include "autonomous-agents/base_components/goap_action.h"
+#include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/ref.hpp"
-#include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/templates/hash_map.hpp"
 #include "godot_cpp/templates/hash_set.hpp"
 #include "godot_cpp/templates/pair.hpp"
 #include "godot_cpp/templates/vector.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 
 using namespace godot;
 GoapPlanner::GoapPlanner() {
@@ -17,12 +18,13 @@ GoapPlanner::~GoapPlanner() {
 void GoapPlanner::_bind_methods() {
 }
 
-Vector<Ref<GoapAction>> GoapPlanner::Plan(GodotObject *gd, HashSet<Ref<GoapAction>> available_actions, HashMap<String, Variant> world_state, HashMap<String, Variant> goal) {
+Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary available_actions, Dictionary world_state, Dictionary goal) {
 	HashSet<Ref<GoapAction>> usable_actions{};
-	for (Ref<GoapAction> action : available_actions) {
-		action->DoReset();
-		if (action->CheckProceduralPrecondition(gd)) {
-			usable_actions.insert(action);
+	Array keys = available_actions.keys();
+	for (int i = 0; i < keys.size(); i++) {
+		available_actions[keys[i]].call("DoReset");
+		if (available_actions[keys[i]].call("CheckProceduralPrecondition", goap_agent, world_state)) {
+			usable_actions.insert(available_actions[keys[i]]);
 		}
 	}
 
@@ -45,70 +47,66 @@ Vector<Ref<GoapAction>> GoapPlanner::Plan(GodotObject *gd, HashSet<Ref<GoapActio
 		}
 	}
 
-  Vector<Ref<GoapAction>> result {};
-  Node *n = cheapest;
-  while(n != nullptr) {
-    if(n->action != nullptr) {
-      result.push_back(n->action);
-    }
-    n = n->parent;
-  }
-  result.reverse();
-  return result;
+	Vector<Ref<GoapAction>> result{};
+	Node *n = cheapest;
+	while (n != nullptr) {
+		if (n->action != nullptr) {
+			result.push_back(n->action);
+		}
+		n = n->parent;
+	}
+	result.reverse();
+	return result;
 }
 
-bool GoapPlanner::BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> usable_actions, HashMap<String, Variant> goal) {
-  bool found_viable_goal = false;
-  for(Ref<GoapAction> action : usable_actions) {
-    if(InState(action->GetPreconditions(), parent->state)) {
-      HashMap<String, Variant> current_state = PopulateState(parent->state, action->GetEffects());
-      Node *node = memnew(Node(parent, parent->running_cost + action->cost, current_state, action));
-      if(InState(goal, current_state)) {
-        leaves.push_back(node);
-        found_viable_goal = true;
-      } else {
-        HashSet<Ref<GoapAction>> subset = ActionSubset(usable_actions, action);
-        bool found = BuildGraph(node, leaves, subset, goal);
-        if(found) {
-          found_viable_goal = true;
-        }
-      }
-    }
-  }
-  return found_viable_goal;
+bool GoapPlanner::BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> usable_actions, Dictionary goal) {
+	bool found_viable_goal = false;
+	for (Ref<GoapAction> action : usable_actions) {
+		if (InState(action->GetPreconditions(), parent->state)) {
+			Dictionary current_state = PopulateState(parent->state, action->GetEffects());
+			Node *node = memnew(Node(parent, parent->running_cost + action->cost, current_state, action));
+			if (InState(goal, current_state)) {
+				leaves.push_back(node);
+				found_viable_goal = true;
+			} else {
+				HashSet<Ref<GoapAction>> subset = ActionSubset(usable_actions, action);
+				bool found = BuildGraph(node, leaves, subset, goal);
+				if (found) {
+					found_viable_goal = true;
+				}
+			}
+		}
+	}
+	return found_viable_goal;
 }
 
 HashSet<Ref<GoapAction>> GoapPlanner::ActionSubset(HashSet<Ref<GoapAction>> actions, Ref<GoapAction> to_remove) {
-  HashSet<Ref<GoapAction>> subset {};
-  for(Ref<GoapAction> action : actions) {
-    if(action != to_remove) {
-      subset.insert(action);
-    }
-  }
-  return subset;
+	HashSet<Ref<GoapAction>> subset{};
+	for (Ref<GoapAction> action : actions) {
+		if (action != to_remove) {
+			subset.insert(action);
+		}
+	}
+	return subset;
 }
 
-bool GoapPlanner::InState(HashMap<String, Variant> test, HashMap<String, Variant> state) {
-  for(KeyValue<String, Variant> match : test) {
-    if(state.has(match.key) && state.get(match.key) == match.value) {
-      continue;
-    } else {
-      return false;
-    }
-  }
-  return true;
+bool GoapPlanner::InState(Dictionary test, Dictionary state) {
+	Array keys = test.keys();
+	for (int i = 0; i < keys.size(); i++) {
+		if (state.has(keys[i]) && state[keys[i]] == test[keys[i]]) {
+			continue;
+		} else {
+			return false;
+		}
+	}
+	return true;
 }
 
-HashMap<String, Variant> GoapPlanner::PopulateState(HashMap<String, Variant> current_state, HashMap<String, Variant> state_change) {
-  for(KeyValue<String, Variant> change : state_change) {
-    if(current_state.has(change.key) && current_state.get(change.key) == change.value) {
-      state_change[change.key] = change.value;
-    } else {
-      state_change.insert(change.key, change.value);
-    }
-  }
+Dictionary GoapPlanner::PopulateState(Dictionary current_state, Dictionary state_change) {
+	Array keys = state_change.keys();
+	for (int i = 0; i < keys.size(); i++) {
+		current_state[keys[i]] = state_change[keys[i]];
+	}
 
-  return state_change;
+	return state_change;
 }
-
-

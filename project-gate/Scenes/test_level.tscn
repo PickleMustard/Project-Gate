@@ -17,6 +17,7 @@
 script = ExtResource("4_do7ow")
 
 [node name="Level" type="Level" parent="."]
+m_should_generate_level = true
 
 [node name="@TileGrid@18855" type="TileGrid" parent="Level"]
 

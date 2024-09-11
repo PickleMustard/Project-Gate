@@ -1,6 +1,7 @@
 #include "base_enemy.h"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/templates/hash_map.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/typed_array.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
@@ -19,19 +20,21 @@ BaseEnemy::~BaseEnemy() {
 void BaseEnemy::_bind_methods() {
 }
 
-HashMap<String, Variant> BaseEnemy::GetWorldState() {
-	HashMap<String, Variant> world_data{};
+Dictionary BaseEnemy::GetWorldState() {
+	Dictionary world_data{};
+  UtilityFunctions::print("Getting world state");
 	CheckForEnemies();
 
-	world_data.insert("seen_enemy", past_enemies.size() > 0);
-	world_data.insert("enemy_within_range", known_enemies.size() > 0);
+	world_data["seen_enemy"] = past_enemies.size() > 0;
+	world_data["has_enemy_within_range"] = known_enemies.size() > 0;
+  world_data["enemies_in_range"] = known_enemies;
 
 	return world_data;
 }
 
-HashMap<String, Variant> BaseEnemy::CreateGoalState() { return HashMap<String, Variant>{}; }
-void BaseEnemy::PlanFailed(HashMap<String, Variant> failed_goal) {}
-void BaseEnemy::PlanFound(HashMap<String, Variant> goal, Vector<Ref<GoapAction>> actions) { UtilityFunctions::print("Plan Found"); }
+Dictionary BaseEnemy::CreateGoalState() { return Dictionary{}; }
+void BaseEnemy::PlanFailed(Dictionary failed_goal) {}
+void BaseEnemy::PlanFound(Dictionary goal, Vector<Ref<GoapAction>> actions) { UtilityFunctions::print("Plan Found"); }
 void BaseEnemy::ActionsFinished() {}
 void BaseEnemy::PlanAborted(Ref<GoapAction> aborter) {}
 
@@ -46,14 +49,18 @@ bool BaseEnemy::MoveAgent(Ref<GoapAction> next_action) {
 
 void BaseEnemy::CheckForEnemies() {
 	//Given the current position, call the TileGrid GetTilesInRadius and check for enemies
+  UtilityFunctions::print("Checking for Enemies");
 	known_enemies.clear();
 	SceneTree *tree = get_tree();
+  UtilityFunctions::print("1");
 	TypedArray<Node> tilegrid = tree->get_nodes_in_group("Tilegrid");
+  UtilityFunctions::print("2", tilegrid);
 	TileGrid *tilegrid_obj = cast_to<TileGrid>(tilegrid[0]);
-
-	Vector2i tile_location = tilegrid_obj->call("GetCoordinateFromPosition", ((Node3D *)get_parent())->get_position(), tilegrid[0].call("GetOuterSize"));
+  UtilityFunctions::print("Got the TileGrid");
+	Vector2i tile_location = tilegrid_obj->call("GetCoordinateFromPosition", ((Node3D *)get_parent())->get_position(), tilegrid_obj->call("GetOuterSize"));
 	Ref<Tile> tile = tilegrid_obj->call("FindTileOnGrid", tile_location);
 	Array neighbors = tilegrid_obj->call("GetNeighborsInRadius", tile, 10);
+  UtilityFunctions::print("Got the neighbors");
 	for (int i = 0; i < neighbors.size(); i++) {
 		if (neighbors[i].call("HasEnemyOnTile")) {
 			known_enemies.push_back(neighbors[i].call("GetCharacterOnTile"));

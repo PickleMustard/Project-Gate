@@ -2,9 +2,9 @@
 #include "autonomous-agents/base_components/finite_state_machine_base.h"
 #include "autonomous-agents/base_components/goap_action.h"
 #include "autonomous-agents/base_components/goap_planner.h"
+#include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
-#include "godot_cpp/templates/hash_map.hpp"
-#include "godot_cpp/templates/hash_set.hpp"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/templates/vector.hpp"
 #include "godot_cpp/variant/array.hpp"
 #include "godot_cpp/variant/callable.hpp"
@@ -12,8 +12,12 @@
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
+#include "level-generation/tilegrid.h"
 
 godot::GoapAgent::GoapAgent() {
+}
+godot::GoapAgent::GoapAgent(Dictionary available_actions) {
+  m_available_actions = available_actions;
 }
 
 godot::GoapAgent::~GoapAgent() {
@@ -25,7 +29,7 @@ void godot::GoapAgent::Update() {
 void godot::GoapAgent::_ready() {
 	UtilityFunctions::print("Creating Agent");
 	state_machine = Ref<FiniteStateMachineBase>(memnew(FiniteStateMachineBase()));
-	m_available_actions = HashSet<Ref<GoapAction>>();
+	//m_available_actions = Dictionary();
 	current_actions = Vector<Ref<GoapAction>>{};
 	planner = Ref<GoapPlanner>(memnew(GoapPlanner()));
 	UtilityFunctions::print("Getting Data Provider");
@@ -46,23 +50,30 @@ void godot::GoapAgent::_process(double p_delta) {
 }
 
 void godot::GoapAgent::RunAI() {
-  //Create a plan, then run through the plan while action / movement points remain
-  Node *enemy = get_parent();
-  Update();
-
+	//Create a plan, then run through the plan while action / movement points remain
+	UtilityFunctions::print("Running AI");
+	Node *enemy = get_parent();
+	UtilityFunctions::print("Got Parent");
+	Update();
+	UtilityFunctions::print("Updated");
 }
 
 void godot::GoapAgent::AddAction(Ref<GoapAction> action) {
-	m_available_actions.insert(action);
+	m_available_actions[action->GetActionName()] = action;
 }
 
 godot::Ref<godot::GoapAction> godot::GoapAgent::GetAction(godot::String type) {
-	for (Ref<GoapAction> act : m_available_actions) {
-		if (act->get_class() == type) {
-			return act;
-		}
+	if (m_available_actions.has(type)) {
+		return m_available_actions[type];
 	}
 	return nullptr;
+}
+
+godot::TileGrid *godot::GoapAgent::GetTileGrid() {
+	SceneTree *tree = get_tree();
+	TypedArray<Node> tilegrid = tree->get_nodes_in_group("Tilegrid");
+	TileGrid *tilegrid_obj = cast_to<TileGrid>(tilegrid[0]);
+	return tilegrid_obj;
 }
 
 void godot::GoapAgent::RemoveAction(Ref<GoapAction> action) {
@@ -77,26 +88,33 @@ bool godot::GoapAgent::HasActionPlan() {
  * Under a function titled createIdleState.
  *
  */
-void godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm, GodotObject *gd) {
-	HashMap<String, Variant> world_state = data_provider->GetWorldState();
-	HashMap<String, Variant> goal = data_provider->CreateGoalState();
-
+void godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
+  UtilityFunctions::print("Idling: ", data_provider);
+	//Dictionary world_state = data_provider->GetWorldState();
+	//Dictionary goal = data_provider->CreateGoalState();
+  Dictionary world_state;
+  Dictionary goal;
 	//Plan
-	Vector<Ref<GoapAction>> plan = planner->Plan(gd, m_available_actions, world_state, goal);
+  UtilityFunctions::print("Planning");
+	//Vector<Ref<GoapAction>> plan = planner->Plan(goap_agent, m_available_actions, world_state, goal);
+  Vector<Ref<GoapAction>> plan {};
 	if (plan.size() > 0) {
-		current_actions = plan;
+    UtilityFunctions::print("Plan found");
+		current_actions = Vector<Ref<GoapAction>>(plan);
 		data_provider->PlanFound(goal, plan);
 
-		fsm->PopState();
-		fsm->PushState(perform_action_state);
+		fsm->call_deferred("PopState");
+		fsm->call_deferred("PushState", perform_action_state);
 	} else {
+    UtilityFunctions::print("Plan not found");
 		data_provider->PlanFailed(goal);
-		fsm->PopState();
-		fsm->PushState(idle_state);
+		//fsm->call_deferred("PopState");
+		//fsm->call_deferred("PushState", idle_state);
 	}
+  UtilityFunctions::print("Ending Idle State");
 }
 
-void godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm, GodotObject *gd) {
+void godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm, Node *goap_agent) {
 	Ref<GoapAction> action = current_actions[0];
 	if (action->RequiresInRange() && action->target == nullptr) {
 		fsm->PopState();
@@ -110,7 +128,7 @@ void godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm, GodotObje
 	}
 }
 
-void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, GodotObject *gd) {
+void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, Node *goap_agent) {
 	if (!HasActionPlan()) {
 		fsm->PopState();
 		fsm->PushState(idle_state);
@@ -128,7 +146,7 @@ void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, Go
 		bool in_range = action->RequiresInRange() ? action->GetInRange() : true;
 
 		if (in_range) {
-			bool success = action->Perform(gd);
+			bool success = action->Perform(goap_agent);
 
 			if (!success) {
 				fsm->PopState();
@@ -147,10 +165,10 @@ void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, Go
 
 void godot::GoapAgent::FindDataProvider() {
 	Node *parent = get_parent();
+  UtilityFunctions::print("Parent: ", parent);
 	Node *potential_provider = parent->find_child("data_provider");
-	/*if(potential_provider->get_class() == "IGoap") {
-	  data_provider = cast_to<IGoap>(potential_provider);
-	}*/
+  UtilityFunctions::print("Data provider: ", potential_provider);
+	data_provider = cast_to<IGoap>(potential_provider);
 }
 
 void godot::GoapAgent::SetAvailableActions(Dictionary actions) {
@@ -160,7 +178,7 @@ void godot::GoapAgent::SetAvailableActions(Dictionary actions) {
 		UtilityFunctions::print("Value Type: ", actions[action_keys[i]].get_type(), "| ", actions[action_keys[i]].get_type_name(actions[action_keys[i]].get_type()));
 		if (actions[action_keys[i]].get_type() == 24) {
 			if (actions[action_keys[i]].can_convert_strict(actions[action_keys[i]].get_type(), Variant::OBJECT)) {
-				m_available_actions.insert(Object::cast_to<GoapAction>(actions[action_keys[i]]));
+				m_available_actions[action_keys[i]] = (Object::cast_to<GoapAction>(actions[action_keys[i]]));
 			}
 			//m_available_actions
 		}
@@ -168,17 +186,16 @@ void godot::GoapAgent::SetAvailableActions(Dictionary actions) {
 }
 
 godot::Dictionary godot::GoapAgent::GetAvailableActions() {
-	Dictionary actions;
-	for (Ref<GoapAction> action : m_available_actions) {
-		actions[action->get_name()] = action;
-	}
-
-	return actions;
+	return m_available_actions;
 }
 
 void godot::GoapAgent::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("AddAvailableAction", "actions"), &GoapAgent::SetAvailableActions);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetAvailableActions"), &GoapAgent::GetAvailableActions);
+	godot::ClassDB::bind_method(godot::D_METHOD("RunAI"), &GoapAgent::RunAI);
+	godot::ClassDB::bind_method(godot::D_METHOD("IdleState", "FSM"), &GoapAgent::IdleState);
+	godot::ClassDB::bind_method(godot::D_METHOD("MoveToState", "FSM", "goap_agent"), &GoapAgent::MoveToState);
+	godot::ClassDB::bind_method(godot::D_METHOD("PerformActionState", "FSM", "goap_agent"), &GoapAgent::PerformActionState);
 	ADD_GROUP("Available Actions", "m_available_");
 	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "m_available_actions"), "AddAvailableAction", "GetAvailableActions");
 }

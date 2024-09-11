@@ -8,8 +8,8 @@
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
-#include "godot_cpp/templates/hash_set.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
+#include "level-generation/tilegrid.h"
 namespace godot {
 class GoapAgent : public Node {
 	GDCLASS(GoapAgent, Node);
@@ -26,9 +26,10 @@ private:
   Ref<GoapPlanner> planner;
 
 public:
-  HashSet<Ref<GoapAction>> m_available_actions;
+  Dictionary m_available_actions;
 
   GoapAgent();
+  GoapAgent(Dictionary available_actions);
   ~GoapAgent();
   void AddAction(Ref<GoapAction> action);
   Ref<GoapAction> GetAction(String type);
@@ -38,15 +39,16 @@ public:
   void _ready() override;
   void _process(double p_delta) override;
 
+  TileGrid *GetTileGrid();
   void SetAvailableActions(Dictionary actions);
   Dictionary GetAvailableActions();
 protected:
   static void _bind_methods();
 private:
   bool HasActionPlan();
-  void IdleState(FiniteStateMachineBase *, GodotObject *);
-  void MoveToState(FiniteStateMachineBase *, GodotObject *);
-  void PerformActionState(FiniteStateMachineBase *, GodotObject *);
+  void IdleState(FiniteStateMachineBase *);
+  void MoveToState(FiniteStateMachineBase *, Node *goap_agent);
+  void PerformActionState(FiniteStateMachineBase *, Node *goap_agent);
   void FindDataProvider();
   void LoadActions();
 

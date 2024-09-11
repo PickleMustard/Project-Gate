@@ -3,7 +3,7 @@
 
 #include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
-#include "godot_cpp/templates/hash_map.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/variant.hpp"
 namespace godot {
@@ -11,17 +11,19 @@ class GoapAction : public Resource {
 	GDCLASS(GoapAction, Resource);
 
 private:
-	HashMap<String, Variant> preconditions;
-	HashMap<String, Variant> effects;
+	Dictionary preconditions;
+	Dictionary effects;
 	bool in_range = false;
   Variant target_enemy;
   Variant target_tile;
+  String m_name;
 
 public:
-	float cost = 1.0f;
-	GodotObject *target;
+	float m_cost;
+	Node *target;
 
 	GoapAction();
+  GoapAction(String name, float cost);
 	~GoapAction();
 
 	void DoReset();
@@ -31,12 +33,13 @@ public:
 	void RemovePrecondition(String key);
 	void AddEffect(String key, Variant value);
 	void RemoveEffect(String key);
-	HashMap<String, Variant> GetPreconditions();
-	HashMap<String, Variant> GetEffects();
+	Dictionary GetPreconditions();
+	Dictionary GetEffects();
+  String GetActionName();
 	virtual void Reset();
 	virtual bool IsDone();
-	virtual bool CheckProceduralPrecondition(GodotObject *agent);
-	virtual bool Perform(GodotObject *agent);
+	virtual bool CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data);
+	virtual bool Perform(Node *goap_agent);
 	virtual bool RequiresInRange();
 
 protected:

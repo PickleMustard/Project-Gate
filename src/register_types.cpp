@@ -1,4 +1,5 @@
 #include "register_types.h"
+#include "autonomous-agents/actions/attack_enemy_action.h"
 #include "autonomous-agents/actors/base_enemy.h"
 #include "autonomous-agents/base_components/finite_state_machine_base.h"
 #include "autonomous-agents/base_components/goap_action.h"
@@ -48,12 +49,15 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<LevelGenerator>();
 
   GDREGISTER_CLASS(FiniteStateMachineBase);
-  GDREGISTER_CLASS(GoapAction);
   GDREGISTER_CLASS(GoapAgent);
   GDREGISTER_CLASS(GoapPlanner);
 
+  GDREGISTER_CLASS(GoapAction);
+  GDREGISTER_CLASS(AttackEnemyAction);
+
   GDREGISTER_CLASS(IGoap);
   GDREGISTER_CLASS(BaseEnemy);
+
 
 
   //Singletons

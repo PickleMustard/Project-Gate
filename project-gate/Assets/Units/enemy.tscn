@@ -1,10 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://2bswkiikpwx4"]
+[gd_scene load_steps=4 format=3 uid="uid://2bswkiikpwx4"]
 
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/Enemy.cs" id="1_k8ecc"]
+
+[sub_resource type="AttackEnemyAction" id="AttackEnemyAction_qtdjs"]
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material_override = ExtResource("1_b2i4i")
+
+[node name="GoapAgent" type="GoapAgent" parent="."]
+m_available_actions = {
+"test": SubResource("AttackEnemyAction_qtdjs")
+}
+
+[node name="data_provider" type="BaseEnemy" parent="."]

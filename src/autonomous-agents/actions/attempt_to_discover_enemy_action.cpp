@@ -1,37 +1,33 @@
-#include "attack_enemy_action.h"
-#include "autonomous-agents/base_components/goap_action.h"
-#include "godot_cpp/classes/scene_tree.hpp"
-#include "godot_cpp/variant/dictionary.hpp"
-#include "godot_cpp/variant/string.hpp"
+#include "attempt_to_discover_enemy_action.h"
 #include "godot_cpp/variant/utility_functions.hpp"
-#include "godot_cpp/variant/variant.hpp"
+#include "godot_cpp/variant/vector2i.hpp"
 #include "level-generation/tilegrid.h"
 
 using namespace godot;
 
-AttackEnemyAction::AttackEnemyAction() : GoapAction("AttackEnemyAction", 3.0f) {
-	AddPrecondition("seen_enemy", true);
-	AddPrecondition("has_enemy_within_range", true);
+AttemptToDiscoverEnemyAction::AttemptToDiscoverEnemyAction() :
+		GoapAction("AttemptToDiscoverEnemyAction", 3.0f) {
+	AddPrecondition("seen_enemy", false);
 }
 
-AttackEnemyAction::~AttackEnemyAction() {
+AttemptToDiscoverEnemyAction::~AttemptToDiscoverEnemyAction() {
 }
 
-void AttackEnemyAction::_bind_methods() {
+void AttemptToDiscoverEnemyAction::_bind_methods() {
 }
 
-void AttackEnemyAction::Reset() {
-	attacked_enemy = false;
+void AttemptToDiscoverEnemyAction::Reset() {
+	seen_enemy = false;
 }
 
-bool AttackEnemyAction::IsDone() {
-	return attacked_enemy;
+bool AttemptToDiscoverEnemyAction::IsDone() {
+	return seen_enemy;
 }
-bool AttackEnemyAction::RequiresInRange() {
+bool AttemptToDiscoverEnemyAction::RequiresInRange() {
 	return true;
 }
 
-bool AttackEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data) {
+bool AttemptToDiscoverEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data) {
 	//Has to have seen an enemy recently and it is in RequiresInRange
 	TileGrid *tilegrid = cast_to<TileGrid>(goap_agent->call("GetTileGrid"));
 	Vector2i ai_location = tilegrid->call("GetCoordinateFromPosition", ((Node3D *)goap_agent->get_parent())->get_position(), tilegrid->call("GetOuterSize"));
@@ -53,15 +49,15 @@ bool AttackEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary
 			}
 		}
 	}
-  if(closest == nullptr) {
-    return false;
-  }
+	if (closest == nullptr) {
+		return false;
+	}
 
-  target = closest;
-  return true;
+	target = closest;
+	return true;
 }
 
-bool AttackEnemyAction::Perform(Node *goap_agent) {
-  UtilityFunctions::print("Performing action");
-  return true;
+bool AttemptToDiscoverEnemyAction::Perform(Node *goap_agent) {
+	UtilityFunctions::print("Performing action");
+	return true;
 }

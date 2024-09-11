@@ -77,12 +77,12 @@ void godot::Level::GenerateLevel() {
 	m_tile_grid->set_owner(this->get_owner());
 	UtilityFunctions::print("here 3");
 	m_tile_grid->GenerateTileGrid(m_should_generate_level);
+	m_tile_grid->add_to_group("Tilegrid");
 
-  UtilityFunctions::print("Emitting Signal: LevelGenerated");
-  emit_signal("LevelGenerated");
+	UtilityFunctions::print("Emitting Signal: LevelGenerated");
+	emit_signal("LevelGenerated");
 
-
-//m_tile_grid->GenerateTileGrid();
+	//m_tile_grid->GenerateTileGrid();
 }
 void godot::Level::SetGridDefinitionOrigin(Vector3 origin) {
 	m_level_grid_def["origin"] = origin;
