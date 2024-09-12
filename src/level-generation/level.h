@@ -13,6 +13,7 @@ class Level : public Node {
 public:
 	Level();
 	~Level();
+  void ReadyLevel();
 	void GenerateLevel();
 
   void SetGridDefinitionOrigin(Vector3 origin);
@@ -22,6 +23,9 @@ public:
 
   Vector3 GetGridDefinitionOrigin();
   int GetGridDefinitionNumRooms();
+
+  void SetShouldGenerateLevel(bool decision);
+  bool GetShouldGenerateLevel();
 
 
 protected:
@@ -33,6 +37,7 @@ private:
 	TileGrid *m_tile_grid;
   //For now, just stores a single tile grid,
   Dictionary m_level_grid_def;
+  bool m_should_generate_level = false;
 };
 } //namespace godot
 

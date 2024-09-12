@@ -1,9 +1,12 @@
 #include "register_types.h"
-#include "autonomous-agents/finite_state_machine_base.h"
-#include "autonomous-agents/goap_action.h"
-#include "autonomous-agents/goap_agent.h"
-#include "autonomous-agents/goap_planner.h"
-#include "autonomous-agents/igoap.h"
+#include "autonomous-agents/actions/attack_enemy_action.h"
+#include "autonomous-agents/actions/attempt_to_discover_enemy_action.h"
+#include "autonomous-agents/actors/base_enemy.h"
+#include "autonomous-agents/base_components/finite_state_machine_base.h"
+#include "autonomous-agents/base_components/goap_action.h"
+#include "autonomous-agents/base_components/goap_agent.h"
+#include "autonomous-agents/base_components/goap_planner.h"
+#include "autonomous-agents/base_components/igoap.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "seeded_random_access.h"
 #include "level-generation/tile_collision.h"
@@ -46,11 +49,17 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level) {
   ClassDB::register_class<Level>();
   ClassDB::register_class<LevelGenerator>();
 
-  ClassDB::register_class<FiniteStateMachineBase>();
-  ClassDB::register_class<IGoap>();
-  ClassDB::register_class<GoapAction>();
-  ClassDB::register_class<GoapAgent>();
-  ClassDB::register_class<GoapPlanner>();
+  GDREGISTER_CLASS(FiniteStateMachineBase);
+  GDREGISTER_CLASS(GoapAgent);
+  GDREGISTER_CLASS(GoapPlanner);
+
+  GDREGISTER_CLASS(GoapAction);
+  GDREGISTER_CLASS(AttackEnemyAction);
+  GDREGISTER_CLASS(AttemptToDiscoverEnemyAction);
+
+  GDREGISTER_CLASS(IGoap);
+  GDREGISTER_CLASS(BaseEnemy);
+
 
 
   //Singletons

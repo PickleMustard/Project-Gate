@@ -52,8 +52,9 @@ public:
 	HashMap<String, Ref<Tile>> GetTileMap();
 
 	Ref<Tile> FindTileOnGrid(Vector2i location);
-	Vector<Ref<Tile>> GetNeighbors(Ref<Tile> tile);
-	static godot::Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
+  Array GetNeighbors(Ref<Tile> tile);
+  Array GetNeighborsInRadius(Ref<Tile> tile, int radius);
+	static Array GetNeighborsStatic(Tile tile, HashMap<String, Ref<Tile>> tile_grid);
 	Vector2 PositionToGrid(Vector3 location);
 
 	godot::Array CalculatePath(godot::Vector2i starting_location, godot::Vector2i end_location);
@@ -63,7 +64,7 @@ public:
 	static Vector2i SubtractHex(Vector2i a, Vector2i b);
 	static int LengthHex(Vector2i hex);
 	static int DistanceHex(Vector2i a, Vector2i b);
-	void GenerateTileGrid();
+	void GenerateTileGrid(bool test_flag);
 
   void AddEnemyCall(Callable addition);
   void SetEnemiesOnGrid();
@@ -88,7 +89,6 @@ private:
 	LevelGenerator *m_showrooms = nullptr;
   Vector<Ref<Tile>> spawnable_locations {};
   Vector<Callable> call_set_enemy_start_positions;
-	//void LayoutGrid();
 };
 
 } //namespace godot

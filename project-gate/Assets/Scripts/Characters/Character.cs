@@ -121,6 +121,10 @@ public partial class Character : Node3D
     return distanceRemaining;
   }
 
+  public bool GetIsMoving() {
+    return isMoving;
+  }
+
   public override string ToString() {
     return this.GetType() + " character";
   }

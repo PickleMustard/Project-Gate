@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System.Collections.Generic;
 using System.Collections;
 
@@ -79,6 +80,9 @@ public partial class CharacterTurnController : Node
     {
       GD.Print("Another Character Available");
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
+      if(CurrentCharacter.IsInGroup("Enemies")) {
+        CurrentCharacter.Call("RunAI");
+      }
     }
     else
     {

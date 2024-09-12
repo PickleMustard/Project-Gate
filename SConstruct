@@ -3,10 +3,16 @@ import os
 import subprocess
 import sys
 
-def getSubdirs(abs_path_dir) :
-    lst = [ name for name in os.listdir(abs_path_dir) if os.path.isdir(os.path.join(abs_path_dir, name)) and name[0] != '.' ]
+def getSubdirs(abs_path_dir):
+    lst = []
+    dir_list = os.listdir(abs_path_dir)
+    for name in dir_list:
+        if os.path.isdir(os.path.join(abs_path_dir, name)) and name[0] != '.':
+            lst = lst + (getSubdirs(os.path.join(abs_path_dir, name)))
+            lst.append(os.path.join(abs_path_dir, name))
     lst.sort()
     return lst
+
 
 def normalize_path(val, env):
     return val if os.path.isabs(val) else os.path.join(env.Dir("#").abspath, val)
@@ -73,7 +79,7 @@ for module in modules:
         print(os.path.join(corePath, module, '*.cpp'))
         #exec(open(os.path.join(corePath, module, 'setup.py')).read())
     else :
-        sources += Glob(os.path.join(corePath, module, '*.cpp'))
+        sources += Glob(os.path.join(module, '*.cpp'))
 
 
 file = "{}{}{}".format(libname, env["suffix"], env["SHLIBSUFFIX"])

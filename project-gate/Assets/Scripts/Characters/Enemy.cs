@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 
 public partial class Enemy : Character
@@ -18,25 +19,38 @@ public partial class Enemy : Character
       TileGrid.Call("AddEnemyCall", SetPositionCall);
     }
     HealCharacter(TotalHealth);
-    GD.Print("Health at beninging ", currentHealth);
+    AddToGroup("Enemies");
+    //GD.Print("Health at beninging ", currentHealth);
   }
 
   public void SetPosition(Resource Tile)
   {
     Vector2I location = new Vector2I();
-    GD.Print("Finished Awaiting");
-    if(Tile.HasMethod("GetLocation")) {
-      GD.Print("Location ", Tile.Call("GetLocation"));
+    //GD.Print("Finished Awaiting");
+    if (Tile.HasMethod("GetLocation"))
+    {
+      //GD.Print("Location ", Tile.Call("GetLocation"));
       location = (Vector2I)Tile.Call("GetLocation");
     }
-    if(TileGrid.HasMethod("GetPositionForHexFromCoordinate")) {
-      GD.Print("Position: ", TileGrid.Call("GetPositionForHexFromCoordinate", location, (int)Tile.Call("GetSize"), true));
+    if (TileGrid.HasMethod("GetPositionForHexFromCoordinate"))
+    {
+      //GD.Print("Position: ", TileGrid.Call("GetPositionForHexFromCoordinate", location, (int)Tile.Call("GetSize"), true));
       Position = (Vector3)TileGrid.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
     }
     if (Tile.HasMethod("SetCharacterOnTile"))
     {
       Tile.Call("SetCharacterOnTile", this);
-      GD.Print("Setting object");
+      //GD.Print("Setting object");
+    }
+  }
+
+  public void RunAI()
+  {
+    Array<Node> children = GetChildren();
+    GD.Print("Enemy children: ", children);
+    if (children[1].HasMethod("RunAI"))
+    {
+      children[1].Call("RunAI");
     }
   }
 }
