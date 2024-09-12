@@ -20,6 +20,11 @@ config/icon="res://icon.svg"
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
 GenerationCommunicatorSingleton="*res://Assets/Scripts/GenerationCommunicator/GenerationCommunicatorSingleton.cs"
 
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+
 [dotnet]
 
 project/assembly_name="Gate Of Scalad"

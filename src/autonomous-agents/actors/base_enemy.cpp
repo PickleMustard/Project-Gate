@@ -25,6 +25,7 @@ Dictionary BaseEnemy::GetWorldState() {
   UtilityFunctions::print("Getting world state");
 	CheckForEnemies();
 
+  world_data["movement_remaining"] = get_parent()->call("GetDistanceRemaining");
 	world_data["seen_enemy"] = past_enemies.size() > 0;
 	world_data["has_enemy_within_range"] = known_enemies.size() > 0;
   world_data["enemies_in_range"] = known_enemies;
@@ -32,10 +33,17 @@ Dictionary BaseEnemy::GetWorldState() {
 	return world_data;
 }
 
-Dictionary BaseEnemy::CreateGoalState() { return Dictionary{}; }
+Dictionary BaseEnemy::CreateGoalState() {
+  Dictionary goal_data;
+  goal_data["attempting_to_find_enemy"] = true;
+  //goal_data["has_enemy_within_range"] = true;
+
+  return goal_data;
+}
+
 void BaseEnemy::PlanFailed(Dictionary failed_goal) {}
 void BaseEnemy::PlanFound(Dictionary goal, Vector<Ref<GoapAction>> actions) { UtilityFunctions::print("Plan Found"); }
-void BaseEnemy::ActionsFinished() {}
+void BaseEnemy::ActionsFinished() {UtilityFunctions::print("Finished action!");}
 void BaseEnemy::PlanAborted(Ref<GoapAction> aborter) {}
 
 bool BaseEnemy::MoveAgent(Ref<GoapAction> next_action) {

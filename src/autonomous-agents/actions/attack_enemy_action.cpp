@@ -18,14 +18,20 @@ AttackEnemyAction::~AttackEnemyAction() {
 }
 
 void AttackEnemyAction::_bind_methods() {
+	godot::ClassDB::bind_method(godot::D_METHOD("CheckProceduralPrecondition", "goap_agent", "world_data"), &AttackEnemyAction::CheckProceduralPrecondition);
+	godot::ClassDB::bind_method(godot::D_METHOD("Perform", "goap_agent"), &AttackEnemyAction::Perform);
 }
 
 void AttackEnemyAction::Reset() {
 	attacked_enemy = false;
 }
 
-bool AttackEnemyAction::IsDone() {
+bool AttackEnemyAction::IsDone(Node *goap_agent) {
 	return attacked_enemy;
+}
+
+bool AttackEnemyAction::InProgress(Node *goap_agent) {
+  return false;
 }
 bool AttackEnemyAction::RequiresInRange() {
 	return true;
@@ -33,8 +39,11 @@ bool AttackEnemyAction::RequiresInRange() {
 
 bool AttackEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data) {
 	//Has to have seen an enemy recently and it is in RequiresInRange
+  UtilityFunctions::print("Checking ", GetActionName(), " preconditions");
 	TileGrid *tilegrid = cast_to<TileGrid>(goap_agent->call("GetTileGrid"));
-	Vector2i ai_location = tilegrid->call("GetCoordinateFromPosition", ((Node3D *)goap_agent->get_parent())->get_position(), tilegrid->call("GetOuterSize"));
+  Node3D *test = (Node3D *)goap_agent->get_parent();
+  float outer_size = tilegrid->call("GetOuterSize");
+	Vector2i ai_location = tilegrid->call("GetCoordinateFromPosition", test->get_position(), 3.0f);
 	Node3D *closest = nullptr;
 	int closest_distance = 1000000;
 	if (world_data.has("enemies_in_range")) {
@@ -62,6 +71,6 @@ bool AttackEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary
 }
 
 bool AttackEnemyAction::Perform(Node *goap_agent) {
-  UtilityFunctions::print("Performing action");
+  UtilityFunctions::print("Performing action ", GetActionName());
   return true;
 }

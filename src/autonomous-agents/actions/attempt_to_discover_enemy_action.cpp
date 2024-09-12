@@ -1,63 +1,71 @@
 #include "attempt_to_discover_enemy_action.h"
+#include "godot_cpp/variant/array.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/vector2i.hpp"
 #include "level-generation/tilegrid.h"
+#include "seeded_random_access.h"
 
 using namespace godot;
 
 AttemptToDiscoverEnemyAction::AttemptToDiscoverEnemyAction() :
 		GoapAction("AttemptToDiscoverEnemyAction", 3.0f) {
+  movement_remaining = Callable(this, "HasMovementRangeRemaining");
 	AddPrecondition("seen_enemy", false);
+  AddPrecondition("movement_remaining", movement_remaining);
+  AddEffect("attempting_to_find_enemy", true);
 }
 
 AttemptToDiscoverEnemyAction::~AttemptToDiscoverEnemyAction() {
 }
 
 void AttemptToDiscoverEnemyAction::_bind_methods() {
+	godot::ClassDB::bind_method(godot::D_METHOD("CheckProceduralPrecondition", "goap_agent", "world_data"), &AttemptToDiscoverEnemyAction::CheckProceduralPrecondition);
+	godot::ClassDB::bind_method(godot::D_METHOD("Perform", "goap_agent"), &AttemptToDiscoverEnemyAction::Perform);
+	godot::ClassDB::bind_method(godot::D_METHOD("HasMovementRangeRemaining", "distance"), &AttemptToDiscoverEnemyAction::HasMovementRangeRemaining);
 }
 
 void AttemptToDiscoverEnemyAction::Reset() {
+  UtilityFunctions::print("discover resetting");
 	seen_enemy = false;
 }
 
-bool AttemptToDiscoverEnemyAction::IsDone() {
-	return seen_enemy;
+bool AttemptToDiscoverEnemyAction::IsDone(Node *goap_agent) {
+  Node *parent = goap_agent->get_parent();
+	return seen_enemy || !HasMovementRangeRemaining(parent->call("GetDistanceRemaining"));
+}
+
+bool AttemptToDiscoverEnemyAction::InProgress(Node *goap_agent) {
+  Node *parent = goap_agent->get_parent();
+  return parent->call("GetIsMoving");
 }
 bool AttemptToDiscoverEnemyAction::RequiresInRange() {
-	return true;
+	return false;
+}
+
+bool AttemptToDiscoverEnemyAction::HasMovementRangeRemaining(int distance) {
+  UtilityFunctions::print("Is this getting called: ", distance);
+  return distance > 0;
 }
 
 bool AttemptToDiscoverEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data) {
 	//Has to have seen an enemy recently and it is in RequiresInRange
-	TileGrid *tilegrid = cast_to<TileGrid>(goap_agent->call("GetTileGrid"));
-	Vector2i ai_location = tilegrid->call("GetCoordinateFromPosition", ((Node3D *)goap_agent->get_parent())->get_position(), tilegrid->call("GetOuterSize"));
-	Node3D *closest = nullptr;
-	int closest_distance = 1000000;
-	if (world_data.has("enemies_in_range")) {
-		Array characters = world_data["enemies_in_range"];
-		for (int i = 0; i < characters.size(); i++) {
-			Node3D *character = cast_to<Node3D>(characters[i]);
-			Vector2i character_location = tilegrid->call("GetCoordinateFromPosition", character->get_position(), tilegrid->call("GetOuterSize"));
-			int distance = tilegrid->call("CalculateDistance", ai_location, character_location);
-			if (closest == nullptr) {
-				closest = character;
-			} else {
-				if (distance < closest_distance) {
-					closest = character;
-					closest_distance = distance;
-				}
-			}
-		}
-	}
-	if (closest == nullptr) {
-		return false;
-	}
-
-	target = closest;
-	return true;
+  UtilityFunctions::print("Checking ", GetActionName(), " preconditions");
+  return true;
 }
 
 bool AttemptToDiscoverEnemyAction::Perform(Node *goap_agent) {
-	UtilityFunctions::print("Performing action");
+	UtilityFunctions::print("Performing action: ", GetActionName());
+  Node3D *unit_controller = cast_to<Node3D>(goap_agent->call("GetUnitController"));
+  UtilityFunctions::print("Got the unit controller ", unit_controller);
+
+  Array destinations = unit_controller->call("GetPotentialDestinations");
+  UtilityFunctions::print("Got some destinations ", destinations.size());
+  SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
+  int location = instance->GetWholeNumber(destinations.size() - 1);
+  UtilityFunctions::print("Location: ", location);
+  Node *tile = cast_to<Node>(destinations[location]);
+  UtilityFunctions::print("Tile: ", tile);
+  unit_controller->call("MoveCharacter", tile->get_parent());
+  UtilityFunctions::print("Moved the character");
 	return true;
 }

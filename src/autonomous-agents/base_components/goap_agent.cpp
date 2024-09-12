@@ -17,14 +17,14 @@
 godot::GoapAgent::GoapAgent() {
 }
 godot::GoapAgent::GoapAgent(Dictionary available_actions) {
-  m_available_actions = available_actions;
+	m_available_actions = available_actions;
 }
 
 godot::GoapAgent::~GoapAgent() {
 }
 
 void godot::GoapAgent::Update() {
-	state_machine->Update(this);
+	should_continue = state_machine->Update(this);
 }
 void godot::GoapAgent::_ready() {
 	UtilityFunctions::print("Creating Agent");
@@ -44,6 +44,10 @@ void godot::GoapAgent::_ready() {
 }
 
 void godot::GoapAgent::_process(double p_delta) {
+	if (should_continue) {
+		should_continue = state_machine->Update(this);
+    counter++;
+	}
 	/*UtilityFunctions::print("Updating State machine");
 	  state_machine->Update(this);
 	UtilityFunctions::print("State machine updated");*/
@@ -76,6 +80,13 @@ godot::TileGrid *godot::GoapAgent::GetTileGrid() {
 	return tilegrid_obj;
 }
 
+godot::Node3D *godot::GoapAgent::GetUnitController() {
+	SceneTree *tree = get_tree();
+	TypedArray<Node> unit_control_group = tree->get_nodes_in_group("UnitControl");
+	Node3D *unit_controller = cast_to<Node3D>(unit_control_group[0]);
+	return unit_controller;
+}
+
 void godot::GoapAgent::RemoveAction(Ref<GoapAction> action) {
 	m_available_actions.erase(action);
 }
@@ -88,65 +99,74 @@ bool godot::GoapAgent::HasActionPlan() {
  * Under a function titled createIdleState.
  *
  */
-void godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
-  UtilityFunctions::print("Idling: ", data_provider);
-	//Dictionary world_state = data_provider->GetWorldState();
-	//Dictionary goal = data_provider->CreateGoalState();
-  Dictionary world_state;
-  Dictionary goal;
+bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
+	UtilityFunctions::print("Idling: ", data_provider);
+	Dictionary world_state = data_provider->GetWorldState();
+	Dictionary goal = data_provider->CreateGoalState();
 	//Plan
-  UtilityFunctions::print("Planning");
-	//Vector<Ref<GoapAction>> plan = planner->Plan(goap_agent, m_available_actions, world_state, goal);
-  Vector<Ref<GoapAction>> plan {};
+	UtilityFunctions::print("Planning");
+	Vector<Ref<GoapAction>> plan = planner->Plan(this, m_available_actions, world_state, goal);
 	if (plan.size() > 0) {
-    UtilityFunctions::print("Plan found");
+		UtilityFunctions::print("Plan found");
 		current_actions = Vector<Ref<GoapAction>>(plan);
 		data_provider->PlanFound(goal, plan);
 
 		fsm->call_deferred("PopState");
 		fsm->call_deferred("PushState", perform_action_state);
+		return true;
 	} else {
-    UtilityFunctions::print("Plan not found");
+		UtilityFunctions::print("Plan not found");
 		data_provider->PlanFailed(goal);
+		return false;
 		//fsm->call_deferred("PopState");
 		//fsm->call_deferred("PushState", idle_state);
 	}
-  UtilityFunctions::print("Ending Idle State");
+	UtilityFunctions::print("Ending Idle State");
 }
 
-void godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm, Node *goap_agent) {
+bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
 	if (action->RequiresInRange() && action->target == nullptr) {
 		fsm->PopState();
 		fsm->PopState();
 		fsm->PushState(idle_state);
-		return;
+		return true;
 	}
 
 	if (data_provider->MoveAgent(action)) {
 		fsm->PopState();
 	}
+	return true;
 }
 
-void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, Node *goap_agent) {
+bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
+	UtilityFunctions::print("Performing an action | ", HasActionPlan());
 	if (!HasActionPlan()) {
+		UtilityFunctions::print("1");
 		fsm->PopState();
 		fsm->PushState(idle_state);
 		data_provider->ActionsFinished();
-		return;
+		return true;
 	}
 
 	Ref<GoapAction> action = current_actions[0];
-	if (action->IsDone()) {
+	UtilityFunctions::print("Is Done? ", action->IsDone(this));
+	UtilityFunctions::print("name: ", action->GetActionName());
+	if (action->IsDone(this)) {
 		current_actions.remove_at(0);
 	}
+  if(action->InProgress(this)) {
+    return true;
+  }
 
 	if (HasActionPlan()) {
+		UtilityFunctions::print("2");
 		action = current_actions[0];
+		UtilityFunctions::print("Requires in Range? ", action->RequiresInRange());
 		bool in_range = action->RequiresInRange() ? action->GetInRange() : true;
 
 		if (in_range) {
-			bool success = action->Perform(goap_agent);
+			bool success = action->Perform(this);
 
 			if (!success) {
 				fsm->PopState();
@@ -161,13 +181,14 @@ void godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm, No
 		fsm->PushState(idle_state);
 		data_provider->ActionsFinished();
 	}
+	return true;
 }
 
 void godot::GoapAgent::FindDataProvider() {
 	Node *parent = get_parent();
-  UtilityFunctions::print("Parent: ", parent);
+	UtilityFunctions::print("Parent: ", parent);
 	Node *potential_provider = parent->find_child("data_provider");
-  UtilityFunctions::print("Data provider: ", potential_provider);
+	UtilityFunctions::print("Data provider: ", potential_provider);
 	data_provider = cast_to<IGoap>(potential_provider);
 }
 
@@ -192,10 +213,12 @@ godot::Dictionary godot::GoapAgent::GetAvailableActions() {
 void godot::GoapAgent::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("AddAvailableAction", "actions"), &GoapAgent::SetAvailableActions);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetAvailableActions"), &GoapAgent::GetAvailableActions);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetTileGrid"), &GoapAgent::GetTileGrid);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetUnitController"), &GoapAgent::GetUnitController);
 	godot::ClassDB::bind_method(godot::D_METHOD("RunAI"), &GoapAgent::RunAI);
 	godot::ClassDB::bind_method(godot::D_METHOD("IdleState", "FSM"), &GoapAgent::IdleState);
-	godot::ClassDB::bind_method(godot::D_METHOD("MoveToState", "FSM", "goap_agent"), &GoapAgent::MoveToState);
-	godot::ClassDB::bind_method(godot::D_METHOD("PerformActionState", "FSM", "goap_agent"), &GoapAgent::PerformActionState);
+	godot::ClassDB::bind_method(godot::D_METHOD("MoveToState", "FSM"), &GoapAgent::MoveToState);
+	godot::ClassDB::bind_method(godot::D_METHOD("PerformActionState", "FSM"), &GoapAgent::PerformActionState);
 	ADD_GROUP("Available Actions", "m_available_");
 	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "m_available_actions"), "AddAvailableAction", "GetAvailableActions");
 }

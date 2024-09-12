@@ -37,7 +37,7 @@ protected:
 	static void _bind_methods();
 
 private:
-	bool BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> usuable_actions, Dictionary goal);
+	bool BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> &usuable_actions, Dictionary goal);
 	HashSet<Ref<GoapAction>> ActionSubset(HashSet<Ref<GoapAction>> actions, Ref<GoapAction> to_remove);
 	bool InState(Dictionary test, Dictionary state);
 	Dictionary PopulateState(Dictionary current_state, Dictionary state_change);

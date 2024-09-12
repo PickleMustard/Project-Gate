@@ -37,7 +37,8 @@ public:
 	Dictionary GetEffects();
   String GetActionName();
 	virtual void Reset();
-	virtual bool IsDone();
+	virtual bool IsDone(Node *goap_agent);
+  virtual bool InProgress(Node *goap_agent);
 	virtual bool CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data);
 	virtual bool Perform(Node *goap_agent);
 	virtual bool RequiresInRange();

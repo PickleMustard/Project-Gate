@@ -40,6 +40,7 @@ public partial class UnitControl : Node3D
     test.Connect(signals[0]["name"].ToString(), notify);
     level = GetNode<Node>("/root/Top/Level");
     unit_location = new Vector2I(0, 0);
+    AddToGroup("UnitControl");
   }
 
   public Callable GetUpdateCharacterSignal()
@@ -62,15 +63,9 @@ public partial class UnitControl : Node3D
 
   public void DisplayPotentialDestinations()
   {
-    TileGrid = GetTree().GetNodesInGroup("Tilegrid")[0];
     if (!CurrentCharacter.isMoving)
     {
-      unit_location = new Vector2I(0, 0);
-      if (TileGrid.HasMethod("GetCoordinateFromPosition"))
-      {
-        unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
-      }
-      Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
+      Godot.Collections.Array MovementRange = GetPotentialDestinations();
       for (int i = 0; i < MovementRange.Count; i++)
       {
         GodotObject temp = MovementRange[i].AsGodotObject();
@@ -87,6 +82,17 @@ public partial class UnitControl : Node3D
     {
       MeshInst.Call("set_instance_shader_parameter", "is_clickable", true);
     }*/
+  }
+
+  public Godot.Collections.Array GetPotentialDestinations()
+  {
+    unit_location = new Vector2I(0, 0);
+    TileGrid = GetTree().GetNodesInGroup("Tilegrid")[0];
+    if (TileGrid.HasMethod("GetCoordinateFromPosition"))
+    {
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
+    }
+    return CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
   }
 
   public Godot.Collections.Array CalculateMovementRange(Vector2I center_tile, int radius)
@@ -358,6 +364,7 @@ public partial class UnitControl : Node3D
     }
     else
     {
+      GD.Print("Done Moving");
       CurrentCharacter.isMoving = false;
     }
   }

@@ -15,7 +15,8 @@ public:
 	AttackEnemyAction();
 	~AttackEnemyAction();
 	void Reset() override;
-	bool IsDone() override;
+	bool IsDone(Node *goap_agent) override;
+  bool InProgress(Node *goap_agent) override;
 	bool RequiresInRange() override;
 	bool CheckProceduralPrecondition(Node *goap_agent, Dictionary) override;
 	bool Perform(Node *goap_agent) override;

@@ -33,8 +33,12 @@ void godot::GoapAction::DoReset() {
 void godot::GoapAction::Reset() {
 }
 
-bool godot::GoapAction::IsDone() {
-	return true;
+bool godot::GoapAction::IsDone(Node *goap_agent) {
+	return false;
+}
+
+bool godot::GoapAction::InProgress(Node *goap_agent) {
+  return false;
 }
 bool godot::GoapAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data) {
 	return true;

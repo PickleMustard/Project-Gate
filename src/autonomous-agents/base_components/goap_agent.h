@@ -40,17 +40,21 @@ public:
   void _process(double p_delta) override;
 
   TileGrid *GetTileGrid();
+  Node3D *GetUnitController();
   void SetAvailableActions(Dictionary actions);
   Dictionary GetAvailableActions();
 protected:
   static void _bind_methods();
 private:
   bool HasActionPlan();
-  void IdleState(FiniteStateMachineBase *);
-  void MoveToState(FiniteStateMachineBase *, Node *goap_agent);
-  void PerformActionState(FiniteStateMachineBase *, Node *goap_agent);
+  bool IdleState(FiniteStateMachineBase *);
+  bool MoveToState(FiniteStateMachineBase *);
+  bool PerformActionState(FiniteStateMachineBase *);
   void FindDataProvider();
   void LoadActions();
+
+  bool should_continue = false;
+  int counter = 0;
 
 
 };

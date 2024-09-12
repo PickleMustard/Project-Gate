@@ -7,6 +7,7 @@
 #include "godot_cpp/templates/pair.hpp"
 #include "godot_cpp/templates/vector.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
+#include "godot_cpp/variant/utility_functions.hpp"
 
 using namespace godot;
 GoapPlanner::GoapPlanner() {
@@ -21,9 +22,11 @@ void GoapPlanner::_bind_methods() {
 Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary available_actions, Dictionary world_state, Dictionary goal) {
 	HashSet<Ref<GoapAction>> usable_actions{};
 	Array keys = available_actions.keys();
+	UtilityFunctions::print("available_actions size: ", keys.size());
 	for (int i = 0; i < keys.size(); i++) {
 		available_actions[keys[i]].call("DoReset");
 		if (available_actions[keys[i]].call("CheckProceduralPrecondition", goap_agent, world_state)) {
+			UtilityFunctions::print("Can use ", ((Ref<GoapAction>)available_actions[keys[i]])->GetActionName());
 			usable_actions.insert(available_actions[keys[i]]);
 		}
 	}
@@ -59,12 +62,15 @@ Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary av
 	return result;
 }
 
-bool GoapPlanner::BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> usable_actions, Dictionary goal) {
+bool GoapPlanner::BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> &usable_actions, Dictionary goal) {
 	bool found_viable_goal = false;
 	for (Ref<GoapAction> action : usable_actions) {
+		UtilityFunctions::print("checking usuable action: ", action->GetActionName(), "| Preconditions: ", action->GetPreconditions(), "| state: ", parent->state);
 		if (InState(action->GetPreconditions(), parent->state)) {
 			Dictionary current_state = PopulateState(parent->state, action->GetEffects());
-			Node *node = memnew(Node(parent, parent->running_cost + action->cost, current_state, action));
+			UtilityFunctions::print("current state");
+			Node *node = memnew(Node(parent, parent->running_cost + action->m_cost, current_state, action));
+			UtilityFunctions::print("checking usuable action: ", action->GetActionName(), "| Preconditions: ", goal, "| state: ", current_state);
 			if (InState(goal, current_state)) {
 				leaves.push_back(node);
 				found_viable_goal = true;
@@ -93,8 +99,20 @@ HashSet<Ref<GoapAction>> GoapPlanner::ActionSubset(HashSet<Ref<GoapAction>> acti
 bool GoapPlanner::InState(Dictionary test, Dictionary state) {
 	Array keys = test.keys();
 	for (int i = 0; i < keys.size(); i++) {
-		if (state.has(keys[i]) && state[keys[i]] == test[keys[i]]) {
-			continue;
+		UtilityFunctions::print("Testing key: ", keys[i], "| ", state.has(keys[i]), " | ", state[keys[i]] == test[keys[i]]);
+		UtilityFunctions::print(state[keys[i]], " | ", test[keys[i]]);
+		UtilityFunctions::print("Type: ", test[keys[i]].get_type());
+		if (state.has(keys[i])) {
+			if (test[keys[i]].get_type() == 25 && (Callable(test[keys[i]])).call(state[keys[i]])) {
+        UtilityFunctions::print(Callable(test[keys[i]]).call(state[keys[i]]));
+        UtilityFunctions::print("Callable Precondition");
+        continue;
+			} else if (state[keys[i]] == test[keys[i]]) {
+				UtilityFunctions::print("Boolean Precondition");
+				continue;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}

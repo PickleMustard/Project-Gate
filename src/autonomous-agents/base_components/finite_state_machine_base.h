@@ -14,7 +14,7 @@ public:
 	~FiniteStateMachineBase();
 	//typedef void (*FSMState)(FiniteStateMachineBase *, GodotObject *);
 
-	void Update(Node *goap_agent);
+	bool Update(Node *goap_agent);
 	void PushState(Callable state);
 	void PopState();
 
