@@ -2,6 +2,7 @@
 #include "autonomous-agents/base_components/finite_state_machine_base.h"
 #include "autonomous-agents/base_components/goap_action.h"
 #include "autonomous-agents/base_components/goap_planner.h"
+#include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/core/class_db.hpp"
@@ -44,14 +45,29 @@ void godot::GoapAgent::_ready() {
 }
 
 void godot::GoapAgent::_process(double p_delta) {
-	if (should_continue) {
+	/*if (should_continue) {
 		should_continue = state_machine->Update(this);
-    counter++;
+    if(!should_continue) {
+      EndTurn();
+    }
 	}
 	/*UtilityFunctions::print("Updating State machine");
 	  state_machine->Update(this);
 	UtilityFunctions::print("State machine updated");*/
 }
+
+void godot::GoapAgent::_physics_process(double p_delta) {
+	if (should_continue) {
+		should_continue = state_machine->Update(this);
+    if(!should_continue) {
+      EndTurn();
+    }
+	}
+	/*UtilityFunctions::print("Updating State machine");
+	  state_machine->Update(this);
+	UtilityFunctions::print("State machine updated");*/
+}
+
 
 void godot::GoapAgent::RunAI() {
 	//Create a plan, then run through the plan while action / movement points remain
@@ -60,6 +76,13 @@ void godot::GoapAgent::RunAI() {
 	UtilityFunctions::print("Got Parent");
 	Update();
 	UtilityFunctions::print("Updated");
+}
+
+void godot::GoapAgent::EndTurn() {
+	SceneTree *tree = get_tree();
+	TypedArray<Node> turn_controllers = tree->get_nodes_in_group("TurnController");
+	Node *turn_controller = cast_to<Node>(turn_controllers[0]);
+  turn_controller->call_deferred("EndTurn");
 }
 
 void godot::GoapAgent::AddAction(Ref<GoapAction> action) {
@@ -142,7 +165,6 @@ bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	UtilityFunctions::print("Performing an action | ", HasActionPlan());
 	if (!HasActionPlan()) {
-		UtilityFunctions::print("1");
 		fsm->PopState();
 		fsm->PushState(idle_state);
 		data_provider->ActionsFinished();
@@ -152,11 +174,11 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
 	UtilityFunctions::print("Is Done? ", action->IsDone(this));
 	UtilityFunctions::print("name: ", action->GetActionName());
-	if (action->IsDone(this)) {
-		current_actions.remove_at(0);
-	}
   if(action->InProgress(this)) {
     return true;
+  }
+  if (action->IsDone(this)) {
+    current_actions.remove_at(0);
   }
 
 	if (HasActionPlan()) {

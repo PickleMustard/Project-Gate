@@ -48,9 +48,9 @@ public partial class Enemy : Character
   {
     Array<Node> children = GetChildren();
     GD.Print("Enemy children: ", children);
-    if (children[1].HasMethod("RunAI"))
+    if (children[2].HasMethod("RunAI"))
     {
-      children[1].Call("RunAI");
+      children[2].Call("RunAI");
     }
   }
 }

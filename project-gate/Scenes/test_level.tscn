@@ -7,7 +7,7 @@
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/Character.cs" id="4_pefaa"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
-[ext_resource type="PackedScene" uid="uid://2bswkiikpwx4" path="res://Assets/Units/enemy.tscn" id="6_q8vmb"]
+[ext_resource type="AudioStream" uid="uid://d4ao63nnk7xvy" path="res://Assets/Sound-Effects/Dev-Only/Explosion3_modified.mp3" id="7_ttskx"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
@@ -17,9 +17,6 @@
 script = ExtResource("4_do7ow")
 
 [node name="Level" type="Level" parent="."]
-m_should_generate_level = true
-
-[node name="@TileGrid@18855" type="TileGrid" parent="Level"]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
@@ -43,13 +40,18 @@ script = ExtResource("3_af0co")
 [node name="character" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
 script = ExtResource("4_pefaa")
-TotalDistance = 40
+TotalDistance = 100
 BaseSpeedAccumulator = 4.0
 SpeedNeededToRequeue = 3.0
 HeapPriority = 3.0
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
 material = ExtResource("4_u1xaw")
+
+[node name="character_audio" type="AudioStreamPlayer3D" parent="character"]
+stream = ExtResource("7_ttskx")
+volume_db = 17.576
+bus = &"Guns"
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
@@ -78,9 +80,6 @@ offset_left = 2.0
 offset_top = 33.0
 offset_right = 100.0
 offset_bottom = 91.0
-
-[node name="Enemy" parent="." instance=ExtResource("6_q8vmb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2219.85, 2.33574, 3949.5)
 
 [node name="Node3D" type="Node3D" parent="."]
 transform = Transform3D(-0.999377, 0, 0.0352833, 0, 1, 0, -0.0352833, 0, -0.999377, 1852.93, -0.216902, 3405.64)

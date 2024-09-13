@@ -37,6 +37,7 @@ public partial class CharacterTurnController : Node
     unitControl = GetNodeOrNull<UnitControl>("/root/Top/pivot/UnitControl");
     level = GetNode<Node>("/root/Top/Level");
     level.Connect(level.GetSignalList()[1]["name"].ToString(), StartLevelTurnController);
+    AddToGroup("TurnController");
 
     Instance = this;
   }

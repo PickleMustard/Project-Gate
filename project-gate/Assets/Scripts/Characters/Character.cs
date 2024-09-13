@@ -76,8 +76,10 @@ public partial class Character : Node3D
     currentHealth -= damageAmount;
     if (currentHealth <= 0)
     {
+      KillCharacter();
     }
   }
+
 
   public void RequeueingCharacter()
   {
@@ -99,6 +101,8 @@ public partial class Character : Node3D
   {
     CharacterTurnController.Instance.RemoveCharacterFromTurnController(this);
     CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);
+    AudioStreamPlayer3D player = (AudioStreamPlayer3D)GetChild(1);
+    player.Play();
     Visible = false;
 
   }

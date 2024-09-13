@@ -36,14 +36,15 @@ bool AttemptToDiscoverEnemyAction::IsDone(Node *goap_agent) {
 
 bool AttemptToDiscoverEnemyAction::InProgress(Node *goap_agent) {
   Node *parent = goap_agent->get_parent();
-  return parent->call("GetIsMoving");
+  bool is_moving = parent->call("GetIsMoving");
+  UtilityFunctions::print("Is Moving Call: ", is_moving);
+  return is_moving;
 }
 bool AttemptToDiscoverEnemyAction::RequiresInRange() {
 	return false;
 }
 
 bool AttemptToDiscoverEnemyAction::HasMovementRangeRemaining(int distance) {
-  UtilityFunctions::print("Is this getting called: ", distance);
   return distance > 0;
 }
 

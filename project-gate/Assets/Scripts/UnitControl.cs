@@ -61,6 +61,7 @@ public partial class UnitControl : Node3D
 
   }
 
+
   public void DisplayPotentialDestinations()
   {
     if (!CurrentCharacter.isMoving)
@@ -180,6 +181,7 @@ public partial class UnitControl : Node3D
       if (TargetTile.HasMethod("GetCharacterOnTile"))
       {
         target = TargetTile.Call("GetCharacterOnTile").AsGodotObject();
+        GD.Print("Getting character on tile: ", TargetTile, " | ", target);
       }
     }
 
@@ -190,8 +192,11 @@ public partial class UnitControl : Node3D
       GD.Print(attacker.Call("GetMainWeapon"));
       if (distance <= (int)(attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange"))
       {
+        GD.Print("Target: ", target, "| Has AttackCharacter Method: ", target.HasMethod("AttackCharacter"));
         if (target.HasMethod("AttackCharacter"))
         {
+          AudioStreamPlayer3D player = (AudioStreamPlayer3D)CurrentCharacter.GetChild(1);
+          player.Play();
           target.Call("AttackCharacter", 5);
         }
       }
@@ -306,7 +311,7 @@ public partial class UnitControl : Node3D
 
   private IEnumerator MoveUnitAlongTile(Vector3 endPosition)
   {
-    GD.Print("End Position: ", endPosition);
+    GD.Print("End Position: ", endPosition, "| ", CurrentCharacter.isMoving);
     Vector3 startPosition = CurrentCharacter.Position;
     float timeElapsed = 0.0f;
 
