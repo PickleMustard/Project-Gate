@@ -277,6 +277,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 *    spawnable_locations: If the instantiated tile has the ability to spawn enemies, it is added to the list of spawnable locations
 */
 Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, int tile_type) {
+	Object *daemon = Engine::get_singleton()->get_singleton("Daemon");
 	Ref<Tile> new_tile;
 	switch (tile_type) {
 		case 1:
@@ -299,7 +300,10 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 			break;
 		case 5:
 			new_tile = Ref<UnitSpawner>(memnew(UnitSpawner(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
-      spawnable_locations.push_back(new_tile);
+      if(daemon->has_method("AddEnemySpawnLocation")) {
+        daemon->call("AddEnemySpawnLocation", new_tile);
+      }
+      //spawnable_locations.push_back(new_tile);
 			if (GenerationCommunicator) {
 				Callable signal = GenerationCommunicator->call("GetSpawnEnemySignal");
 				new_tile->call("SetSpawnerCallable", signal);
@@ -307,6 +311,13 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 			break;
 		case 6:
 			new_tile = Ref<StartingTile>(memnew(StartingTile(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
+      if(daemon->has_method("AddPlayerSpawnLocation")) {
+        daemon->call("AddPlayerSpawnLocation", new_tile);
+      }
+			if (GenerationCommunicator) {
+				Callable signal = GenerationCommunicator->call("GetSpawnCharacterSignal");
+				new_tile->call("SetSpawnerCallable", signal);
+			}
 			break;
 		default:
 			new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));

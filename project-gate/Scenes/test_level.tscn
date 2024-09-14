@@ -1,13 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=7 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/UnitControl.cs" id="2_ggfwn"]
 [ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/CharacterTurnController.cs" id="4_do7ow"]
-[ext_resource type="Script" path="res://Assets/Scripts/Characters/Character.cs" id="4_pefaa"]
-[ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="4_u1xaw"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
-[ext_resource type="AudioStream" uid="uid://d4ao63nnk7xvy" path="res://Assets/Sound-Effects/Dev-Only/Explosion3_modified.mp3" id="7_ttskx"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
@@ -36,22 +33,6 @@ rotationDuration = 0.3
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("3_af0co")
-
-[node name="character" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 5, 3873.73)
-script = ExtResource("4_pefaa")
-TotalDistance = 100
-BaseSpeedAccumulator = 4.0
-SpeedNeededToRequeue = 3.0
-HeapPriority = 3.0
-
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="character"]
-material = ExtResource("4_u1xaw")
-
-[node name="character_audio" type="AudioStreamPlayer3D" parent="character"]
-stream = ExtResource("7_ttskx")
-volume_db = 17.576
-bus = &"Guns"
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)

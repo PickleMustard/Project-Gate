@@ -34,7 +34,7 @@ public partial class UnitControl : Node3D
     test_update = new Callable(this, "TestTileEvent");
     InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
     i_handle.DisplayDestinations += DisplayPotentialDestinations;
-    capsule = GetNode<Node3D>("/root/Top/character");
+    //capsule = GetNode<Node3D>("/root/Top/character");
     test = Engine.GetSingleton("GlobalTileNotifier");
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);

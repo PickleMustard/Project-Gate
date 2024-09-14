@@ -35,8 +35,10 @@ public partial class CharacterTurnController : Node
     AliveCharacterList = new List<Character>();
     PriorityUpdateHeap = new PriorityQueue<Character, float>();
     unitControl = GetNodeOrNull<UnitControl>("/root/Top/pivot/UnitControl");
-    level = GetNode<Node>("/root/Top/Level");
-    level.Connect(level.GetSignalList()[1]["name"].ToString(), StartLevelTurnController);
+    //level = GetNode<Node>("/root/Top/Level");
+    //level.Connect(level.GetSignalList()[1]["name"].ToString(), StartLevelTurnController);
+    Node Daemon = (Node)Engine.GetSingleton("Daemon");
+    Daemon.Connect("StartTurnController", StartLevelTurnController);
     AddToGroup("TurnController");
 
     Instance = this;
@@ -50,6 +52,7 @@ public partial class CharacterTurnController : Node
   {
     GD.Print("Starting Turn Controller");
     CallDeferred("EndGlobalTurn");
+    CurrentCharacter = (Character)CallDeferred("NextCharacter");
   }
 
   public Character NextCharacter()
@@ -75,7 +78,7 @@ public partial class CharacterTurnController : Node
    */
   public void EndTurn()
   {
-    GD.Print("Ending ", CurrentCharacter.ToString(), "'s turn");
+    //GD.Print("Ending ", CurrentCharacter.ToString(), "'s turn");
     CurrentCharacter = NextCharacter();
     if (CurrentCharacter != null)
     {
@@ -91,6 +94,9 @@ public partial class CharacterTurnController : Node
       EndGlobalTurn();
       CurrentCharacter = NextCharacter();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
+      if(CurrentCharacter.IsInGroup("Enemies")) {
+        CurrentCharacter.Call("RunAI");
+      }
     }
   }
 
@@ -132,7 +138,7 @@ public partial class CharacterTurnController : Node
     }
     GD.Print("MovementQueue: ", MovementQueue.Count);
     GD.Print(MovementQueue.ToString());
-    CurrentCharacter = NextCharacter();
+    //CurrentCharacter = NextCharacter();
 
   }
 

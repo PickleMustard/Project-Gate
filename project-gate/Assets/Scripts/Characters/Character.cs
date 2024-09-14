@@ -33,6 +33,7 @@ public partial class Character : Node3D
   public Grenade grenade { get; private set; }
   private Godot.Collections.Array items;
   private float CurrentSpeed;
+  private Node TileGrid;
 
   private int distanceRemaining { get; set; }
 
@@ -45,6 +46,8 @@ public partial class Character : Node3D
   }
 
   public void SetupCharacter() {
+    Node level = GetNode<Node>("/root/Top/Level");
+    TileGrid = level.GetChildren()[0];
     CurrentSpeed = StartingSpeed;
     distanceRemaining = TotalDistance;
     InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
@@ -80,7 +83,6 @@ public partial class Character : Node3D
     }
   }
 
-
   public void RequeueingCharacter()
   {
     if (CurrentHeapPriority < 0)
@@ -90,6 +92,27 @@ public partial class Character : Node3D
     else
     {
       CurrentHeapPriority += 1;
+    }
+  }
+
+  public void SetPosition(Resource Tile)
+  {
+    Vector2I location = new Vector2I();
+    //GD.Print("Finished Awaiting");
+    if (Tile.HasMethod("GetLocation"))
+    {
+      //GD.Print("Location ", Tile.Call("GetLocation"));
+      location = (Vector2I)Tile.Call("GetLocation");
+    }
+    if (TileGrid.HasMethod("GetPositionForHexFromCoordinate"))
+    {
+      //GD.Print("Position: ", TileGrid.Call("GetPositionForHexFromCoordinate", location, (int)Tile.Call("GetSize"), true));
+      Position = (Vector3)TileGrid.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
+    }
+    if (Tile.HasMethod("SetCharacterOnTile"))
+    {
+      Tile.Call("SetCharacterOnTile", this);
+      //GD.Print("Setting object");
     }
   }
 

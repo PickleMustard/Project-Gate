@@ -28,10 +28,10 @@ public partial class GenerationCommunicatorSingleton : Node
   {
     //Instance = this;
     //Engine.RegisterSingleton("GenerationCommunicatorSingleton", this);
-    UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
-    GenerateItemCall = new Callable(this, "GenerateItem");
-    SpawnEnemyCall = new Callable(this, "SpawnEnemy");
-    SpawnCharacterCall = new Callable(this, "SpawnCharacter");
+    //UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
+    //GenerateItemCall = new Callable(this, "GenerateItem");
+    //SpawnEnemyCall = new Callable(this, "SpawnEnemy");
+    //SpawnCharacterCall = new Callable(this, "SpawnCharacter");
     Top = GetNodeOrNull<Node3D>("/root/Top");
   }
 
@@ -59,14 +59,17 @@ public partial class GenerationCommunicatorSingleton : Node
   public void SpawnCharacter(Resource Tile)
   {
     GD.Print("Spawning Character");
-    Character new_character = new Character();
+    //Character new_character = new Character();
+    Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/character.tscn").Instantiate();
+    Top.AddChild(character, true);
+    character.Call("SetPosition", Tile);
   }
 
   public void SpawnEnemy(Resource Tile)
   {
     GD.Print("Spawning Enemy");
     Node enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate();
-    Top.AddChild(enemy);
+    Top.AddChild(enemy, true);
     enemy.Call("SetPosition", Tile);
     //if(Tile.HasMethod("SetCharacterOnTile")) {
       //Tile.Call("SetCharacterOnTile", Tile);

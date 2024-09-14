@@ -29,6 +29,7 @@ godot::Level::Level() {
 	//YamlParser::test_yaml_caller();
 
 	//Engine::get_singleton()->connect("RegenerateGrid", callable_mp(this, &godot::Level::GenerateLevel));
+  add_to_group("Level");
 	UtilityFunctions::print(get_child_count());
 }
 

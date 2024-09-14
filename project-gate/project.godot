@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
 GenerationCommunicatorSingleton="*res://Assets/Scripts/GenerationCommunicator/GenerationCommunicatorSingleton.cs"
+Daemon="*res://Assets/Scripts/Daemon/Daemon.cs"
 
 [display]
 
@@ -33,6 +34,10 @@ project/assembly_name="Gate Of Scalad"
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+
+[global_group]
+
+PlayerCharacters="Player Characters to be controlled"
 
 [input]
 

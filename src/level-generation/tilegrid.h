@@ -88,6 +88,7 @@ protected:
 private:
 	LevelGenerator *m_showrooms = nullptr;
   Vector<Ref<Tile>> spawnable_locations {};
+  Vector<Ref<Tile>> start_locations {};
   Vector<Callable> call_set_enemy_start_positions;
 };
 
