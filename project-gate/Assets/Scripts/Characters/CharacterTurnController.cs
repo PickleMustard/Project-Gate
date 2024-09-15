@@ -35,8 +35,6 @@ public partial class CharacterTurnController : Node
     AliveCharacterList = new List<Character>();
     PriorityUpdateHeap = new PriorityQueue<Character, float>();
     unitControl = GetNodeOrNull<UnitControl>("/root/Top/pivot/UnitControl");
-    //level = GetNode<Node>("/root/Top/Level");
-    //level.Connect(level.GetSignalList()[1]["name"].ToString(), StartLevelTurnController);
     Node Daemon = (Node)Engine.GetSingleton("Daemon");
     Daemon.Connect("StartTurnController", StartLevelTurnController);
     AddToGroup("TurnController");
@@ -51,7 +49,7 @@ public partial class CharacterTurnController : Node
   public void StartLevel()
   {
     GD.Print("Starting Turn Controller");
-    CallDeferred("EndGlobalTurn");
+    CallDeferred("CalculateMovementQueue");
     CurrentCharacter = (Character)CallDeferred("NextCharacter");
   }
 
@@ -62,6 +60,10 @@ public partial class CharacterTurnController : Node
       Character next_character = MovementQueue.Dequeue();
       next_character.ResetDistanceRemaining();
       next_character.MakeMainCharacter();
+      if (next_character.IsInGroup("Enemies"))
+      {
+        next_character.Call("RunAI");
+      }
       return next_character;
     }
     else
@@ -84,9 +86,6 @@ public partial class CharacterTurnController : Node
     {
       GD.Print("Another Character Available");
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
-      if(CurrentCharacter.IsInGroup("Enemies")) {
-        CurrentCharacter.Call("RunAI");
-      }
     }
     else
     {
@@ -94,10 +93,11 @@ public partial class CharacterTurnController : Node
       EndGlobalTurn();
       CurrentCharacter = NextCharacter();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
-      if(CurrentCharacter.IsInGroup("Enemies")) {
-        CurrentCharacter.Call("RunAI");
-      }
     }
+  }
+
+  public Callable GetEndTurnCall() {
+    return new Callable(this, "EndTurn");
   }
 
   public void AddCharacterToMovementQueue(Character SpawnedCharacter)
@@ -116,29 +116,52 @@ public partial class CharacterTurnController : Node
    */
   public void EndGlobalTurn()
   {
-    GD.Print("Character List Size: ", AliveCharacterList.Count);
-    int caution = 0;
-    foreach(Character c in AliveCharacterList) {
+    //    GD.Print("Character List Size: ", AliveCharacterList.Count);
+    //    int caution = 0;
+    //    foreach(Character c in AliveCharacterList) {
+    //      c.ResetPriority();
+    //      GD.Print("CurrentHeapPriority b4 enqueue: ", c.CurrentHeapPriority);
+    //      PriorityUpdateHeap.Enqueue(c, c.CurrentHeapPriority);
+    //    }
+    //    GD.Print("heap: ", PriorityUpdateHeap.Count);
+    //    while(PriorityUpdateHeap.Count > 0 && caution < 1000) {
+    //      GD.Print("Going through heap");
+    //      Character calclatee = PriorityUpdateHeap.Dequeue();
+    //      bool ShouldRequeue = calclatee.UpdateMovementCalcs();
+    //      GD.Print(ShouldRequeue);
+    //      if(ShouldRequeue) {
+    //        calclatee.RequeueingCharacter();
+    //        GD.Print("Requeueing with Priority: ", calclatee.CurrentHeapPriority);
+    //        PriorityUpdateHeap.Enqueue(calclatee, calclatee.CurrentHeapPriority);
+    //      }
+    //      caution++;
+    //    }
+    //    GD.Print("MovementQueue: ", MovementQueue.Count);
+    //    GD.Print(MovementQueue.ToString());
+    //CurrentCharacter = NextCharacter();
+    CalculateMovementQueue();
+
+  }
+
+  private void CalculateMovementQueue()
+  {
+    PriorityUpdateHeap.Clear();
+    foreach (Character c in AliveCharacterList)
+    {
       c.ResetPriority();
-      GD.Print("CurrentHeapPriority b4 enqueue: ", c.CurrentHeapPriority);
       PriorityUpdateHeap.Enqueue(c, c.CurrentHeapPriority);
     }
-    GD.Print("heap: ", PriorityUpdateHeap.Count);
-    while(PriorityUpdateHeap.Count > 0 && caution < 1000) {
-      GD.Print("Going through heap");
-      Character calclatee = PriorityUpdateHeap.Dequeue();
-      bool ShouldRequeue = calclatee.UpdateMovementCalcs();
-      GD.Print(ShouldRequeue);
-      if(ShouldRequeue) {
-        calclatee.RequeueingCharacter();
-        GD.Print("Requeueing with Priority: ", calclatee.CurrentHeapPriority);
-        PriorityUpdateHeap.Enqueue(calclatee, calclatee.CurrentHeapPriority);
+
+    while (PriorityUpdateHeap.Count > 0)
+    {
+      Character calculatingCharacter = PriorityUpdateHeap.Dequeue();
+      bool ShouldRequeue = calculatingCharacter.UpdateMovementCalcs();
+      if (ShouldRequeue)
+      {
+        calculatingCharacter.RequeueingCharacter();
+        PriorityUpdateHeap.Enqueue(calculatingCharacter, calculatingCharacter.CurrentHeapPriority);
       }
-      caution++;
     }
-    GD.Print("MovementQueue: ", MovementQueue.Count);
-    GD.Print(MovementQueue.ToString());
-    //CurrentCharacter = NextCharacter();
 
   }
 

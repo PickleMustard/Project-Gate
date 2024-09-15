@@ -5,6 +5,10 @@ public partial class Character : Node3D
   private const float INTITIAL_REQUEUE_PRIORITY = 1.0f;
   [Signal]
   public delegate void UpdateMainCharacterEventHandler();
+  [Signal]
+  public delegate void UpdatedMovementRemainingEventHandler();
+  [Signal]
+  public delegate void UpdatedHeapPriorityEventHandler();
 
   [Export]
   public int TotalDistance = 8;
@@ -43,6 +47,8 @@ public partial class Character : Node3D
   public override void _Ready()
   {
     SetupCharacter();
+    GD.Print("Character Setup");
+    GD.Print(ToString());
   }
 
   public void SetupCharacter() {
@@ -101,18 +107,15 @@ public partial class Character : Node3D
     //GD.Print("Finished Awaiting");
     if (Tile.HasMethod("GetLocation"))
     {
-      //GD.Print("Location ", Tile.Call("GetLocation"));
       location = (Vector2I)Tile.Call("GetLocation");
     }
     if (TileGrid.HasMethod("GetPositionForHexFromCoordinate"))
     {
-      //GD.Print("Position: ", TileGrid.Call("GetPositionForHexFromCoordinate", location, (int)Tile.Call("GetSize"), true));
       Position = (Vector3)TileGrid.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
     }
     if (Tile.HasMethod("SetCharacterOnTile"))
     {
       Tile.Call("SetCharacterOnTile", this);
-      //GD.Print("Setting object");
     }
   }
 
@@ -132,14 +135,12 @@ public partial class Character : Node3D
 
   public void HealCharacter(int healAmount)
   {
-    GD.Print("Healing ", healAmount);
     currentHealth += healAmount;
   }
 
 
   public void MakeMainCharacter()
   {
-    GD.Print("Emitting Signal");
     EmitSignal(SignalName.UpdateMainCharacter, this);
   }
 
@@ -153,12 +154,13 @@ public partial class Character : Node3D
   }
 
   public override string ToString() {
-    return this.GetType() + " character";
+    return this.GetType() + " character\nDistance Remaining: "+ distanceRemaining+ "\nCurrent Priority: "+ CurrentHeapPriority;
   }
 
   public void DecrementDistanceRemaining(int decrementor)
   {
     distanceRemaining -= decrementor;
+    EmitSignal(SignalName.UpdatedMovementRemaining, GetDistanceRemaining());
   }
 
   public bool UpdateMovementCalcs()
@@ -195,6 +197,7 @@ public partial class Character : Node3D
   {
     GD.Print("Resetting Distance");
     distanceRemaining = TotalDistance;
+    EmitSignal(SignalName.UpdatedMovementRemaining, GetDistanceRemaining());
   }
 
 }

@@ -10,6 +10,7 @@
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
+HeapPriority = 10.0
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material_override = ExtResource("1_b2i4i")

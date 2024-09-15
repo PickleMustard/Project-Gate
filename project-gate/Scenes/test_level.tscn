@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=8 format=3 uid="uid://ccrv07q1oy36f"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
 [ext_resource type="Script" path="res://Assets/Scripts/UnitControl.cs" id="2_ggfwn"]
 [ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/CharacterTurnController.cs" id="4_do7ow"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
+[ext_resource type="PackedScene" uid="uid://c8yim1xd3mn7o" path="res://User-Interface/user_interface.tscn" id="6_qmqhf"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
@@ -14,6 +15,8 @@
 script = ExtResource("4_do7ow")
 
 [node name="Level" type="Level" parent="."]
+
+[node name="@TileGrid@62671" type="TileGrid" parent="Level"]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
@@ -38,30 +41,6 @@ script = ExtResource("3_af0co")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
 directional_shadow_mode = 0
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 135.0
-offset_bottom = 69.0
-
-[node name="Button" type="Button" parent="Control"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.013
-anchor_bottom = 0.006
-offset_right = 77.48
-offset_bottom = 30.76
-focus_mode = 1
-text = "End Turn
-"
-
-[node name="CodeEdit" type="CodeEdit" parent="Control"]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 33.0
-offset_right = 100.0
-offset_bottom = 91.0
-
 [node name="Node3D" type="Node3D" parent="."]
 transform = Transform3D(-0.999377, 0, 0.0352833, 0, 1, 0, -0.0352833, 0, -0.999377, 1852.93, -0.216902, 3405.64)
 
@@ -72,4 +51,4 @@ mesh = SubResource("BoxMesh_yeooe")
 transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 0.927824, -0.0434665)
 texture = ExtResource("6_1dwfk")
 
-[connection signal="button_up" from="Control/Button" to="CharacterTurnController" method="EndTurn"]
+[node name="Control" parent="." instance=ExtResource("6_qmqhf")]

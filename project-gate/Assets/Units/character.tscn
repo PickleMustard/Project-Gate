@@ -6,6 +6,7 @@
 
 [node name="character" type="Node3D" groups=["PlayerCharacters"]]
 script = ExtResource("1_hm57b")
+HeapPriority = 20.0
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material = ExtResource("1_mkf7m")
