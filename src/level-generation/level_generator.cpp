@@ -9,6 +9,7 @@
 #include "godot_cpp/classes/shader_material.hpp"
 #include "godot_cpp/core/math.hpp"
 #include "godot_cpp/core/memory.hpp"
+#include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "seeded_random_access.h"
 #include "tile_collision.h"
@@ -94,14 +95,14 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 }
 
 /* Generates the Directed Graph of rooms to create the TileGrid from
-*
-* Arguments:
-* starting_location: Vector2i for the position of the origin on the grid
-*
-* Returns:
-* m_Rooms_Graph Pointer: The pointer to the starting room node within the directed graph
-* 			Will spawn the player units on this tile
-*/
+ *
+ * Arguments:
+ * starting_location: Vector2i for the position of the origin on the grid
+ *
+ * Returns:
+ * m_Rooms_Graph Pointer: The pointer to the starting room node within the directed graph
+ * 			Will spawn the player units on this tile
+ */
 LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i starting_location) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	LevelGenerator::m_Rooms_Graph *rooms_graph = new m_Rooms_Graph{ HashMap<String, m_Room_Vertex *>{} };
@@ -112,7 +113,7 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 	Dictionary level_metadata = graph_to_build["Level"];
 	m_level_point_total = level_metadata["generation_point_total"];
 	Array Nodes = graph_to_build["Nodes"];
-  m_num_rooms = Nodes.size();
+	m_num_rooms = Nodes.size();
 	Array Edges = graph_to_build["Edges"];
 	//Generate the vertices
 	for (int i = 0; i < Nodes.size(); i++) {
@@ -177,30 +178,38 @@ void LevelGenerator::m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph) {
 }
 
 /* Connects the room centers defined on an edge to each other with a line of tiles
-* 	FOR FUTURE: have an argument to vary the width of the connection
-*
-* Arguments:
-*   tile_bit_map: Reference to the List of tile positions and the Tile type defined for that position
-*    m_Rooms_Graph: Pointer to the starting node of the directed graph of rooms
-*
-* Returns:
-*   No Direct Returns
-*
-* Out variables:
-*    tile_bit_map: Updates the connecting tiles between rooms as ordinary tiles
-*/
+ * 	FOR FUTURE: have an argument to vary the width of the connection
+ *
+ * Arguments:
+ *   tile_bit_map: Reference to the List of tile positions and the Tile type defined for that position
+ *    m_Rooms_Graph: Pointer to the starting node of the directed graph of rooms
+ *
+ * Returns:
+ *   No Direct Returns
+ *
+ * Out variables:
+ *    tile_bit_map: Updates the connecting tiles between rooms as ordinary tiles
+ */
 void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph) {
 	int nums_rooms = graph->vertices.size();
 	for (int i = 0; i < nums_rooms; i++) {
 		String node_hash = vformat("node_%d", i);
 		UtilityFunctions::print("color: ", graph->vertices[node_hash]->color);
 		int num_edges = graph->vertices[node_hash]->edges.size();
-		if (num_edges > 0) {
-			for (int j = 0; j < num_edges; j++) {
-				String edge_hash = vformat("node_%d_edge_%d", i, j);
+		for (int j = 0; j < num_edges; j++) {
+			String edge_hash = vformat("node_%d_edge_%d", i, j);
+			float dist = m_HexDistance(graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location) / 2.0f;
+			int x = Math::round((graph->vertices[node_hash]->location.x - graph->vertices[node_hash]->edges[edge_hash]->destination->location.x) / dist);
+			int y = Math::round((graph->vertices[node_hash]->location.y - graph->vertices[node_hash]->edges[edge_hash]->destination->location.y) / dist);
+			UtilityFunctions::print("Info: ", dist, ", (", x, ",", y, ")");
+			UtilityFunctions::print("Notted: (", x ^ x, ", ", y ^ y, ")");
+			UtilityFunctions::print(graph->vertices[node_hash]->edges[edge_hash]->direction);
+
+			if (num_edges > 0) {
 				m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
-				m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location - Vector2i(1, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location - Vector2i(1, 0));
-				m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(1, 1), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(1, 1));
+				m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x, y));
+				//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location+ Vector2i(x, 0));
+				//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location+ Vector2i(0, y));
 			}
 		}
 	}
@@ -261,21 +270,21 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 }
 
 /*  Tile Creation Factory Method to instantiate a Reference to a Tile Resource given a certain set of criteria
-*
-* Arguments:
-*    GenerationCommnicator: Singleton object that controls connection between low-level Tile objects in C++ and character controls in C#
-*    spawnable_locations: Reference to the list of Tile Resources that can spawn enemies
-*    location: Vector3 position of the tile within World Space
-*    q: column location of the tile; q in axial representation
-*    r: row location of the tile; r in axial represntation
-*    tile_type: int representation of the desired type of tile to be instantiated
-*
-* Returns:
-*    Ref<Tile>: Returns an instantiated reference to the Tile Resource with the provided characteristics
-*
-* Out Variables:
-*    spawnable_locations: If the instantiated tile has the ability to spawn enemies, it is added to the list of spawnable locations
-*/
+ *
+ * Arguments:
+ *    GenerationCommnicator: Singleton object that controls connection between low-level Tile objects in C++ and character controls in C#
+ *    spawnable_locations: Reference to the list of Tile Resources that can spawn enemies
+ *    location: Vector3 position of the tile within World Space
+ *    q: column location of the tile; q in axial representation
+ *    r: row location of the tile; r in axial represntation
+ *    tile_type: int representation of the desired type of tile to be instantiated
+ *
+ * Returns:
+ *    Ref<Tile>: Returns an instantiated reference to the Tile Resource with the provided characteristics
+ *
+ * Out Variables:
+ *    spawnable_locations: If the instantiated tile has the ability to spawn enemies, it is added to the list of spawnable locations
+ */
 Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, int tile_type) {
 	Object *daemon = Engine::get_singleton()->get_singleton("Daemon");
 	Ref<Tile> new_tile;
@@ -300,10 +309,10 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 			break;
 		case 5:
 			new_tile = Ref<UnitSpawner>(memnew(UnitSpawner(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
-      if(daemon->has_method("AddEnemySpawnLocation")) {
-        daemon->call("AddEnemySpawnLocation", new_tile);
-      }
-      //spawnable_locations.push_back(new_tile);
+			if (daemon->has_method("AddEnemySpawnLocation")) {
+				daemon->call("AddEnemySpawnLocation", new_tile);
+			}
+			//spawnable_locations.push_back(new_tile);
 			if (GenerationCommunicator) {
 				Callable signal = GenerationCommunicator->call("GetSpawnEnemySignal");
 				new_tile->call("SetSpawnerCallable", signal);
@@ -311,9 +320,9 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 			break;
 		case 6:
 			new_tile = Ref<StartingTile>(memnew(StartingTile(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
-      if(daemon->has_method("AddPlayerSpawnLocation")) {
-        daemon->call("AddPlayerSpawnLocation", new_tile);
-      }
+			if (daemon->has_method("AddPlayerSpawnLocation")) {
+				daemon->call("AddPlayerSpawnLocation", new_tile);
+			}
 			if (GenerationCommunicator) {
 				Callable signal = GenerationCommunicator->call("GetSpawnCharacterSignal");
 				new_tile->call("SetSpawnerCallable", signal);
@@ -327,17 +336,17 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 }
 
 /* For a given tile, set the mesh and material
-*
-* Arguments:
-*    mesh_generator: Pointer to the Mesh Generator object that either loads the saved mesh or creates the new mesh type if it is not saved
-*    ResourceLoader: Pointer to the ResourceLoader Resource that loads a saved mesh
-*    mesh_material_name: String containing the absoluate path to the Material for the given mesh
-*    tile_mesh_name: String containing the absolute path to the Tile Mesh for the given tile
-*    tile_type: int representation of the type of tile
-*
-* Returns:
-*    No Direct Returns
-*/
+ *
+ * Arguments:
+ *    mesh_generator: Pointer to the Mesh Generator object that either loads the saved mesh or creates the new mesh type if it is not saved
+ *    ResourceLoader: Pointer to the ResourceLoader Resource that loads a saved mesh
+ *    mesh_material_name: String containing the absoluate path to the Material for the given mesh
+ *    tile_mesh_name: String containing the absolute path to the Tile Mesh for the given tile
+ *    tile_type: int representation of the type of tile
+ *
+ * Returns:
+ *    No Direct Returns
+ */
 void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, int tile_type) {
 	Ref<Mesh> m_mesh;
 	Ref<ShaderMaterial> m_mesh_material;
@@ -534,18 +543,18 @@ LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<ui
 }
 
 /* For a given graph of room nodes, fill the tile bit map with the corresponding tiles and types in the rooms
-*
-* Arguments:
-*    tile_bit_map: Reference to the vector of tile positions and the corresponding type
-*    graph: Pointer to the starting node of the graph of rooms
-*    grid_origin: Vector2i location of the tile situated at the origin of the grid in axial notation
-*
-* Returns:
-*    No Direct Returns
-*
-* Out Variables:
-*    tile_bit_map: Tile positions corresponding to the locations within rooms in the graph are filled out with their tile types
-*/
+ *
+ * Arguments:
+ *    tile_bit_map: Reference to the vector of tile positions and the corresponding type
+ *    graph: Pointer to the starting node of the graph of rooms
+ *    grid_origin: Vector2i location of the tile situated at the origin of the grid in axial notation
+ *
+ * Returns:
+ *    No Direct Returns
+ *
+ * Out Variables:
+ *    tile_bit_map: Tile positions corresponding to the locations within rooms in the graph are filled out with their tile types
+ */
 void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	int num_of_rooms = graph->vertices.size();
@@ -656,13 +665,13 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 }
 
 /* Generates the interactable types for a room given a certain point allocation
-*
-* Arguments:
-*    num_points: Point allocation for the total sum of interactables to be spawned
-*
-* Returns:
-*     Vector<int>: Vector containing the int representation of interactables to be placed within a room
-*/
+ *
+ * Arguments:
+ *    num_points: Point allocation for the total sum of interactables to be spawned
+ *
+ * Returns:
+ *     Vector<int>: Vector containing the int representation of interactables to be placed within a room
+ */
 Vector<int> LevelGenerator::m_GenerateInteractableType(int num_points) {
 	Vector<int> generated_interactables{};
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
@@ -804,6 +813,7 @@ void LevelGenerator::m_DrawLineTiles(Vector<uint8_t> &tile_bit_map, Vector2i fir
 	int distance = m_HexDistance(first_room_center, second_room_center);
 	for (int i = 0; i <= distance; i++) {
 		Vector2i location = m_HexRound(first_room_center, second_room_center, distance, i);
+		UtilityFunctions::print("Hex Round Location: ", location);
 		//UtilityFunctions::print(vformat("%d q, %d r", location[0], location[1]));
 		if (location[0] >= 0 && location[1] >= 0) {
 			tile_bit_map.set(location[0] * m_maximum_grid_size[1] + location[1], 0x0001);
@@ -814,28 +824,28 @@ void LevelGenerator::m_DrawLineTiles(Vector<uint8_t> &tile_bit_map, Vector2i fir
 
 Vector2i LevelGenerator::m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step) {
 	Vector2 approximate_location = Vector2(first_room[0] + (second_room[0] - first_room[0]) * (1.0f / distance * step), first_room[1] + (second_room[1] - first_room[1]) * (1.0f / distance * step));
-	int q = static_cast<int>(Math::round(approximate_location[0]));
-	int r = static_cast<int>(Math::round(approximate_location[1]));
+	int q = (Math::round(approximate_location[0]));
+	int r = (Math::round(approximate_location[1]));
 
-	float q_diff = q - approximate_location[0];
-	float r_diff = r - approximate_location[1];
+	float q_diff = Math::abs(q - approximate_location[0]);
+	float r_diff = Math::abs(r - approximate_location[1]);
 
 	if (Math::abs(q) >= Math::abs(r)) {
-		return Vector2i(q + static_cast<int>(Math::round(q_diff + 0.5f * r_diff)), r);
+		return Vector2i(q + (Math::round(q_diff + 0.5f * r_diff)), r);
 	} else {
-		return Vector2i(q, r + static_cast<int>(Math::round(r_diff * 0.5f * q_diff)));
+		return Vector2i(q, r + (Math::round(r_diff + 0.5f * q_diff)));
 	}
 }
 
 int LevelGenerator::m_HexDistance(Vector2i first_room, Vector2i second_room) {
-	int distance = (Math::abs(first_room[0] - second_room[0]) +
-						   Math::abs(first_room[0] + first_room[1] -
-								   second_room[0] - second_room[1]) +
-						   Math::abs(first_room[1] - second_room[1])) /
-			2;
+	int distance = Math::round((Math::abs(first_room[0] - second_room[0]) +
+									   Math::abs(first_room[0] + first_room[1] -
+											   second_room[0] - second_room[1]) +
+									   Math::abs(first_room[1] - second_room[1])) /
+			2.0f);
 	return distance;
 }
 
 int LevelGenerator::GetNumRooms() {
-  return m_num_rooms;
+	return m_num_rooms;
 }
