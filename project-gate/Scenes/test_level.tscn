@@ -4,10 +4,9 @@
 [ext_resource type="Script" path="res://Assets/Scripts/UnitControl.cs" id="2_ggfwn"]
 [ext_resource type="Script" path="res://Assets/Scripts/InputHandler.cs" id="3_af0co"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/CharacterTurnController.cs" id="4_do7ow"]
+[ext_resource type="ArrayMesh" uid="uid://byuiot46edvse" path="res://sphere.tres" id="5_7frrk"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
 [ext_resource type="PackedScene" uid="uid://c8yim1xd3mn7o" path="res://User-Interface/user_interface.tscn" id="6_qmqhf"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_yeooe"]
 
 [node name="Top" type="Node3D"]
 
@@ -15,8 +14,9 @@
 script = ExtResource("4_do7ow")
 
 [node name="Level" type="Level" parent="."]
+m_level_file_location = "res://Configuration/Testing/test.yml"
 
-[node name="@TileGrid@18980" type="TileGrid" parent="Level"]
+[node name="@TileGrid@110931" type="TileGrid" parent="Level"]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
@@ -31,8 +31,8 @@ fov = 110.0
 
 [node name="UnitControl" type="Node3D" parent="pivot"]
 script = ExtResource("2_ggfwn")
-movementTime = 0.5
-rotationDuration = 0.3
+movementTime = 0.1
+rotationDuration = 0.01
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("3_af0co")
@@ -45,7 +45,7 @@ directional_shadow_mode = 0
 transform = Transform3D(-0.999377, 0, 0.0352833, 0, 1, 0, -0.0352833, 0, -0.999377, 1852.93, -0.216902, 3405.64)
 
 [node name="TileMeshGenerator" type="TileMeshGenerator" parent="Node3D"]
-mesh = SubResource("BoxMesh_yeooe")
+mesh = ExtResource("5_7frrk")
 
 [node name="Sprite3D" type="Sprite3D" parent="Node3D"]
 transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 0.927824, -0.0434665)

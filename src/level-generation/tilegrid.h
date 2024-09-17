@@ -2,6 +2,7 @@
 #define TILEGRID_H
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/string.hpp"
 #pragma once
 
 #include "godot_cpp/variant/vector2i.hpp"
@@ -64,7 +65,7 @@ public:
 	static Vector2i SubtractHex(Vector2i a, Vector2i b);
 	static int LengthHex(Vector2i hex);
 	static int DistanceHex(Vector2i a, Vector2i b);
-	void GenerateTileGrid(bool test_flag);
+	void GenerateTileGrid(bool test_flag, String file);
 
   void AddEnemyCall(Callable addition);
   void SetEnemiesOnGrid();
@@ -90,6 +91,7 @@ private:
   Vector<Ref<Tile>> spawnable_locations {};
   Vector<Ref<Tile>> start_locations {};
   Vector<Callable> call_set_enemy_start_positions;
+  String m_file_location;
 };
 
 } //namespace godot

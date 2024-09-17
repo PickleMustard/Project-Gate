@@ -11,6 +11,7 @@
 
 #include <sys/types.h>
 #include "godot_cpp/classes/resource_loader.hpp"
+#include "godot_cpp/variant/string.hpp"
 #include "level-generation/tile_mesh_generator.h"
 #include "tiles/tile.h"
 
@@ -39,6 +40,7 @@ private:
 
   struct m_Room_Edge {
     int weight;
+    int constraint;
     Vector2i direction;
     m_Room_Vertex *destination;
   };
@@ -89,12 +91,12 @@ public:
 	LevelGenerator(float outer_size, float inner_size, float height, bool is_flat_topped, int num_rooms, const Vector2i &grid_size);
 	~LevelGenerator();
 
-	HashMap<String, Ref<Tile>> *GenerateLevel(TileGrid *root, Vector<Ref<Tile>> &spawnable_locations);
+	HashMap<String, Ref<Tile>> *GenerateLevel(TileGrid *root, Vector<Ref<Tile>> &spawnable_locations, String file);
   int GetNumRooms();
 
 private:
 	void m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations);
-  m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location);
+  m_Rooms_Graph* m_GenerateRoomGraph(Vector2i starting_location, String file);
   void m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph);
   void m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin);
   void m_ConnectGraphNodes(Vector<uint8_t> &tile_bilt_map, m_Rooms_Graph *graph);

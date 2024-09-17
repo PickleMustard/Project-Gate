@@ -18,7 +18,6 @@ public partial class Enemy : Character
     {
       TileGrid.Call("AddEnemyCall", SetPositionCall);
     }
-    HealCharacter(TotalHealth);
     AddToGroup("Enemies");
     //GD.Print("Health at beninging ", currentHealth);
   }

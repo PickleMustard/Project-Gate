@@ -197,7 +197,7 @@ public partial class UnitControl : Node3D
         {
           AudioStreamPlayer3D player = (AudioStreamPlayer3D)CurrentCharacter.GetChild(1);
           player.Play();
-          target.Call("AttackCharacter", 5);
+          target.Call("AttackCharacter", 1);
         }
       }
     }

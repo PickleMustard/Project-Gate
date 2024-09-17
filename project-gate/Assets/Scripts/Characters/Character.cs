@@ -29,7 +29,7 @@ public partial class Character : Node3D
   public float HeapPriority = 1.0f;
 
   public int currentHealth { get; private set; }
-  public float CurrentHeapPriority {get; private set;}
+  public float CurrentHeapPriority { get; private set; }
 
   [Export]
   public Weapon main_weapon { get; private set; }
@@ -44,6 +44,9 @@ public partial class Character : Node3D
   public bool isMoving { get; set; } = false;
   private Callable updateMovementCalcs;
 
+  public override void _EnterTree()
+  {
+  }
   public override void _Ready()
   {
     SetupCharacter();
@@ -51,7 +54,8 @@ public partial class Character : Node3D
     GD.Print(ToString());
   }
 
-  public void SetupCharacter() {
+  public void SetupCharacter()
+  {
     Node level = GetNode<Node>("/root/Top/Level");
     TileGrid = level.GetChildren()[0];
     CurrentSpeed = StartingSpeed;
@@ -69,6 +73,7 @@ public partial class Character : Node3D
     CharacterTurnController.Instance.AddUpdateCharacterMovementCallable(updateMovementCalcs);
     CharacterTurnController.Instance.AddCharacterToTurnController(this);
     currentHealth = TotalHealth;
+    SetupHealthbar();
     ResetPriority();
     if (main_weapon == null)
     {
@@ -79,10 +84,26 @@ public partial class Character : Node3D
     GD.Print("Character");
   }
 
+  private void SetupHealthbar() {
+    Healthbar hb = FindChild("Healthbar") as Healthbar;
+    if(hb != null) {
+      hb.SetupHealthBar(TotalHealth);
+    }
+  }
+  private void UpdateHealthbar()
+  {
+    Healthbar hb = FindChild("Healthbar") as Healthbar;
+    if(hb != null) {
+      hb.UpdateHealthBar(currentHealth);
+    }
+
+  }
+
   public void AttackCharacter(int damageAmount)
   {
     GD.Print("Current Health ", currentHealth);
     currentHealth -= damageAmount;
+    UpdateHealthbar();
     if (currentHealth <= 0)
     {
       KillCharacter();
@@ -119,7 +140,8 @@ public partial class Character : Node3D
     }
   }
 
-  public void ResetPriority() {
+  public void ResetPriority()
+  {
     CurrentHeapPriority = -HeapPriority;
   }
 
@@ -136,6 +158,7 @@ public partial class Character : Node3D
   public void HealCharacter(int healAmount)
   {
     currentHealth += healAmount;
+    UpdateHealthbar();
   }
 
 
@@ -149,12 +172,14 @@ public partial class Character : Node3D
     return distanceRemaining;
   }
 
-  public bool GetIsMoving() {
+  public bool GetIsMoving()
+  {
     return isMoving;
   }
 
-  public override string ToString() {
-    return this.GetType() + " character\nDistance Remaining: "+ distanceRemaining+ "\nCurrent Priority: "+ CurrentHeapPriority;
+  public override string ToString()
+  {
+    return this.GetType() + " character\nDistance Remaining: " + distanceRemaining + "\nCurrent Priority: " + CurrentHeapPriority;
   }
 
   public void DecrementDistanceRemaining(int decrementor)
