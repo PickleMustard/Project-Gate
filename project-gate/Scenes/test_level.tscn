@@ -16,7 +16,7 @@ script = ExtResource("4_do7ow")
 [node name="Level" type="Level" parent="."]
 m_level_file_location = "res://Configuration/Testing/test.yml"
 
-[node name="@TileGrid@110931" type="TileGrid" parent="Level"]
+[node name="@TileGrid@17479" type="TileGrid" parent="Level"]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)

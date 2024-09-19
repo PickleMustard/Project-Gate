@@ -7,19 +7,17 @@ public partial class Enemy : Character
   Node TileGrid;
   Node level;
 
-  Func<Node> test;
   public override void _Ready()
   {
     SetupCharacter();
+    team = Character.CHARACTER_TEAM.enemy;
     Callable SetPositionCall = new Callable(this, "SetPosition");
-    level = GetNode<Node>("/root/Top/Level");
-    TileGrid = level.GetChildren()[0];
-    if (TileGrid.HasMethod("AddEnemyCall"))
-    {
-      TileGrid.Call("AddEnemyCall", SetPositionCall);
-    }
     AddToGroup("Enemies");
-    //GD.Print("Health at beninging ", currentHealth);
+    GD.Print("Testing ClassDB assignment during runtime: ", ClassDB.ClassExists("Character"));
+    var test = ResourceLoader.Load("res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs") as CSharpScript;
+    var second_test = (GodotObject)test.New();
+    GD.Print(second_test);
+    GD.Print(second_test.HasMethod("UpdateHeapPriority"));
   }
 
 

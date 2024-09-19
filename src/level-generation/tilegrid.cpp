@@ -104,9 +104,6 @@ void TileGrid::_notification(int p_what) {
  * Returns:
  *    No Direct Returns
  */
-void TileGrid::AddEnemyCall(Callable addition) {
-	call_set_enemy_start_positions.push_back(addition);
-}
 
 /* When the level has finished creation, spawn the given number of enemies at random spawnable locations across the TileGrid
  *
@@ -130,10 +127,6 @@ void TileGrid::SetEnemiesOnGrid() {
 		used_locations.push_back(location);
 	}
 	spawnable_locations[50]->call("SpawnCharacter");
-	UtilityFunctions::print("Setting enemies on list of size: ", call_set_enemy_start_positions.size());
-	// for (int i = 0; i < call_set_enemy_start_positions.size(); i++) {
-	//   call_set_enemy_start_positions[i].call(m_tile_grid->begin()->value);
-	// }
 }
 
 void TileGrid::SetPlayerTeamOnGrid() {
@@ -555,7 +548,6 @@ void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("SetEnemiesOnGrid"), &TileGrid::SetEnemiesOnGrid);
-	godot::ClassDB::bind_method(godot::D_METHOD("AddEnemyCall", "addition"), &TileGrid::AddEnemyCall);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNeighborsInRadius", "starting_tile", "radius"), &TileGrid::GetNeighborsInRadius);

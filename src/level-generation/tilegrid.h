@@ -67,7 +67,6 @@ public:
 	static int DistanceHex(Vector2i a, Vector2i b);
 	void GenerateTileGrid(bool test_flag, String file);
 
-  void AddEnemyCall(Callable addition);
   void SetEnemiesOnGrid();
   void SetPlayerTeamOnGrid();
 

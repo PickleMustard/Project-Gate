@@ -171,17 +171,21 @@ public partial class UnitControl : Node3D
   public void AttackTile(Vector2I TargetPosition, Vector2I ShooterLocation, GodotObject attacker)
   {
     GD.Print("Attacking Location");
-    GodotObject target = new GodotObject();
+    Character target = new Character();
     Resource TargetTile = new Resource();
     Resource ShooterTile = new Resource();
     if (TileGrid.HasMethod("FindTileOnGrid"))
     {
-      ShooterTile = (Resource)TileGrid.Call("FindTileOnGrid", ShooterLocation).AsGodotObject();
-      TargetTile = (Resource)TileGrid.Call("FindTileOnGrid", TargetPosition).AsGodotObject();
+      ShooterTile = TileGrid.Call("FindTileOnGrid", ShooterLocation).AsGodotObject() as Resource;
+      TargetTile = TileGrid.Call("FindTileOnGrid", TargetPosition).AsGodotObject() as Resource;
       if (TargetTile.HasMethod("GetCharacterOnTile"))
       {
-        target = TargetTile.Call("GetCharacterOnTile").AsGodotObject();
-        GD.Print("Getting character on tile: ", TargetTile, " | ", target);
+        target = TargetTile.Call("GetCharacterOnTile").AsGodotObject() as Character;
+        //GD.Print("Getting character on tile: ", TargetTile, " | ", target);
+        if(target == null || !target.GetType().IsSubclassOf(System.Type.GetType("Character"))) {
+          GD.PushError("Could not get the Character: ", target, " on Tile: ", TargetTile);
+          return;
+        }
       }
     }
 
@@ -193,11 +197,11 @@ public partial class UnitControl : Node3D
       if (distance <= (int)(attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange"))
       {
         GD.Print("Target: ", target, "| Has AttackCharacter Method: ", target.HasMethod("AttackCharacter"));
-        if (target.HasMethod("AttackCharacter"))
+        if (target.HasMethod("AttackCharacter") && target.team != CurrentCharacter.team)
         {
           AudioStreamPlayer3D player = (AudioStreamPlayer3D)CurrentCharacter.GetChild(1);
           player.Play();
-          target.Call("AttackCharacter", 1);
+          CurrentCharacter.AttackCharacter(target);
         }
       }
     }

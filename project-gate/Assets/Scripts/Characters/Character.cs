@@ -1,8 +1,15 @@
 using Godot;
 
+[GlobalClass]
 public partial class Character : Node3D
 {
   private const float INTITIAL_REQUEUE_PRIORITY = 1.0f;
+  public enum CHARACTER_TEAM
+  {
+    player,
+    enemy
+  }
+
   [Signal]
   public delegate void UpdateMainCharacterEventHandler();
   [Signal]
@@ -12,58 +19,55 @@ public partial class Character : Node3D
 
   [Export]
   public int TotalDistance = 8;
-
   [Export]
   public int TotalHealth = 10;
-
   [Export]
   public float BaseSpeedAccumulator = 2.0f;
-
   [Export]
   public float SpeedNeededToRequeue = 2.0f;
-
   [Export]
   public float StartingSpeed = 0.2f;
-
   [Export]
   public float HeapPriority = 1.0f;
+  [Export]
+  public Weapon MainWeapon { get; private set; }
+  [Export]
+  public Grenade grenade { get; private set; }
+  [Export]
+  public CHARACTER_TEAM team;
 
   public int currentHealth { get; private set; }
   public float CurrentHeapPriority { get; private set; }
-
-  [Export]
-  public Weapon main_weapon { get; private set; }
-  [Export]
-  public Grenade grenade { get; private set; }
-  private Godot.Collections.Array items;
-  private float CurrentSpeed;
-  private Node TileGrid;
-
-  private int distanceRemaining { get; set; }
-
   public bool isMoving { get; set; } = false;
+  private float CurrentSpeed;
+  private Godot.Collections.Array items;
+  private Node TileGrid;
+  private int distanceRemaining { get; set; }
   private Callable updateMovementCalcs;
 
-  public override void _EnterTree()
-  {
-  }
+  public string testWeaponGenerationName = "testweapon";
+
   public override void _Ready()
   {
     SetupCharacter();
     GD.Print("Character Setup");
     GD.Print(ToString());
+    GD.Print(GetClass());
   }
 
   public void SetupCharacter()
   {
-    Node level = GetNode<Node>("/root/Top/Level");
+    Node level = GetTree().GetNodesInGroup("Level")[0];
     TileGrid = level.GetChildren()[0];
     CurrentSpeed = StartingSpeed;
     distanceRemaining = TotalDistance;
-    InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
+#if DEBUG
+    InputHandler i_handle = GetTree().GetNodesInGroup("InputHandler")[0] as InputHandler;
     i_handle.UpdateCharacter += MakeMainCharacter;
     i_handle.ResetCharacter += ResetDistanceRemaining;
-    Node3D UnitMovement = GetNodeOrNull<Node3D>("/root/Top/pivot/UnitControl");
+    GD.Print("Debugging in Character Setup");
+#endif
+    UnitControl UnitMovement = GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl;
     if (UnitMovement.HasMethod("GetUpdateCharacterSignal"))
     {
       Connect(SignalName.UpdateMainCharacter, (Callable)UnitMovement.Call("GetUpdateCharacterSignal"));
@@ -72,34 +76,46 @@ public partial class Character : Node3D
     EmitSignal(SignalName.UpdateMainCharacter, this);
     CharacterTurnController.Instance.AddUpdateCharacterMovementCallable(updateMovementCalcs);
     CharacterTurnController.Instance.AddCharacterToTurnController(this);
-    currentHealth = TotalHealth;
+
     SetupHealthbar();
     ResetPriority();
-    if (main_weapon == null)
+
+    if (MainWeapon == null)
     {
-      main_weapon = new Weapon();
-      main_weapon.SetWeaponName("Pistol");
-      main_weapon.SetMaxRange(10);
+      //GenerationCommunicatorSingleton generator = Engine.GetSingleton("GenerationCommunicatorSingleton") as GenerationCommunicatorSingleton;
+      //generator.GenerateItem(4);
+//      MainWeapon = new Weapon();
+//      MainWeapon.SetWeaponName("Pistol");
+//      MainWeapon.SetMaxRange(10);
+//      MainWeapon.SetWeaponDamage(2);
+//      MainWeapon.SetOnHitBehavior(new SimpleDamageBehavior());
+
+      WeaponGenerator weaponGenerator = new WeaponGenerator();
+      MainWeapon = weaponGenerator.GenerateWeapon(testWeaponGenerationName);
     }
     GD.Print("Character");
   }
 
-  private void SetupHealthbar() {
+  private void SetupHealthbar()
+  {
+    currentHealth = TotalHealth;
     Healthbar hb = FindChild("Healthbar") as Healthbar;
-    if(hb != null) {
+    if (hb != null)
+    {
       hb.SetupHealthBar(TotalHealth);
     }
   }
   private void UpdateHealthbar()
   {
     Healthbar hb = FindChild("Healthbar") as Healthbar;
-    if(hb != null) {
+    if (hb != null)
+    {
       hb.UpdateHealthBar(currentHealth);
     }
 
   }
 
-  public void AttackCharacter(int damageAmount)
+  public void RecieveDamage(int damageAmount)
   {
     GD.Print("Current Health ", currentHealth);
     currentHealth -= damageAmount;
@@ -108,6 +124,11 @@ public partial class Character : Node3D
     {
       KillCharacter();
     }
+  }
+
+  public void AttackCharacter(Character target)
+  {
+    MainWeapon.OnHit(target);
   }
 
   public void RequeueingCharacter()
@@ -125,7 +146,6 @@ public partial class Character : Node3D
   public void SetPosition(Resource Tile)
   {
     Vector2I location = new Vector2I();
-    //GD.Print("Finished Awaiting");
     if (Tile.HasMethod("GetLocation"))
     {
       location = (Vector2I)Tile.Call("GetLocation");
@@ -210,12 +230,12 @@ public partial class Character : Node3D
 
   public void SetMainWeapon(Weapon UpdatedWeapon)
   {
-    main_weapon = UpdatedWeapon;
+    MainWeapon = UpdatedWeapon;
   }
 
   public Weapon GetMainWeapon()
   {
-    return main_weapon;
+    return MainWeapon;
   }
 
   public void ResetDistanceRemaining()

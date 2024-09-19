@@ -45,12 +45,9 @@ public partial class InputHandler : Node
     private Godot.Collections.Dictionary RegenerateGrid;
 
     public override void _Ready() {
-      Level = GetNode<Node>("/root/Top/Level");
-      GD.Print(Level.ToString());
+      Level = GetTree().GetNodesInGroup("Level")[0];
       RegenerateGrid = Level.GetSignalList()[0];
-      GD.Print(Level.GetSignalConnectionList(RegenerateGrid["name"].ToString()));
-      GD.Print(RegenerateGrid);
-
+      AddToGroup("InputHandler");
     }
 
     public override void _Input(InputEvent @event) {

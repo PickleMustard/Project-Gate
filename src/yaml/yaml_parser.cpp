@@ -1,6 +1,7 @@
 #include "yaml_parser.h"
 #include "godot_cpp/classes/file_access.hpp"
 #include "godot_cpp/classes/json.hpp"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/char_string.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
@@ -26,7 +27,7 @@ godot::YamlParser::~YamlParser() {
 }
 
 void godot::YamlParser::_bind_methods() {
-
+  godot::ClassDB::bind_static_method("YamlParser", godot::D_METHOD("parse_file", "file"), &YamlParser::parse_file);
 }
 
 godot::Dictionary godot::YamlParser::parse_file(godot::String file) {
@@ -41,7 +42,7 @@ godot::Dictionary godot::YamlParser::parse_file(godot::String file) {
   godot::CharString temporary_string = input_string.utf8();
   c4::substr text_string = ryml::to_substr(temporary_string.ptrw());
   c4::yml::Tree tree = parser.parse_in_place("", text_string);
-  char buf[100000];
+  char buf[100000] {};
   c4::substr output_json = buf;
   ryml::emit_json(tree, output_json);
   input_string = output_json.str;
@@ -83,6 +84,5 @@ void godot::YamlParser::test_yaml_caller() {
 
 
   YamlParser::test_yaml(ymlb);
-
 }
 
