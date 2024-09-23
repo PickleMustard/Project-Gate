@@ -15,9 +15,6 @@ public partial class Enemy : Character
     AddToGroup("Enemies");
     GD.Print("Testing ClassDB assignment during runtime: ", ClassDB.ClassExists("Character"));
     var test = ResourceLoader.Load("res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs") as CSharpScript;
-    var second_test = (GodotObject)test.New();
-    GD.Print(second_test);
-    GD.Print(second_test.HasMethod("UpdateHeapPriority"));
   }
 
 

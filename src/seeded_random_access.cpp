@@ -108,6 +108,16 @@ int SeededRandomAccess::GetWholeNumber(int upper_limit) {
 	return m_generator->randi_range(0, upper_limit);
 }
 
+float SeededRandomAccess::GetFloatRange(float lower_limit, float upper_limit) {
+  ERR_FAIL_NULL_V_MSG(m_generator, 0, "Could not get the Random Number Generator");
+  return m_generator->randf_range(lower_limit, upper_limit);
+}
+
+float SeededRandomAccess::GetWholeFloat(float upper_limit) {
+  ERR_FAIL_NULL_V_MSG(m_generator, 0, "Could not get the Random Number Generator");
+  return m_generator->randf_range(0.0, upper_limit);
+}
+
 /*
 * Godot Bind Methods to the engines function database
 * Exports the functions defined alongside their function pointer, and arguments
@@ -116,6 +126,8 @@ int SeededRandomAccess::GetWholeNumber(int upper_limit) {
 void SeededRandomAccess::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetInteger", "lower_limit", "upper_limit"), &SeededRandomAccess::GetInteger, int(), int());
 	godot::ClassDB::bind_method(godot::D_METHOD("GetWholeNumber", "upper_limit"), &SeededRandomAccess::GetWholeNumber, int());
+	godot::ClassDB::bind_method(godot::D_METHOD("GetFloatRange", "lower_limit", "upper_limit"), &SeededRandomAccess::GetFloatRange, int(), int());
+	godot::ClassDB::bind_method(godot::D_METHOD("GetWholeFloat", "upper_limit"), &SeededRandomAccess::GetWholeFloat, int());
   godot::ClassDB::bind_static_method("SeededRandomAccess", godot::D_METHOD("GetInstance"), &SeededRandomAccess::GetInstance);
 //  godot::ClassDB::bind_method(godot::D_METHOD("GetInstance"), &SeededRandomAccess::GetInstance());
 }

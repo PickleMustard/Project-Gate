@@ -38,7 +38,6 @@ public partial class CharacterTurnController : Node
     Node Daemon = (Node)Engine.GetSingleton("Daemon");
     Daemon.Connect("StartTurnController", StartLevelTurnController);
     AddToGroup("TurnController");
-
     Instance = this;
   }
 
@@ -48,7 +47,7 @@ public partial class CharacterTurnController : Node
    */
   public void StartLevel()
   {
-    GD.Print("Starting Turn Controller");
+    GD.Print("Starting Turn Controller, ", AliveCharacterList.Count);
     CallDeferred("CalculateMovementQueue");
     CurrentCharacter = (Character)CallDeferred("NextCharacter");
   }
@@ -177,6 +176,7 @@ public partial class CharacterTurnController : Node
 
   public void AddCharacterToTurnController(Character character)
   {
+    GD.Print("Adding Character to movment queue: ", character);
     AliveCharacterList.Add(character);
   }
 

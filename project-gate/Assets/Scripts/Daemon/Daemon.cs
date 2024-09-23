@@ -6,6 +6,9 @@ public partial class Daemon : Node {
   private Godot.Collections.Array EnemySpawnLocations;
   private Godot.Collections.Array PlayerTeamSpawnLocations;
 
+  private CharacterGenerator generator;
+  private GenerationCommunicatorSingleton communicator;
+
   private Node Level; //Takes the level generated signal to start its background processes
 
   public static Daemon Instance;
@@ -20,6 +23,8 @@ public partial class Daemon : Node {
   public override void _Ready() {
     EnemySpawnLocations = new Godot.Collections.Array();
     PlayerTeamSpawnLocations = new Godot.Collections.Array();
+    generator = new CharacterGenerator();
+    communicator = Engine.GetSingleton("GenerationCommunicatorSingleton") as GenerationCommunicatorSingleton;
     Level = GetTree().GetNodesInGroup("Level")[0];
     Level.Connect("LevelGenerated", new Callable(this, "LevelStartProcesses"));
   }
@@ -67,8 +72,15 @@ public partial class Daemon : Node {
 
   private void AddPlayerTeam() {
     List<int> used_location = new List<int>();
-    ((GodotObject)PlayerTeamSpawnLocations[0]).Call("SpawnCharacter");
-    ((GodotObject)PlayerTeamSpawnLocations[1]).Call("SpawnCharacter");
-    ((GodotObject)PlayerTeamSpawnLocations[2]).Call("SpawnCharacter");
+    Character generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
+    communicator.SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[0], generatedCharacter);
+    generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
+    communicator.SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[1], generatedCharacter);
+    generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
+    communicator.SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[2], generatedCharacter);
+
+    //((GodotObject)PlayerTeamSpawnLocations[0]).Call("SpawnCharacter");
+    //((GodotObject)PlayerTeamSpawnLocations[1]).Call("SpawnCharacter");
+    //((GodotObject)PlayerTeamSpawnLocations[2]).Call("SpawnCharacter");
   }
 }

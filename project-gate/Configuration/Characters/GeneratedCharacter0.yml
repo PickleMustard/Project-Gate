@@ -1,0 +1,45 @@
+Potential-Names: "Names/Ranged"
+Movement-Range-Bounds:
+  - 5
+  - 10
+Action-Points-Bounds:
+  - 2
+  - 5
+Accumulation-Rate-Bounds:
+  - 1.0
+  - 2.7
+Requeue-Speed-Bounds:
+  - 1.0
+  - 2.7
+Turn-Priority-Bounds:
+  - 5
+  - 20
+Potential-Starting-Weapons: "Weapons/Potential/Ranged0"
+Potential-Starting-Grenades: "Weapons/Potential/Grenades0"
+Potential-Proficiencies:
+  - Number-Proficiencies:
+    - Proficient: 2
+    - Passable: 3
+    - Clumsy: 2
+  - Proficient:
+    - "handgun"
+    - "shotgun"
+    - "carbine"
+  - Passable:
+    - "melee"
+    - "handgun"
+    - "shotgun"
+    - "carbine"
+    - "rifle"
+    - "longbarrel"
+    - "special"
+  - Clumsy:
+    - "melee"
+    - "handgun"
+    - "shotgun"
+    - "carbine"
+    - "rifle"
+    - "longbarrel"
+    - "special"
+Potential-Passive-Behaviors: "Behaviors/Ranged0"
+

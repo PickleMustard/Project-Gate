@@ -71,10 +71,11 @@ public partial class GenerationCommunicatorSingleton : Node
     character.Call("SetPosition", Tile);
   }
 
-  public void SpawnPlayerCharacter(Resource Tile) {
-    Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate();
+  public void SpawnPlayerCharacter(Resource Tile, Character generatedCharacter) {
+    Node3D character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Node3D;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     Top.AddChild(character, true);
+    character.ReplaceBy(generatedCharacter, true);
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
     bannerMargin.AddChild(characterBanner, true);
@@ -88,7 +89,8 @@ public partial class GenerationCommunicatorSingleton : Node
     characterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
     CurrentCharacter.Connect(CurrentCharacter.GetSignalList()[1]["name"].ToString(), characterBanner.GetUpdateMovementCallable());
     CurrentCharacter.Connect(CurrentCharacter.GetSignalList()[2]["name"].ToString(), characterBanner.GetUpdateHeapPriorityCallable());
-    character.Call("SetPosition", Tile);
+    generatedCharacter.SetupCharacter();
+    generatedCharacter.Call("SetPosition", Tile);
   }
 
   public void SpawnEnemy(Resource Tile)

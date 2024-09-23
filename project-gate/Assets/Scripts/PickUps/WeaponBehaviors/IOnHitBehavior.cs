@@ -2,5 +2,5 @@
  *
  */
 public interface IOnHitBehavior {
-  void CalculateOnHit(int baseDamage, Character target); //Might need to use params type[] list if different implementations need different amounts of parameters
+  public void CalculateOnHit(int baseDamage, float proficieny, Character target); //Might need to use params type[] list if different implementations need different amounts of parameters
 }

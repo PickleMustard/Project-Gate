@@ -1,4 +1,7 @@
 using Godot;
+using System;
+using System.Collections.Generic;
+using Godot.Collections;
 
 [GlobalClass]
 public partial class Character : Node3D
@@ -9,6 +12,12 @@ public partial class Character : Node3D
     player,
     enemy
   }
+  public enum WEAPON_PROFICIENCIES
+  {
+    skilled = 1,
+    passable,
+    clumsy
+  }
 
   [Signal]
   public delegate void UpdateMainCharacterEventHandler();
@@ -17,42 +26,56 @@ public partial class Character : Node3D
   [Signal]
   public delegate void UpdatedHeapPriorityEventHandler();
 
+  [Signal]
+  public delegate void OnHitPassiveBehaviorEventHandler();
+  [Signal]
+  public delegate void RecieveDamagePassiveBehaviorEventHandler();
+  [Signal]
+  public delegate void EndTurnPassiveBehaviorEventHandler();
+  [Signal]
+  public delegate void StepOnTilePassiveBehaviorEventHandler();
+  [Signal]
+  public delegate void PickUpItemPassiveBehaviorEventHandler();
+
   [Export]
-  public int TotalDistance = 8;
+  public int TotalDistance {get; private set;} = 5;
   [Export]
-  public int TotalHealth = 10;
+  public int TotalHealth {get; private set;} = 5;
   [Export]
-  public float BaseSpeedAccumulator = 2.0f;
+  public float BaseSpeedAccumulator = 1.0f;
   [Export]
-  public float SpeedNeededToRequeue = 2.0f;
+  public float SpeedNeededToRequeue = 1.0f;
   [Export]
-  public float StartingSpeed = 0.2f;
+  public float StartingSpeed = 0.1f;
   [Export]
-  public float HeapPriority = 1.0f;
+  public float HeapPriority = 1;
   [Export]
   public Weapon MainWeapon { get; private set; }
   [Export]
   public Grenade grenade { get; private set; }
   [Export]
   public CHARACTER_TEAM team;
+  public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
+  public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
   public int currentHealth { get; private set; }
-  public float CurrentHeapPriority { get; private set; }
+  public float CurrentHeapPriority { get; private set; } = 1.0f;
   public bool isMoving { get; set; } = false;
   private float CurrentSpeed;
   private Godot.Collections.Array items;
   private Node TileGrid;
-  private int distanceRemaining { get; set; }
+  [Export]
+  public int distanceRemaining { get; set; }
   private Callable updateMovementCalcs;
 
-  public string testWeaponGenerationName = "testweapon";
-
-  public override void _Ready()
-  {
-    SetupCharacter();
-    GD.Print("Character Setup");
-    GD.Print(ToString());
-    GD.Print(GetClass());
+  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, int movementDistance, int actionPoints, float accumulationRate, float requeueSpeed, int turnPriority){
+    this.Name = name;
+    this.MainWeapon = weapon;
+    this.grenade = grenade;
+    this.TotalDistance = movementDistance;
+    this.BaseSpeedAccumulator = accumulationRate;
+    this.SpeedNeededToRequeue = requeueSpeed;
+    this.HeapPriority = turnPriority;
   }
 
   public void SetupCharacter()
@@ -79,21 +102,6 @@ public partial class Character : Node3D
 
     SetupHealthbar();
     ResetPriority();
-
-    if (MainWeapon == null)
-    {
-      //GenerationCommunicatorSingleton generator = Engine.GetSingleton("GenerationCommunicatorSingleton") as GenerationCommunicatorSingleton;
-      //generator.GenerateItem(4);
-//      MainWeapon = new Weapon();
-//      MainWeapon.SetWeaponName("Pistol");
-//      MainWeapon.SetMaxRange(10);
-//      MainWeapon.SetWeaponDamage(2);
-//      MainWeapon.SetOnHitBehavior(new SimpleDamageBehavior());
-
-      WeaponGenerator weaponGenerator = new WeaponGenerator();
-      MainWeapon = weaponGenerator.GenerateWeapon(testWeaponGenerationName);
-    }
-    GD.Print("Character");
   }
 
   private void SetupHealthbar()
@@ -117,6 +125,7 @@ public partial class Character : Node3D
 
   public void RecieveDamage(int damageAmount)
   {
+    EmitSignal(SignalName.RecieveDamagePassiveBehavior);
     GD.Print("Current Health ", currentHealth);
     currentHealth -= damageAmount;
     UpdateHealthbar();
@@ -128,7 +137,9 @@ public partial class Character : Node3D
 
   public void AttackCharacter(Character target)
   {
-    MainWeapon.OnHit(target);
+    GD.Print("Attac Character Calculations: ", (int)MainWeapon.weaponType, " | ", proficiencies[(int)MainWeapon.weaponType], " | ", (int)proficiencies[(int)MainWeapon.weaponType]);
+    MainWeapon.OnHit(1.0f / (int)proficiencies[(int)MainWeapon.weaponType], target);
+    EmitSignal(SignalName.OnHitPassiveBehavior);
   }
 
   public void RequeueingCharacter()
@@ -175,6 +186,22 @@ public partial class Character : Node3D
 
   }
 
+  public void EndCharacterTurn() {
+    EmitSignal(SignalName.EndTurnPassiveBehavior);
+  }
+
+  public void MovedCharacter() {
+    EmitSignal(SignalName.StepOnTilePassiveBehavior);
+  }
+
+  public void AddItemToCharacter() {
+    EmitSignal(SignalName.PickUpItemPassiveBehavior);
+  }
+
+  public void RemoveItemFromCharacter() {
+
+  }
+
   public void HealCharacter(int healAmount)
   {
     currentHealth += healAmount;
@@ -199,7 +226,7 @@ public partial class Character : Node3D
 
   public override string ToString()
   {
-    return this.GetType() + " character\nDistance Remaining: " + distanceRemaining + "\nCurrent Priority: " + CurrentHeapPriority;
+    return this.GetType() + " " + Name + "\nDistance Remaining: " + distanceRemaining + "\nCurrent Priority: " + CurrentHeapPriority;
   }
 
   public void DecrementDistanceRemaining(int decrementor)
@@ -211,7 +238,7 @@ public partial class Character : Node3D
   public bool UpdateMovementCalcs()
   {
     bool requeue = false;
-    GD.Print("CurrentHeapPriority: ", CurrentHeapPriority);
+    GD.Print("CurrentHeapPriority: ", CurrentHeapPriority, "| Should Requeue: ", requeue, "| CurrentSpeed: ", CurrentSpeed, "| Requeue Speed: ", SpeedNeededToRequeue);
     if (CurrentHeapPriority < 0)
     {
       CurrentSpeed += BaseSpeedAccumulator;
