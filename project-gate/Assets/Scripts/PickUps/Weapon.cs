@@ -30,6 +30,21 @@ public partial class Weapon : Resource
   public IEndTurnBehavior EndTurnBehavior;
   public IGetTargetingBehavior TargetingBehavior;
 
+  public void SetInitialWeaponParameters(string name, int maxRange, int effectiveRange, int baseDamage, string weaponType, bool ignoresLOS, bool canRicochet, bool canPierce,
+      IOnHitBehavior onhit, IStartTurnBehavior startTurn, IEndTurnBehavior endTurn, IGetTargetingBehavior targeting) {
+    this.WeaponName = name;
+    this.MaxRange = maxRange;
+    this.EffectiveRange = effectiveRange;
+    this.BaseDamage = baseDamage;
+    this.weaponType = (WEAPON_TYPES)System.Enum.Parse(typeof(WEAPON_TYPES), weaponType);
+    this.IgnoresLineSight = ignoresLOS;
+
+    this.OnHitBehavior = onhit;
+    this.StartTurnBehavior = startTurn;
+    this.EndTurnBehavior = endTurn;
+    this.TargetingBehavior = targeting;
+  }
+
   public void SetWeaponDamage(int newDamage)
   {
     BaseDamage = newDamage;
@@ -47,12 +62,11 @@ public partial class Weapon : Resource
   public void SetIgnoreLineOfSight(bool shouldIgnore) {
     IgnoresLineSight = shouldIgnore;
   }
-  public void OnHit(float proficiency, Character target)
+  public void OnHit(Character attacker, Resource targetedLocation, Node TileGrid)
   {
-    GD.Print(proficiency);
     if (OnHitBehavior != null)
     {
-      OnHitBehavior.CalculateOnHit(BaseDamage, proficiency, target);
+      OnHitBehavior.CalculateOnHit(this, attacker, targetedLocation, TileGrid);
     }
   }
   public void SetWeaponName(string name)

@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://doocapes8ilwm"]
+
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/obstacle_shader.gdshader" id="1_idnjc"]
+[ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_r61e7"]
+
+[resource]
+render_priority = 0
+next_pass = ExtResource("1_r61e7")
+shader = ExtResource("1_idnjc")

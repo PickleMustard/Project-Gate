@@ -1,0 +1,12 @@
+Name: "Legaheavy 30"
+Max-Range: 15
+Effective-Range: 10
+Base-Damage: 14
+Weapon-Type: "rifle"
+Ignores-LOS: false
+Can-Ricochet: false
+Can-Pierce: false
+On-Hit-Behavior: "SimpleDamageBehavior"
+Start-Turn-Behavior: "none"
+End-Turn-Behavior: "none"
+Targeting-Behavior: "LinearTargeting"

@@ -7,12 +7,13 @@
 [ext_resource type="Texture2D" uid="uid://bg6fhem324yn0" path="res://Assets/Textures/User-Interface/barHorizontal_green_mid 200.png" id="4_jsanq"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/HealthbarTexture.cs" id="6_yb7xx"]
 
-[sub_resource type="AttackEnemyAction" id="AttackEnemyAction_n30qs"]
+[sub_resource type="AttemptToDiscoverEnemyAction" id="AttemptToDiscoverEnemyAction_4huoc"]
 
-[sub_resource type="AttemptToDiscoverEnemyAction" id="AttemptToDiscoverEnemyAction_h21s8"]
+[sub_resource type="AttackEnemyAction" id="AttackEnemyAction_gjleo"]
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
+team = 1
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material_override = ExtResource("1_b2i4i")
@@ -25,8 +26,8 @@ bus = &"Enemy Sound Effects"
 
 [node name="GoapAgent" type="GoapAgent" parent="."]
 m_available_actions = {
-"Attack Enemy": SubResource("AttackEnemyAction_n30qs"),
-"Discover Enemy": SubResource("AttemptToDiscoverEnemyAction_h21s8")
+"Attack Enemy": SubResource("AttackEnemyAction_gjleo"),
+"Discover Enemy": SubResource("AttemptToDiscoverEnemyAction_4huoc")
 }
 
 [node name="data_provider" type="BaseEnemy" parent="."]

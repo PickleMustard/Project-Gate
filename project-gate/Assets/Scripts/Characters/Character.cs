@@ -38,6 +38,8 @@ public partial class Character : Node3D
   public delegate void PickUpItemPassiveBehaviorEventHandler();
 
   [Export]
+  public string CharacterName {get; private set;} = "Temp";
+  [Export]
   public int TotalDistance {get; private set;} = 5;
   [Export]
   public int TotalHealth {get; private set;} = 5;
@@ -68,11 +70,13 @@ public partial class Character : Node3D
   public int distanceRemaining { get; set; }
   private Callable updateMovementCalcs;
 
-  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, int movementDistance, int actionPoints, float accumulationRate, float requeueSpeed, int turnPriority){
-    this.Name = name;
+  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority){
+    this.CharacterName = name;
     this.MainWeapon = weapon;
     this.grenade = grenade;
+    this.proficiencies = proficiencies;
     this.TotalDistance = movementDistance;
+    this.TotalHealth = health;
     this.BaseSpeedAccumulator = accumulationRate;
     this.SpeedNeededToRequeue = requeueSpeed;
     this.HeapPriority = turnPriority;
@@ -135,10 +139,10 @@ public partial class Character : Node3D
     }
   }
 
-  public void AttackCharacter(Character target)
+  public void AttackCharacter(Resource target)
   {
     GD.Print("Attac Character Calculations: ", (int)MainWeapon.weaponType, " | ", proficiencies[(int)MainWeapon.weaponType], " | ", (int)proficiencies[(int)MainWeapon.weaponType]);
-    MainWeapon.OnHit(1.0f / (int)proficiencies[(int)MainWeapon.weaponType], target);
+    MainWeapon.OnHit(this, target, GetTree().GetNodesInGroup("TileGrid")[0]);
     EmitSignal(SignalName.OnHitPassiveBehavior);
   }
 

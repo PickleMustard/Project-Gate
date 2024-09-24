@@ -23,7 +23,6 @@ public partial class UnitControl : Node3D
 
   private Callable UpdateCharacter;
   private Character CurrentCharacter;
-  private Callable test_update;
   Godot.GodotObject test;
   Node3D capsule;
 
@@ -31,7 +30,6 @@ public partial class UnitControl : Node3D
   {
     Callable notify = new Callable(this, "NotifyLog");
     UpdateCharacter = new Callable(this, "UpdateCurrentCharacter");
-    test_update = new Callable(this, "TestTileEvent");
     InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
     i_handle.DisplayDestinations += DisplayPotentialDestinations;
     //capsule = GetNode<Node3D>("/root/Top/character");
@@ -120,11 +118,6 @@ public partial class UnitControl : Node3D
     return MovementRange;
   }
 
-  public void TestTileEvent()
-  {
-    GD.Print("Doing some work here!");
-  }
-
   public void NotifyLog(Node tile_collider)
   {
     unit_location = new Vector2I(0, 0);
@@ -143,6 +136,7 @@ public partial class UnitControl : Node3D
     {
       CurrentUnitLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
     }
+    GD.Print("Desired Tile Location: ", DesiredTileLocation, "| Current Unit Location: ", CurrentUnitLocation);
 
     if (TileGrid.HasMethod("FindTileOnGrid"))
     {
@@ -157,7 +151,7 @@ public partial class UnitControl : Node3D
       GD.Print(tempChar.AsGodotObject());
       if (tempChar.AsGodotObject() != null)
       {
-        AttackTile(DesiredTileLocation, CurrentUnitLocation, tempChar.AsGodotObject());
+        AttackTile(DesiredTileLocation, CurrentUnitLocation, CurrentCharacter);
       }
       else
       {
@@ -193,15 +187,16 @@ public partial class UnitControl : Node3D
     {
       int distance = (int)TileGrid.Call("CalculateDistance", ShooterLocation, TargetPosition);
       GD.Print("Distance between attacker and target: ", distance);
-      GD.Print(attacker.Call("GetMainWeapon"));
-      if (distance <= (int)(attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange"))
+      GD.Print(attacker);
+      //GD.Print(attacker.Call("GetMainWeapon"));
+      if (distance <= (int)((attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange")))
       {
         GD.Print("Target: ", target, "| Has AttackCharacter Method: ", target.HasMethod("AttackCharacter"));
         if (target.HasMethod("AttackCharacter") && target.team != CurrentCharacter.team)
         {
           AudioStreamPlayer3D player = (AudioStreamPlayer3D)CurrentCharacter.GetChild(1);
           player.Play();
-          CurrentCharacter.AttackCharacter(target);
+          CurrentCharacter.AttackCharacter(TargetTile);
         }
       }
     }
@@ -287,10 +282,6 @@ public partial class UnitControl : Node3D
     {
       var temp = TileGrid.Call("FindTileOnGrid", unit_location);
       var tempObject = temp.AsGodotObject();
-      if (tempObject.HasMethod("AddStepOnEvent"))
-      {
-        tempObject.Call("AddStepOnEvent", test_update);
-      }
       if (tempObject.HasMethod("SetCharacterOnTile"))
       {
         GD.Print("Resetting character");
@@ -337,10 +328,6 @@ public partial class UnitControl : Node3D
     {
       var temp = TileGrid.Call("FindTileOnGrid", unit_location);
       var tempObject = temp.AsGodotObject();
-      if (tempObject.HasMethod("AddStepOnEvent"))
-      {
-        tempObject.Call("AddStepOnEvent", test_update);
-      }
       if (tempObject.HasMethod("SetCharacterOnTile"))
       {
         GD.Print("Setting character");

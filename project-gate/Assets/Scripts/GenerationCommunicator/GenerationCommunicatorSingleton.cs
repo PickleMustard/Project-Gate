@@ -52,8 +52,11 @@ public partial class GenerationCommunicatorSingleton : Node
   }
   public void SpawnCharacter(Resource Tile)
   {
+    ResourceLoader.Load<Resource>("AttackEnemyAction");
     Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/character.tscn").Instantiate();
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
+    WeaponGenerator weaponGenerator = new WeaponGenerator();
+    Weapon startingWeapon = weaponGenerator.GenerateWeapon("res://Configuration/Weapons/testweapon.yml");
     Top.AddChild(character, true);
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
@@ -75,7 +78,9 @@ public partial class GenerationCommunicatorSingleton : Node
     Node3D character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Node3D;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     Top.AddChild(character, true);
+    string name = character.Name;
     character.ReplaceBy(generatedCharacter, true);
+    generatedCharacter.Name = name;
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
     bannerMargin.AddChild(characterBanner, true);
@@ -83,7 +88,7 @@ public partial class GenerationCommunicatorSingleton : Node
     bannerMargin.SizeFlagsStretchRatio = 2;
     bannerMargin.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
 
-    characterBanner.UpdateCharacterName("This is a temporary name");
+    characterBanner.UpdateCharacterName(generatedCharacter.CharacterName);
     characterBanner.UpdateMovementRemaining(CurrentCharacter.GetDistanceRemaining());
     characterBanner.UpdateHeapPriority(CurrentCharacter.HeapPriority);
     characterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;

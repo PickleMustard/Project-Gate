@@ -215,7 +215,7 @@ void godot::GoapAgent::FindDataProvider() {
 }
 
 void godot::GoapAgent::SetAvailableActions(Dictionary actions) {
-	m_available_actions.clear();
+	//m_available_actions.clear();
 	Array action_keys = actions.keys();
 	for (int i = 0; i < action_keys.size(); i++) {
 		UtilityFunctions::print("Value Type: ", actions[action_keys[i]].get_type(), "| ", actions[action_keys[i]].get_type_name(actions[action_keys[i]].get_type()));

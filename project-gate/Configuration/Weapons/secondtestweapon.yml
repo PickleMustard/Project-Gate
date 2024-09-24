@@ -1,4 +1,0 @@
-Name: "Second Test Weapon"
-Range: 10
-Damage: 50
-OnHitBehavior: SecondTestBehavior

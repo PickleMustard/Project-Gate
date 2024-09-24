@@ -1,4 +1,7 @@
 Potential-Names: "Names/Ranged"
+Health-Range-Bounds:
+  - 30
+  - 60
 Movement-Range-Bounds:
   - 5
   - 10
@@ -6,8 +9,8 @@ Action-Points-Bounds:
   - 2
   - 5
 Accumulation-Rate-Bounds:
-  - 1.0
-  - 2.7
+  - 0.0
+  - 1.2
 Requeue-Speed-Bounds:
   - 1.0
   - 2.7
