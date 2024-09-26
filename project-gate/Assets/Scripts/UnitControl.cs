@@ -67,11 +67,15 @@ public partial class UnitControl : Node3D
       Godot.Collections.Array MovementRange = GetPotentialDestinations();
       for (int i = 0; i < MovementRange.Count; i++)
       {
-        GodotObject temp = MovementRange[i].AsGodotObject();
-        if (temp.HasMethod("set_instance_shader_parameter"))
-        {
-          temp.Call("set_instance_shader_parameter", "is_clickable", true);
-        }
+        MeshInstance3D temp = MovementRange[i].AsGodotObject() as MeshInstance3D;
+        //if (temp.HasMethod("set_instance_shader_parameter"))
+        //{
+          //temp.Call("set_instance_shader_parameter", "is_clickable", true);
+        //}
+        GD.Print(temp.GetActiveMaterial(0));
+        Material activeMaterial = temp.GetActiveMaterial(0);
+        Material blinkingDisplay = ResourceLoader.Load("res://Assets/Materials/test_spawner_tile_material.tres") as Material;
+        activeMaterial.NextPass = blinkingDisplay;
       }
     }
     /*string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, unit_location[0], unit_location[1]);
@@ -222,11 +226,13 @@ public partial class UnitControl : Node3D
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       for (int i = 0; i < MovementRange.Count; i++)
       {
-        GodotObject temp = MovementRange[i].AsGodotObject();
-        if (temp.HasMethod("set_instance_shader_parameter"))
-        {
-          temp.Call("set_instance_shader_parameter", "is_clickable", false);
-        }
+        MeshInstance3D temp = MovementRange[i].AsGodotObject() as MeshInstance3D;
+        Material activeMaterial = temp.GetActiveMaterial(0);
+        activeMaterial.NextPass = null;
+        //if (temp.HasMethod("set_instance_shader_parameter"))
+        //{
+          //temp.Call("set_instance_shader_parameter", "is_clickable", false);
+        //}
       }
       tile = tile_collider.GetParent();
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))

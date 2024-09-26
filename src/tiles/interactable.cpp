@@ -16,7 +16,7 @@ godot::Interactable::~Interactable() {
 
 void godot::Interactable::TileSteppedOnEvent() {
 	UtilityFunctions::print("Interacting");
-	if (SteppedOnTileCallables.size() > 0) {
+	/*if (SteppedOnTileCallables.size() > 0) {
 		for (int i = 0; i < SteppedOnTileCallables.size(); i++) {
 			Callable event = SteppedOnTileCallables[i];
 			UtilityFunctions::print("Calling Event ", event.get_method());
@@ -26,7 +26,7 @@ void godot::Interactable::TileSteppedOnEvent() {
 				event.call();
 			}
 		}
-	}
+	}*/
 }
 
 void godot::Interactable::TileSteppedOffEvent() {

@@ -3,5 +3,6 @@
 [ext_resource type="Shader" path="res://Assets/Textures/Shaders/test_tile_shader.gdshader" id="1_8efcr"]
 
 [resource]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_8efcr")

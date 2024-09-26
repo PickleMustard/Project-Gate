@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://bg6fhem324yn0" path="res://Assets/Textures/User-Interface/barHorizontal_green_mid 200.png" id="4_jsanq"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/HealthbarTexture.cs" id="6_yb7xx"]
 
-[sub_resource type="AttemptToDiscoverEnemyAction" id="AttemptToDiscoverEnemyAction_4huoc"]
-
 [sub_resource type="AttackEnemyAction" id="AttackEnemyAction_gjleo"]
+
+[sub_resource type="AttemptToDiscoverEnemyAction" id="AttemptToDiscoverEnemyAction_4huoc"]
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")

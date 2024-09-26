@@ -365,11 +365,13 @@ void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator,
 		memdelete(m_rs);
 	}
 	if (rl->exists(mesh_material_name)) {
-		m_mesh_material = rl->load(mesh_material_name);
+		m_mesh_material = rl->load(mesh_material_name)->duplicate();
 		int surface_count = m_mesh->get_surface_count();
 		for (int i = 0; i < surface_count; i++) {
 			m_mesh->surface_set_material(i, m_mesh_material);
+      m_mesh_material->set_local_to_scene(true);
 		}
+    m_mesh->set_local_to_scene(true);
 	}
 }
 

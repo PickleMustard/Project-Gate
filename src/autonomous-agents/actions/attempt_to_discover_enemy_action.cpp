@@ -9,10 +9,10 @@ using namespace godot;
 
 AttemptToDiscoverEnemyAction::AttemptToDiscoverEnemyAction() :
 		GoapAction("AttemptToDiscoverEnemyAction", 3.0f) {
-  movement_remaining = Callable(this, "HasMovementRangeRemaining");
+	movement_remaining = Callable(this, "HasMovementRangeRemaining");
 	AddPrecondition("seen_enemy", false);
-  AddPrecondition("movement_remaining", movement_remaining);
-  AddEffect("attempting_to_find_enemy", true);
+	AddPrecondition("movement_remaining", movement_remaining);
+	AddEffect("attempting_to_find_enemy", true);
 }
 
 AttemptToDiscoverEnemyAction::~AttemptToDiscoverEnemyAction() {
@@ -25,48 +25,42 @@ void AttemptToDiscoverEnemyAction::_bind_methods() {
 }
 
 void AttemptToDiscoverEnemyAction::Reset() {
-  UtilityFunctions::print("discover resetting");
+	UtilityFunctions::print("discover resetting");
 	seen_enemy = false;
 }
 
 bool AttemptToDiscoverEnemyAction::IsDone(Node *goap_agent) {
-  Node *parent = goap_agent->get_parent();
+	Node *parent = goap_agent->get_parent();
 	return seen_enemy || !HasMovementRangeRemaining(parent->call("GetDistanceRemaining"));
 }
 
 bool AttemptToDiscoverEnemyAction::InProgress(Node *goap_agent) {
-  Node *parent = goap_agent->get_parent();
-  bool is_moving = parent->call("GetIsMoving");
-  UtilityFunctions::print("Is Moving Call: ", is_moving);
-  return is_moving;
+	Node *parent = goap_agent->get_parent();
+	bool is_moving = parent->call("GetIsMoving");
+	UtilityFunctions::print("Is Moving Call: ", is_moving);
+	return is_moving;
 }
 bool AttemptToDiscoverEnemyAction::RequiresInRange() {
 	return false;
 }
 
 bool AttemptToDiscoverEnemyAction::HasMovementRangeRemaining(int distance) {
-  return distance > 0;
+	return distance > 0;
 }
 
 bool AttemptToDiscoverEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data) {
 	//Has to have seen an enemy recently and it is in RequiresInRange
-  UtilityFunctions::print("Checking ", GetActionName(), " preconditions");
-  return true;
+	UtilityFunctions::print("Checking ", GetActionName(), " preconditions");
+	return true;
 }
 
 bool AttemptToDiscoverEnemyAction::Perform(Node *goap_agent) {
 	UtilityFunctions::print("Performing action: ", GetActionName());
-  Node3D *unit_controller = cast_to<Node3D>(goap_agent->call("GetUnitController"));
-  UtilityFunctions::print("Got the unit controller ", unit_controller);
-
-  Array destinations = unit_controller->call("GetPotentialDestinations");
-  UtilityFunctions::print("Got some destinations ", destinations.size());
-  SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
-  int location = instance->GetWholeNumber(destinations.size() - 1);
-  UtilityFunctions::print("Location: ", location);
-  Node *tile = cast_to<Node>(destinations[location]);
-  UtilityFunctions::print("Tile: ", tile);
-  unit_controller->call("MoveCharacter", tile->get_parent());
-  UtilityFunctions::print("Moved the character");
+	Node3D *unit_controller = cast_to<Node3D>(goap_agent->call("GetUnitController"));
+	Array destinations = unit_controller->call("GetPotentialDestinations");
+	SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
+	int location = instance->GetWholeNumber(destinations.size() - 1);
+	Node *tile = cast_to<Node>(destinations[location]);
+	unit_controller->call("MoveCharacter", tile->get_parent());
 	return true;
 }

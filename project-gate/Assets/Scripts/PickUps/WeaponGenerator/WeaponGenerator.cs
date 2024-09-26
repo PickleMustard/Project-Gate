@@ -28,6 +28,9 @@ public partial class WeaponGenerator : Resource
     string targetingBehaviorPath = (string)parsedData["Targeting-Behavior"];
 
     CSharpScript onHitBehavior = ResourceLoader.Load(WEAPON_BEHAVIOR_DIRECTORY + onHitBehaviorPath + ".cs") as CSharpScript;
+    GD.Print("OnHitBehavior using as: ", onHitBehavior);
+    IOnHitBehavior test = onHitBehavior.New().AsGodotObject() as IOnHitBehavior;
+    GD.Print("OnHitBehavior second using as: ", test.GetType());
     CSharpScript targetingBehavior = ResourceLoader.Load(WEAPON_BEHAVIOR_DIRECTORY + targetingBehaviorPath + ".cs") as CSharpScript;
     CSharpScript startTurnBehavior = null;
     CSharpScript endTurnBehavior = null;
@@ -42,7 +45,7 @@ public partial class WeaponGenerator : Resource
     }
 
     generatedWeapon.SetInitialWeaponParameters(weaponName, maxRange, effectiveRange, baseDamage, weaponType, ignoresLOS, canRicochet, canPierce,
-        onHitBehavior as IOnHitBehavior, startTurnBehavior as IStartTurnBehavior, endTurnBehavior as IEndTurnBehavior, targetingBehavior as IGetTargetingBehavior);
+        test, startTurnBehavior as IStartTurnBehavior, endTurnBehavior as IEndTurnBehavior, targetingBehavior as IGetTargetingBehavior);
 
 
     return generatedWeapon;

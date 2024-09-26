@@ -12,7 +12,7 @@ void vertex() {
 }
 
 void fragment() {
-	
+
 	if(is_clickable == true) {
 		ALBEDO = vec3(0.0, 0.45, 0.2);
 	} else {

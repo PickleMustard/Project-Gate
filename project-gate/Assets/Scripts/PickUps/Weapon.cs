@@ -40,6 +40,7 @@ public partial class Weapon : Resource
     this.IgnoresLineSight = ignoresLOS;
 
     this.OnHitBehavior = onhit;
+    GD.Print("Set OnHitBehavior: ", OnHitBehavior);
     this.StartTurnBehavior = startTurn;
     this.EndTurnBehavior = endTurn;
     this.TargetingBehavior = targeting;
@@ -66,6 +67,7 @@ public partial class Weapon : Resource
   {
     if (OnHitBehavior != null)
     {
+      GD.Print("OnHitBehavior");
       OnHitBehavior.CalculateOnHit(this, attacker, targetedLocation, TileGrid);
     }
   }

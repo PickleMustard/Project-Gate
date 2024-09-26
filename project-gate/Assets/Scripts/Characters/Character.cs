@@ -142,7 +142,7 @@ public partial class Character : Node3D
   public void AttackCharacter(Resource target)
   {
     GD.Print("Attac Character Calculations: ", (int)MainWeapon.weaponType, " | ", proficiencies[(int)MainWeapon.weaponType], " | ", (int)proficiencies[(int)MainWeapon.weaponType]);
-    MainWeapon.OnHit(this, target, GetTree().GetNodesInGroup("TileGrid")[0]);
+    MainWeapon.OnHit(this, target, GetTree().GetNodesInGroup("Tilegrid")[0]);
     EmitSignal(SignalName.OnHitPassiveBehavior);
   }
 

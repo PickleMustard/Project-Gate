@@ -1,7 +1,11 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bfvbi6svtdjve"]
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bfvbi6svtdjve"]
 
-[ext_resource type="Shader" path="res://Assets/Textures/Shaders/spawner_shader.gdshader" id="1_imrd8"]
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/localscreenspace.gdshader" id="1_s5nhp"]
+[ext_resource type="Texture2D" uid="uid://p5nnt66mbgf5" path="res://Assets/Textures/Sprites/test_icon.png" id="2_waw4c"]
 
 [resource]
 render_priority = 0
-shader = ExtResource("1_imrd8")
+shader = ExtResource("1_s5nhp")
+shader_parameter/tiling = Vector2(1, 1)
+shader_parameter/offset = Vector2(0, 0)
+shader_parameter/image = ExtResource("2_waw4c")

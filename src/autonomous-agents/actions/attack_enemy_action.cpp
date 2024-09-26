@@ -41,9 +41,9 @@ bool AttackEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary
 	//Has to have seen an enemy recently and it is in RequiresInRange
   UtilityFunctions::print("Checking ", GetActionName(), " preconditions");
 	TileGrid *tilegrid = cast_to<TileGrid>(goap_agent->call("GetTileGrid"));
-  Node3D *test = (Node3D *)goap_agent->get_parent();
+  Node3D *unit = (Node3D *)goap_agent->get_parent();
   float outer_size = tilegrid->call("GetOuterSize");
-	Vector2i ai_location = tilegrid->call("GetCoordinateFromPosition", test->get_position(), 3.0f);
+	Vector2i ai_location = tilegrid->call("GetCoordinateFromPosition", unit->get_position(), 3.0f);
 	Node3D *closest = nullptr;
 	int closest_distance = 1000000;
 	if (world_data.has("enemies_in_range")) {
@@ -54,6 +54,7 @@ bool AttackEnemyAction::CheckProceduralPrecondition(Node *goap_agent, Dictionary
 			int distance = tilegrid->call("CalculateDistance", ai_location, character_location);
 			if (closest == nullptr) {
 				closest = character;
+        closest_distance = distance;
 			} else {
 				if (distance < closest_distance) {
 					closest = character;

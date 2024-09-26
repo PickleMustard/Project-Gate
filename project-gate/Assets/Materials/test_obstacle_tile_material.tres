@@ -1,7 +1,9 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://57lvcshmvdu"]
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://57lvcshmvdu"]
 
 [ext_resource type="Shader" path="res://Assets/Textures/Shaders/obstacle_shader.gdshader" id="1_jman8"]
+[ext_resource type="Material" uid="uid://bfvbi6svtdjve" path="res://Assets/Materials/test_spawner_tile_material.tres" id="1_ruhdf"]
 
 [resource]
 render_priority = 0
+next_pass = ExtResource("1_ruhdf")
 shader = ExtResource("1_jman8")
