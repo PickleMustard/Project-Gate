@@ -17,6 +17,10 @@ public partial class Enemy : Character
     var test = ResourceLoader.Load("res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs") as CSharpScript;
   }
 
+  //Needs to set the behaviors of the Goap agent underneath the node
+  public void SetAIBehaviors(Godot.Collections.Array behaviors) {
+
+  }
 
   public void RunAI()
   {

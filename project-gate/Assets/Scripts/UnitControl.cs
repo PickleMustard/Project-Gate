@@ -32,6 +32,7 @@ public partial class UnitControl : Node3D
     UpdateCharacter = new Callable(this, "UpdateCurrentCharacter");
     InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
     i_handle.DisplayDestinations += DisplayPotentialDestinations;
+    i_handle.HideDestinations += HidePotentialDestinations;
     //capsule = GetNode<Node3D>("/root/Top/character");
     test = Engine.GetSingleton("GlobalTileNotifier");
     var signals = test.GetSignalList();
@@ -59,6 +60,20 @@ public partial class UnitControl : Node3D
 
   }
 
+  public void HidePotentialDestinations()
+  {
+    if (!CurrentCharacter.isMoving)
+    {
+      Godot.Collections.Array MovementRange = CalculateCharacterMovementRange(unit_location, Mathf.Max(CurrentCharacter.MainWeapon.GetMaxRange(), CurrentCharacter.GetDistanceRemaining()));
+      for (int i = 0; i < MovementRange.Count; i++)
+      {
+        MeshInstance3D tileMesh = ((Godot.Collections.Dictionary)MovementRange[i])["TileMesh"].AsGodotObject() as MeshInstance3D;
+        Material activeMaterial = tileMesh.GetActiveMaterial(0);
+        activeMaterial.NextPass = null;
+      }
+    }
+  }
+
 
   public void DisplayPotentialDestinations()
   {
@@ -67,24 +82,39 @@ public partial class UnitControl : Node3D
       Godot.Collections.Array MovementRange = GetPotentialDestinations();
       for (int i = 0; i < MovementRange.Count; i++)
       {
-        MeshInstance3D temp = MovementRange[i].AsGodotObject() as MeshInstance3D;
-        //if (temp.HasMethod("set_instance_shader_parameter"))
-        //{
-          //temp.Call("set_instance_shader_parameter", "is_clickable", true);
-        //}
-        GD.Print(temp.GetActiveMaterial(0));
-        Material activeMaterial = temp.GetActiveMaterial(0);
-        Material blinkingDisplay = ResourceLoader.Load("res://Assets/Materials/test_spawner_tile_material.tres") as Material;
+        MeshInstance3D tileMesh = ((Godot.Collections.Dictionary)MovementRange[i])["TileMesh"].AsGodotObject() as MeshInstance3D;
+        bool hasEnemy = false;
+        if (((Godot.Collections.Dictionary)MovementRange[i]).ContainsKey("CharacterType"))
+        {
+          hasEnemy = (int)((Godot.Collections.Dictionary)MovementRange[i])["CharacterType"] == (int)Character.CHARACTER_TEAM.enemy;
+        }
+        string locationString = tileMesh.GetParent().Name;
+        Material activeMaterial = tileMesh.GetActiveMaterial(0);
+        Material blinkingDisplay = (ResourceLoader.Load("res://Assets/Materials/RangeIndicator.tres")).Duplicate() as Material;
+        if (hasEnemy)
+        {
+          blinkingDisplay.Call("set_shader_parameter", "color", new Color(.5f, 0.0f, 0.0f, 0.0f));
+        }
+        blinkingDisplay.ResourceLocalToScene = true;
         activeMaterial.NextPass = blinkingDisplay;
       }
+      if (CurrentCharacter.MainWeapon.GetMaxRange() > CurrentCharacter.GetDistanceRemaining())
+      {
+        Godot.Collections.Array WeaponRange = GetPotentialDestinations(CurrentCharacter.MainWeapon.GetMaxRange());
+        for (int i = 0; i < WeaponRange.Count; i++)
+        {
+          if (!MovementRange.Contains(WeaponRange[i]))
+          {
+            MeshInstance3D tileMesh = ((Godot.Collections.Dictionary)WeaponRange[i])["TileMesh"].AsGodotObject() as MeshInstance3D;
+            Material activeMaterial = tileMesh.GetActiveMaterial(0);
+            Material blinkingDisplay = (ResourceLoader.Load("res://Assets/Materials/RangeIndicator.tres")).Duplicate() as Material;
+            blinkingDisplay.Call("set_shader_parameter", "color", new Color(.5f, 0.0f, 0.0f, 0.0f));
+            activeMaterial.NextPass = blinkingDisplay;
+          }
+        }
+
+      }
     }
-    /*string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, unit_location[0], unit_location[1]);
-    var find_tile = GetNode<Node>(formated_tile_name);
-    var MeshInst = find_tile.GetChildren()[1];
-    if (MeshInst.HasMethod("set_instance_shader_parameter"))
-    {
-      MeshInst.Call("set_instance_shader_parameter", "is_clickable", true);
-    }*/
   }
 
   public Godot.Collections.Array GetPotentialDestinations()
@@ -95,7 +125,59 @@ public partial class UnitControl : Node3D
     {
       unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
     }
-    return CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
+    return CalculateCharacterMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
+  }
+
+  public Godot.Collections.Array GetPotentialDestinations(int radius)
+  {
+    unit_location = new Vector2I(0, 0);
+    TileGrid = GetTree().GetNodesInGroup("Tilegrid")[0];
+    if (TileGrid.HasMethod("GetCoordinateFromPosition"))
+    {
+      unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
+    }
+    return CalculateCharacterMovementRange(unit_location, radius);
+  }
+
+  public Godot.Collections.Array CalculateCharacterMovementRange(Vector2I center_tile, int radius)
+  {
+    Godot.Collections.Array MovementRange = new Godot.Collections.Array();
+    string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
+    Node found_tile = GetNode<Node>(formated_tile_name);
+    for (int q = -radius; q <= radius; q++)
+    {
+      int r1 = Mathf.Max(-radius, -q - radius);
+      int r2 = Mathf.Min(radius, -q + radius);
+      for (int r = r1; r <= r2; r++)
+      {
+        string potential_formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
+        found_tile = GetNodeOrNull<Node>(potential_formated_tile_name);
+        if (found_tile != null)
+        {
+          GodotObject TileReference = new GodotObject();
+          Character possibleCharacter = new Character();
+          if (TileGrid.HasMethod("FindTileOnGrid"))
+          {
+            TileReference = TileGrid.Call("FindTileOnGrid", new Vector2I(center_tile[0] + q, center_tile[1] + r)).AsGodotObject();
+          }
+
+          if (TileReference.HasMethod("GetCharacterOnTile"))
+          {
+            possibleCharacter = TileReference.Call("GetCharacterOnTile").AsGodotObject() as Character;
+          }
+          Godot.Collections.Dictionary tileInformation = new Godot.Collections.Dictionary();
+          tileInformation["TileMesh"] = found_tile.GetChildren()[1];
+          if (possibleCharacter != null)
+          {
+            tileInformation["CharacterType"] = (int)possibleCharacter.team;
+          }
+          MovementRange.Add(tileInformation);
+        }
+      }
+    }
+
+    return MovementRange;
+
   }
 
   public Godot.Collections.Array CalculateMovementRange(Vector2I center_tile, int radius)
@@ -103,7 +185,6 @@ public partial class UnitControl : Node3D
     Godot.Collections.Array MovementRange = new Godot.Collections.Array();
     string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
     Node found_tile = GetNode<Node>(formated_tile_name);
-    MovementRange.Add(found_tile.GetChildren()[1]);
     for (int q = -radius; q <= radius; q++)
     {
       int r1 = Mathf.Max(-radius, -q - radius);
@@ -180,7 +261,8 @@ public partial class UnitControl : Node3D
       {
         target = TargetTile.Call("GetCharacterOnTile").AsGodotObject() as Character;
         //GD.Print("Getting character on tile: ", TargetTile, " | ", target);
-        if(target == null || !target.GetType().IsSubclassOf(System.Type.GetType("Character"))) {
+        if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("Character")))
+        {
           GD.PushError("Could not get the Character: ", target, " on Tile: ", TargetTile);
           return;
         }
@@ -223,17 +305,8 @@ public partial class UnitControl : Node3D
       {
         unit_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
       }
+      HidePotentialDestinations();
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
-      for (int i = 0; i < MovementRange.Count; i++)
-      {
-        MeshInstance3D temp = MovementRange[i].AsGodotObject() as MeshInstance3D;
-        Material activeMaterial = temp.GetActiveMaterial(0);
-        activeMaterial.NextPass = null;
-        //if (temp.HasMethod("set_instance_shader_parameter"))
-        //{
-          //temp.Call("set_instance_shader_parameter", "is_clickable", false);
-        //}
-      }
       tile = tile_collider.GetParent();
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))
       {

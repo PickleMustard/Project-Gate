@@ -1,9 +1,11 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://k6f12crlx6sk"]
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://k6f12crlx6sk"]
 
 [ext_resource type="Shader" path="res://Assets/Textures/Shaders/starter_tile_shader.gdshader" id="1_kl7h4"]
+[ext_resource type="Material" uid="uid://bkhy1826rc7ya" path="res://Assets/Materials/RangeIndicator.tres" id="1_r8mfq"]
 
 [resource]
 render_priority = 0
+next_pass = ExtResource("1_r8mfq")
 shader = ExtResource("1_kl7h4")
 shader_parameter/shine_color = Color(1, 1, 1, 1)
 shader_parameter/cycle_interval = 3.53

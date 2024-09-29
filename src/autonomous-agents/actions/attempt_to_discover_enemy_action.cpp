@@ -1,5 +1,6 @@
 #include "attempt_to_discover_enemy_action.h"
 #include "godot_cpp/variant/array.hpp"
+#include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/vector2i.hpp"
 #include "level-generation/tilegrid.h"
@@ -60,7 +61,8 @@ bool AttemptToDiscoverEnemyAction::Perform(Node *goap_agent) {
 	Array destinations = unit_controller->call("GetPotentialDestinations");
 	SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
 	int location = instance->GetWholeNumber(destinations.size() - 1);
-	Node *tile = cast_to<Node>(destinations[location]);
+  Dictionary meshDict = destinations[location];
+	Node *tile = cast_to<Node>(meshDict["TileMesh"]);
 	unit_controller->call("MoveCharacter", tile->get_parent());
 	return true;
 }

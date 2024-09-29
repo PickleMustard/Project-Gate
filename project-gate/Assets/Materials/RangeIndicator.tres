@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bkhy1826rc7ya"]
+
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/blinking-interactable-tile.gdshader" id="1_dig3n"]
+[ext_resource type="Texture2D" uid="uid://p5nnt66mbgf5" path="res://Assets/Textures/Sprites/test_icon.png" id="2_i6nm3"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_dig3n")
+shader_parameter/color = Color(0, 0.267643, 0.05546, 1)
+shader_parameter/image = ExtResource("2_i6nm3")

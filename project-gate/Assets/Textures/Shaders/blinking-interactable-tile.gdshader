@@ -3,8 +3,7 @@ render_mode cull_back, unshaded;
 
 uniform sampler2D image : source_color;
 uniform sampler2D DEPTH_TEXTURE: hint_depth_texture, filter_linear_mipmap;
-uniform vec2 tiling = vec2(1.0);
-uniform vec2 offset = vec2(0.0);
+uniform vec3 color: source_color;
 
 varying vec4 NODE_POSITION_CLIP;
 varying mat4 CAMERA;
@@ -33,9 +32,9 @@ void fragment() {
 	
 	vec3 world_avs_x = vec3((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).x, 0.0, 0.0);
 	vec3 step = smoothstep(vec3(0.0), world_avs_x, vec3(0.1));
-	vec3 test = dot(vec3(1.0), world_abs_y) < 0.0 ? -world_abs_y : cross(cross(world_abs_y, vec3(1)), world_abs_y);
-	test = test * abs(sin(TIME)) * step;
+	//vec3 test = dot(vec3(1.0), world_abs_y) < 0.0 ? -world_abs_y : cross(cross(world_abs_y, vec3(1)), world_abs_y);
+	float test = abs(sin(TIME));
 	//vec3 output = mix(test, vec3(0.0), fresnel);
-	ALBEDO = test * texture_albedo.rgb;
-	ALPHA = texture_albedo.r;
+	ALBEDO = color;
+	ALPHA = texture_albedo.r * test;
 }

@@ -1,9 +1,11 @@
 Name: "Basic Ruffian"
+Health: 30
 Movement-Range: 8
 Action-Points: 3
 Accumulation-Rate: 1.0
 Requeue-Speed: 1.0
 Turn-Priority: 18
-Enemy-Weapon: ""
+Enemy-Weapon: "BasicRuffianPistol"
+Enemy-Grenade: "None"
 AI-Behaviors:
   - "AttackEnemyBehavior"

@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://doocapes8ilwm"]
 
-[ext_resource type="Shader" path="res://Assets/Textures/Shaders/localscreenspace.gdshader" id="2_3i8pq"]
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/blinking-interactable-tile.gdshader" id="2_3i8pq"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="3_s15m7"]
 
 [resource]

@@ -1,6 +1,6 @@
 [gd_resource type="ArrayMesh" load_steps=2 format=4 uid="uid://byuiot46edvse"]
 
-[ext_resource type="Material" uid="uid://57lvcshmvdu" path="res://Assets/Materials/test_obstacle_tile_material.tres" id="1_caayj"]
+[ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_ew2go"]
 
 [resource]
 _surfaces = [{
@@ -9,7 +9,7 @@ _surfaces = [{
 "format": 34359742483,
 "index_count": 144,
 "index_data": PackedByteArray("AgABAAAAAAADAAIABgAFAAQABAAHAAYACgAJAAgACAALAAoADgANAAwADAAPAA4AEgARABAAEAATABIAFgAVABQAFAAXABYAGgAZABgAGAAbABoAHgAdABwAHAAfAB4AIgAhACAAIAAjACIAJgAlACQAJAAnACYAKgApACgAKAArACoALgAtACwALAAvAC4AMgAxADAAMAAzADIANgA1ADQANAA3ADYAOgA5ADgAOAA7ADoAPgA9ADwAPAA/AD4AQgBBAEAAQABDAEIARgBFAEQARABHAEYASgBJAEgASABLAEoATgBNAEwATABPAE4AUgBRAFAAUABTAFIAVgBVAFQAVABXAFYAWgBZAFgAWABbAFoAXgBdAFwAXABfAF4A"),
-"material": ExtResource("1_caayj"),
+"material": ExtResource("1_ew2go"),
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 96,
