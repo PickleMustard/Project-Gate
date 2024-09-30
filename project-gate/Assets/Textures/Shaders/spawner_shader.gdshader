@@ -1,17 +1,17 @@
 shader_type spatial;
 render_mode diffuse_burley;
-instance uniform bool is_clickable = false;
+//instance uniform bool is_clickable = false;
 
 void vertex() {
 	// Called for every vertex the material is visible on.
 }
 
 void fragment() {
-	if(is_clickable == true) {
-		ALBEDO = vec3(0.0, 0.45, 0.2);
-	} else {
+	//if(is_clickable == true) {
+	//	ALBEDO = vec3(0.0, 0.45, 0.2);
+	//} else {
 		ALBEDO = vec3(0.4, 0.4, 0.2);
-	}
+	//}
 }
 
 //void light() {

@@ -9,11 +9,8 @@ public partial class Enemy : Character
 
   public override void _Ready()
   {
-    SetupCharacter();
     team = Character.CHARACTER_TEAM.enemy;
     Callable SetPositionCall = new Callable(this, "SetPosition");
-    AddToGroup("Enemies");
-    GD.Print("Testing ClassDB assignment during runtime: ", ClassDB.ClassExists("Character"));
     var test = ResourceLoader.Load("res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs") as CSharpScript;
   }
 
@@ -24,11 +21,10 @@ public partial class Enemy : Character
 
   public void RunAI()
   {
-    Array<Node> children = GetChildren();
-    GD.Print("Enemy children: ", children);
-    if (children[2].HasMethod("RunAI"))
+    Node aiAgent = this.FindChild("agent", true, false);
+    if (aiAgent.HasMethod("RunAI"))
     {
-      children[2].Call("RunAI");
+      aiAgent.Call("RunAI");
     }
   }
 }

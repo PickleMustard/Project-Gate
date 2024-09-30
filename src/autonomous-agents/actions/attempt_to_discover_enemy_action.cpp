@@ -31,13 +31,11 @@ void AttemptToDiscoverEnemyAction::Reset() {
 }
 
 bool AttemptToDiscoverEnemyAction::IsDone(Node *goap_agent) {
-	Node *parent = goap_agent->get_parent();
-	return seen_enemy || !HasMovementRangeRemaining(parent->call("GetDistanceRemaining"));
+	return seen_enemy || !HasMovementRangeRemaining(goap_agent->get_parent()->call("GetDistanceRemaining"));
 }
 
 bool AttemptToDiscoverEnemyAction::InProgress(Node *goap_agent) {
-	Node *parent = goap_agent->get_parent();
-	bool is_moving = parent->call("GetIsMoving");
+	bool is_moving = goap_agent->get_parent()->call("GetIsMoving");
 	UtilityFunctions::print("Is Moving Call: ", is_moving);
 	return is_moving;
 }
@@ -57,7 +55,7 @@ bool AttemptToDiscoverEnemyAction::CheckProceduralPrecondition(Node *goap_agent,
 
 bool AttemptToDiscoverEnemyAction::Perform(Node *goap_agent) {
 	UtilityFunctions::print("Performing action: ", GetActionName());
-	Node3D *unit_controller = cast_to<Node3D>(goap_agent->call("GetUnitController"));
+	Node *unit_controller = cast_to<Node>(goap_agent->call("GetUnitController"));
 	Array destinations = unit_controller->call("GetPotentialDestinations");
 	SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
 	int location = instance->GetWholeNumber(destinations.size() - 1);

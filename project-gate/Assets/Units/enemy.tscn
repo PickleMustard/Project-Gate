@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://2bswkiikpwx4"]
+[gd_scene load_steps=7 format=3 uid="uid://2bswkiikpwx4"]
 
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/Enemy.cs" id="1_k8ecc"]
@@ -6,10 +6,6 @@
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/Healthbar.cs" id="4_iculo"]
 [ext_resource type="Texture2D" uid="uid://bg6fhem324yn0" path="res://Assets/Textures/User-Interface/barHorizontal_green_mid 200.png" id="4_jsanq"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/HealthbarTexture.cs" id="6_yb7xx"]
-
-[sub_resource type="AttackEnemyAction" id="AttackEnemyAction_gjleo"]
-
-[sub_resource type="AttemptToDiscoverEnemyAction" id="AttemptToDiscoverEnemyAction_4huoc"]
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
@@ -23,14 +19,6 @@ stream = ExtResource("3_m1hy7")
 volume_db = 16.97
 max_db = 6.0
 bus = &"Enemy Sound Effects"
-
-[node name="GoapAgent" type="GoapAgent" parent="."]
-m_available_actions = {
-"Attack Enemy": SubResource("AttackEnemyAction_gjleo"),
-"Discover Enemy": SubResource("AttemptToDiscoverEnemyAction_4huoc")
-}
-
-[node name="data_provider" type="BaseEnemy" parent="."]
 
 [node name="Healthbar" type="Sprite3D" parent="."]
 transform = Transform3D(2.7, 0, 0, 0, 2.7, 0, 0, 0, 2.7, 0, 1.20144, 0)

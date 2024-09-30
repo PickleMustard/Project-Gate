@@ -15,13 +15,13 @@ namespace godot {
 class GoapPlanner : public Resource {
 	GDCLASS(GoapPlanner, Resource)
 public:
-	struct Node {
-		Node *parent;
+	struct PlanningNode {
+		PlanningNode *parent;
 		float running_cost;
 		Dictionary state;
 		Ref<GoapAction> action;
 
-		Node(Node *n_parent, float n_running_cost, Dictionary n_state, Ref<GoapAction> n_action) {
+		PlanningNode(PlanningNode *n_parent, float n_running_cost, Dictionary n_state, Ref<GoapAction> n_action) {
 			parent = n_parent;
 			running_cost = n_running_cost;
 			state = n_state;
@@ -37,7 +37,7 @@ protected:
 	static void _bind_methods();
 
 private:
-	bool BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> &usuable_actions, Dictionary goal);
+	bool BuildGraph(PlanningNode *parent, Vector<PlanningNode *> &leaves, HashSet<Ref<GoapAction>> &usuable_actions, Dictionary goal);
 	HashSet<Ref<GoapAction>> ActionSubset(HashSet<Ref<GoapAction>> actions, Ref<GoapAction> to_remove);
 	bool InState(Dictionary test, Dictionary state);
 	Dictionary PopulateState(Dictionary current_state, Dictionary state_change);

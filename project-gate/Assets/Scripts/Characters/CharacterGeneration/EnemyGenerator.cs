@@ -48,6 +48,27 @@ public partial class EnemyGenerator : Resource
     float requeueSpeed = (float)parsedData["Requeue-Speed"];
     float accumulationRate = (float)parsedData["Accumulation-Rate"];
 
+    Node informationProvider = (Node)ClassDB.Instantiate((string)parsedData["IGOAP"]);
+    enemy.AddChild(informationProvider, true);
+    informationProvider.Name = "data_provider";
+
+    Node agent = (Node)ClassDB.Instantiate("GoapAgent");
+    enemy.AddChild(agent, true);
+    agent.Name = "agent";
+
+    Godot.Collections.Array Actions = (Godot.Collections.Array)parsedData["AI-Behaviors"];
+
+    Godot.Collections.Dictionary availableActions = new Godot.Collections.Dictionary();
+    for(int i = 0; i < Actions.Count; i++) {
+      Resource action = (Resource)ClassDB.Instantiate((string)Actions[i]);
+      availableActions.Add(action.Call("GetActionName"), action);
+      GD.Print(availableActions);
+    }
+    if(agent.HasMethod("AddAvailableAction")) {
+      GD.Print("Setting Available Actions");
+      agent.Call("AddAvailableAction", availableActions);
+    }
+
     GD.Print(ClassDB.ClassExists("AttackEnemyAction"));
     Resource behavior = (Resource)ClassDB.Instantiate("AttackEnemyAction");
 

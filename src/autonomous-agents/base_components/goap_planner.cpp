@@ -31,16 +31,16 @@ Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary av
 		}
 	}
 
-	Vector<Node *> leaves{};
-	Node *start = memnew(Node(nullptr, 0.0f, world_state, nullptr));
+	Vector<PlanningNode *> leaves{};
+	PlanningNode *start = memnew(PlanningNode(nullptr, 0.0f, world_state, nullptr));
 	bool success = BuildGraph(start, leaves, usable_actions, goal);
 
 	if (!success) {
 		return Vector<Ref<GoapAction>>{};
 	}
 
-	Node *cheapest = nullptr;
-	for (Node *leaf : leaves) {
+	PlanningNode *cheapest = nullptr;
+	for (PlanningNode *leaf : leaves) {
 		if (cheapest == nullptr) {
 			cheapest = leaf;
 		} else {
@@ -51,7 +51,7 @@ Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary av
 	}
 
 	Vector<Ref<GoapAction>> result{};
-	Node *n = cheapest;
+	PlanningNode *n = cheapest;
 	while (n != nullptr) {
 		if (n->action != nullptr) {
 			result.push_back(n->action);
@@ -62,14 +62,14 @@ Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary av
 	return result;
 }
 
-bool GoapPlanner::BuildGraph(Node *parent, Vector<Node *> &leaves, HashSet<Ref<GoapAction>> &usable_actions, Dictionary goal) {
+bool GoapPlanner::BuildGraph(PlanningNode *parent, Vector<PlanningNode *> &leaves, HashSet<Ref<GoapAction>> &usable_actions, Dictionary goal) {
 	bool found_viable_goal = false;
 	for (Ref<GoapAction> action : usable_actions) {
 		UtilityFunctions::print("checking usuable action: ", action->GetActionName(), "| Preconditions: ", action->GetPreconditions(), "| state: ", parent->state);
 		if (InState(action->GetPreconditions(), parent->state)) {
 			Dictionary current_state = PopulateState(parent->state, action->GetEffects());
 			UtilityFunctions::print("current state");
-			Node *node = memnew(Node(parent, parent->running_cost + action->m_cost, current_state, action));
+			PlanningNode *node = memnew(PlanningNode(parent, parent->running_cost + action->m_cost, current_state, action));
 			UtilityFunctions::print("checking usuable action: ", action->GetActionName(), "| Preconditions: ", goal, "| state: ", current_state);
 			if (InState(goal, current_state)) {
 				leaves.push_back(node);

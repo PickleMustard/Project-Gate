@@ -54,12 +54,6 @@ public partial class UnitControl : Node3D
   }
 
 
-  public override void _Process(double delta)
-  {
-
-
-  }
-
   public void HidePotentialDestinations()
   {
     if (!CurrentCharacter.isMoving)
@@ -82,6 +76,7 @@ public partial class UnitControl : Node3D
       Godot.Collections.Array MovementRange = GetPotentialDestinations();
       for (int i = 0; i < MovementRange.Count; i++)
       {
+        GD.Print("here");
         MeshInstance3D tileMesh = ((Godot.Collections.Dictionary)MovementRange[i])["TileMesh"].AsGodotObject() as MeshInstance3D;
         bool hasEnemy = false;
         if (((Godot.Collections.Dictionary)MovementRange[i]).ContainsKey("CharacterType"))
@@ -105,7 +100,7 @@ public partial class UnitControl : Node3D
         {
           if (!MovementRange.Contains(WeaponRange[i]))
           {
-            MeshInstance3D tileMesh = ((Godot.Collections.Dictionary)WeaponRange[i])["TileMesh"].AsGodotObject() as MeshInstance3D;
+            MeshInstance3D tileMesh = (MeshInstance3D)((Godot.Collections.Dictionary)WeaponRange[i])["TileMesh"].AsGodotObject();
             Material activeMaterial = tileMesh.GetActiveMaterial(0);
             Material blinkingDisplay = (ResourceLoader.Load("res://Assets/Materials/RangeIndicator.tres")).Duplicate() as Material;
             blinkingDisplay.Call("set_shader_parameter", "color", new Color(.5f, 0.0f, 0.0f, 0.0f));
@@ -155,7 +150,7 @@ public partial class UnitControl : Node3D
         if (found_tile != null)
         {
           GodotObject TileReference = new GodotObject();
-          Character possibleCharacter = new Character();
+          Character possibleCharacter = null;
           if (TileGrid.HasMethod("FindTileOnGrid"))
           {
             TileReference = TileGrid.Call("FindTileOnGrid", new Vector2I(center_tile[0] + q, center_tile[1] + r)).AsGodotObject();

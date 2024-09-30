@@ -2,6 +2,9 @@ using Godot;
 
 public partial class GenerationCommunicatorSingleton : Node
 {
+  [Signal]
+  public delegate void IdentifyStrayNodeEventHandler();
+
   public static GenerationCommunicatorSingleton Instance { get; private set; }
 
   public Character CurrentCharacter { get; set; }
@@ -50,7 +53,7 @@ public partial class GenerationCommunicatorSingleton : Node
   {
     return SpawnEnemyCall;
   }
-  public void SpawnCharacter(Resource Tile)
+  public void SpawnCharacter(Resource Tile, Character generatedCharacter, Node resourceProvider, Godot.Collections.Array<Resource> Actions)
   {
     ResourceLoader.Load<Resource>("AttackEnemyAction");
     Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/character.tscn").Instantiate();
@@ -74,10 +77,12 @@ public partial class GenerationCommunicatorSingleton : Node
     character.Call("SetPosition", Tile);
   }
 
-  public void SpawnPlayerCharacter(Resource Tile, Character generatedCharacter) {
+  public void SpawnPlayerCharacter(Resource Tile, Character generatedCharacter)
+  {
     Node3D character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Node3D;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     Top.AddChild(character, true);
+
     string name = character.Name;
     character.ReplaceBy(generatedCharacter, true);
     generatedCharacter.Name = name;
@@ -89,20 +94,33 @@ public partial class GenerationCommunicatorSingleton : Node
     bannerMargin.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
 
     characterBanner.UpdateCharacterName(generatedCharacter.CharacterName);
-    characterBanner.UpdateMovementRemaining(CurrentCharacter.GetDistanceRemaining());
-    characterBanner.UpdateHeapPriority(CurrentCharacter.HeapPriority);
+    characterBanner.UpdateMovementRemaining(generatedCharacter.GetDistanceRemaining());
+    characterBanner.UpdateHeapPriority(generatedCharacter.HeapPriority);
     characterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
-    CurrentCharacter.Connect(CurrentCharacter.GetSignalList()[1]["name"].ToString(), characterBanner.GetUpdateMovementCallable());
-    CurrentCharacter.Connect(CurrentCharacter.GetSignalList()[2]["name"].ToString(), characterBanner.GetUpdateHeapPriorityCallable());
+    generatedCharacter.Connect(generatedCharacter.GetSignalList()[1]["name"].ToString(), characterBanner.GetUpdateMovementCallable());
+    generatedCharacter.Connect(generatedCharacter.GetSignalList()[2]["name"].ToString(), characterBanner.GetUpdateHeapPriorityCallable());
+    generatedCharacter.AddToGroup("PlayerTeam");
     generatedCharacter.SetupCharacter();
     generatedCharacter.Call("SetPosition", Tile);
   }
 
-  public void SpawnEnemy(Resource Tile)
+  public void SpawnEnemy(Resource Tile, Character generatedCharacter)
   {
-    Node enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate();
+    Character enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as Character;
     Top.AddChild(enemy, true);
-    enemy.Call("SetPosition", Tile);
+    enemy.ReplaceBy(generatedCharacter);
+    generatedCharacter.AddToGroup("Enemies");
+    generatedCharacter.Name = generatedCharacter.CharacterName;
+    generatedCharacter.SetupCharacter();
+    enemy.QueueFree();
+
+    //Godot.Collections.Array<Node> children = generatedCharacter.GetChildren();
+    //for (int i = 0; i < children.Count; i++)
+    //{
+      //children[i].Owner = generatedCharacter;
+    //}
+
+    generatedCharacter.Call("SetPosition", Tile);
   }
   public Callable GetUpdateCharacterSignal()
   {

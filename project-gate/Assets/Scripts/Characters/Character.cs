@@ -38,11 +38,11 @@ public partial class Character : Node3D
   public delegate void PickUpItemPassiveBehaviorEventHandler();
 
   [Export]
-  public string CharacterName {get; private set;} = "Temp";
+  public string CharacterName { get; private set; } = "Temp";
   [Export]
-  public int TotalDistance {get; private set;} = 5;
+  public int TotalDistance { get; private set; } = 5;
   [Export]
-  public int TotalHealth {get; private set;} = 5;
+  public int TotalHealth { get; private set; } = 5;
   [Export]
   public float BaseSpeedAccumulator = 1.0f;
   [Export]
@@ -70,7 +70,8 @@ public partial class Character : Node3D
   public int distanceRemaining { get; set; }
   private Callable updateMovementCalcs;
 
-  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority){
+  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority)
+  {
     this.CharacterName = name;
     this.MainWeapon = weapon;
     this.grenade = grenade;
@@ -82,8 +83,22 @@ public partial class Character : Node3D
     this.HeapPriority = turnPriority;
   }
 
+  public void IdentifyStray()
+  {
+    if (!IsInsideTree())
+    {
+      GD.Print("I'm a stray node Character");
+    }
+  }
+
+  public override void _Ready() {
+    GenerationCommunicatorSingleton s = (GenerationCommunicatorSingleton)Engine.GetSingleton("GenerationCommunicatorSingleton");
+    s.IdentifyStrayNode += IdentifyStray;
+  }
+
   public void SetupCharacter()
   {
+    //Connect(GenerationCommunicatorSingleton.SignalName.IdentifyStrayNode, new Callable(this, "IdentifyStray"));
     Node level = GetTree().GetNodesInGroup("Level")[0];
     TileGrid = level.GetChildren()[0];
     CurrentSpeed = StartingSpeed;
@@ -190,19 +205,23 @@ public partial class Character : Node3D
 
   }
 
-  public void EndCharacterTurn() {
+  public void EndCharacterTurn()
+  {
     EmitSignal(SignalName.EndTurnPassiveBehavior);
   }
 
-  public void MovedCharacter() {
+  public void MovedCharacter()
+  {
     EmitSignal(SignalName.StepOnTilePassiveBehavior);
   }
 
-  public void AddItemToCharacter() {
+  public void AddItemToCharacter()
+  {
     EmitSignal(SignalName.PickUpItemPassiveBehavior);
   }
 
-  public void RemoveItemFromCharacter() {
+  public void RemoveItemFromCharacter()
+  {
 
   }
 

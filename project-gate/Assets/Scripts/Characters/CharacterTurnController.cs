@@ -61,6 +61,7 @@ public partial class CharacterTurnController : Node
       next_character.MakeMainCharacter();
       if (next_character.IsInGroup("Enemies"))
       {
+        PrintOrphanNodes();
         next_character.Call("RunAI");
       }
       return next_character;
@@ -79,6 +80,10 @@ public partial class CharacterTurnController : Node
    */
   public void EndTurn()
   {
+    GenerationCommunicatorSingleton s = (GenerationCommunicatorSingleton)Engine.GetSingleton("GenerationCommunicatorSingleton");
+    s.EmitSignal(GenerationCommunicatorSingleton.SignalName.IdentifyStrayNode);
+    PrintOrphanNodes();
+
     //GD.Print("Ending ", CurrentCharacter.ToString(), "'s turn");
     CurrentCharacter = NextCharacter();
     if (CurrentCharacter != null)

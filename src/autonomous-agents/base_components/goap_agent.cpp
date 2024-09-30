@@ -103,10 +103,10 @@ godot::TileGrid *godot::GoapAgent::GetTileGrid() {
 	return tilegrid_obj;
 }
 
-godot::Node3D *godot::GoapAgent::GetUnitController() {
+godot::Node *godot::GoapAgent::GetUnitController() {
 	SceneTree *tree = get_tree();
 	TypedArray<Node> unit_control_group = tree->get_nodes_in_group("UnitControl");
-	Node3D *unit_controller = cast_to<Node3D>(unit_control_group[0]);
+	Node *unit_controller = cast_to<Node>(unit_control_group[0]);
 	return unit_controller;
 }
 
@@ -209,7 +209,7 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 void godot::GoapAgent::FindDataProvider() {
 	Node *parent = get_parent();
 	UtilityFunctions::print("Parent: ", parent);
-	Node *potential_provider = parent->find_child("data_provider");
+	Node *potential_provider = parent->find_child("data_provider", true, false);
 	UtilityFunctions::print("Data provider: ", potential_provider);
 	data_provider = cast_to<IGoap>(potential_provider);
 }

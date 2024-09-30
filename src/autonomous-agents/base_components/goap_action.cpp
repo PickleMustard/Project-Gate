@@ -1,4 +1,5 @@
 #include "goap_action.h"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/variant.hpp"
@@ -20,6 +21,8 @@ godot::GoapAction::~GoapAction() {
 }
 
 void godot::GoapAction::_bind_methods() {
+  godot::ClassDB::bind_method(godot::D_METHOD("GetActionName"),&GoapAction::GetActionName);
+
 	//godot::ClassDB::bind_method(godot::D_METHOD("CheckProceduralPrecondition", "goap_agent", "world_data"), &GoapAction::CheckProceduralPrecondition);
 	//godot::ClassDB::bind_method(godot::D_METHOD("Perform", "goap_agent"), &GoapAction::Perform);
 }

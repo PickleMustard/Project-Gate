@@ -42,7 +42,7 @@ public:
   void _physics_process(double p_delta) override;
 
   TileGrid *GetTileGrid();
-  Node3D *GetUnitController();
+  Node *GetUnitController();
   void SetAvailableActions(Dictionary actions);
   Dictionary GetAvailableActions();
 protected:

@@ -7,6 +7,7 @@ public partial class Daemon : Node {
   private Godot.Collections.Array PlayerTeamSpawnLocations;
 
   private CharacterGenerator generator;
+  private EnemyGenerator e_generator;
   private GenerationCommunicatorSingleton communicator;
 
   private Node Level; //Takes the level generated signal to start its background processes
@@ -24,6 +25,7 @@ public partial class Daemon : Node {
     EnemySpawnLocations = new Godot.Collections.Array();
     PlayerTeamSpawnLocations = new Godot.Collections.Array();
     generator = new CharacterGenerator();
+    e_generator = new EnemyGenerator();
     communicator = Engine.GetSingleton("GenerationCommunicatorSingleton") as GenerationCommunicatorSingleton;
     Level = GetTree().GetNodesInGroup("Level")[0];
     Level.Connect("LevelGenerated", new Callable(this, "LevelStartProcesses"));
@@ -65,7 +67,9 @@ public partial class Daemon : Node {
         location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count);
       }
       GD.Print("Attemptin to spawn something at ", location);
-      ((GodotObject)EnemySpawnLocations[location]).Call("SpawnCharacter");
+      Character generatedEnemy = e_generator.GenerateEnemy("BasicRuffian");
+      GD.Print("Generated Enemy: ", generatedEnemy);
+      communicator.SpawnEnemy((Resource)EnemySpawnLocations[location], generatedEnemy);
       used_locations.Add(location);
     }
   }

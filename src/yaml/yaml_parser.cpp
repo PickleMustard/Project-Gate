@@ -2,6 +2,7 @@
 #include "godot_cpp/classes/file_access.hpp"
 #include "godot_cpp/classes/json.hpp"
 #include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/char_string.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
@@ -67,6 +68,7 @@ void godot::YamlParser::test_yaml(godot::CharString text) {
   printf("Here\n");
 
 	UtilityFunctions::print(vformat("Parser Output: %s", gs));
+  memdelete(parseResult);
 
 }
 
