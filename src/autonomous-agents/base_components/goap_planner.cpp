@@ -36,6 +36,7 @@ Vector<Ref<GoapAction>> GoapPlanner::Plan(godot::Node *goap_agent, Dictionary av
 	bool success = BuildGraph(start, leaves, usable_actions, goal);
 
 	if (!success) {
+    UtilityFunctions::print("Could not find plan");
 		return Vector<Ref<GoapAction>>{};
 	}
 
@@ -70,11 +71,13 @@ bool GoapPlanner::BuildGraph(PlanningNode *parent, Vector<PlanningNode *> &leave
 			Dictionary current_state = PopulateState(parent->state, action->GetEffects());
 			UtilityFunctions::print("current state");
 			PlanningNode *node = memnew(PlanningNode(parent, parent->running_cost + action->m_cost, current_state, action));
-			UtilityFunctions::print("checking usuable action: ", action->GetActionName(), "| Preconditions: ", goal, "| state: ", current_state);
-			if (InState(goal, current_state)) {
+			UtilityFunctions::print("checking usuable action results: ", action->GetActionName(), "| Agent Goals: ", goal, "| state: ", current_state);
+			if (InState(current_state, goal)) {
 				leaves.push_back(node);
 				found_viable_goal = true;
+        UtilityFunctions::print("Found Viable goal");
 			} else {
+        UtilityFunctions::print("Could not find goal, going deeper");
 				HashSet<Ref<GoapAction>> subset = ActionSubset(usable_actions, action);
 				bool found = BuildGraph(node, leaves, subset, goal);
 				if (found) {

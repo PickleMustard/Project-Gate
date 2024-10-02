@@ -140,6 +140,7 @@ bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
 	} else {
 		UtilityFunctions::print("Plan not found");
 		data_provider->PlanFailed(goal);
+    should_continue = false;
 		return false;
 		//fsm->call_deferred("PopState");
 		//fsm->call_deferred("PushState", idle_state);
@@ -149,6 +150,7 @@ bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
 
 bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
+  UtilityFunctions::print("Moving state: ", action);
 	if (action->RequiresInRange() && action->target == nullptr) {
 		fsm->PopState();
 		fsm->PopState();
@@ -185,10 +187,12 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 		UtilityFunctions::print("2");
 		action = current_actions[0];
 		UtilityFunctions::print("Requires in Range? ", action->RequiresInRange());
-		bool in_range = action->RequiresInRange() ? action->GetInRange() : true;
+	  Dictionary world_state = data_provider->GetWorldState();
+		bool in_range = action->RequiresInRange() ? action->GetInRange(this, world_state) : true;
 
 		if (in_range) {
 			bool success = action->Perform(this);
+      UtilityFunctions::print("Success? ", success);
 
 			if (!success) {
 				fsm->PopState();

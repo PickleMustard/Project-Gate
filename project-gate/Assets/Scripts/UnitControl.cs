@@ -76,7 +76,6 @@ public partial class UnitControl : Node3D
       Godot.Collections.Array MovementRange = GetPotentialDestinations();
       for (int i = 0; i < MovementRange.Count; i++)
       {
-        GD.Print("here");
         MeshInstance3D tileMesh = ((Godot.Collections.Dictionary)MovementRange[i])["TileMesh"].AsGodotObject() as MeshInstance3D;
         bool hasEnemy = false;
         if (((Godot.Collections.Dictionary)MovementRange[i]).ContainsKey("CharacterType"))
@@ -275,8 +274,6 @@ public partial class UnitControl : Node3D
         GD.Print("Target: ", target, "| Has AttackCharacter Method: ", target.HasMethod("AttackCharacter"));
         if (target.HasMethod("AttackCharacter") && target.team != CurrentCharacter.team)
         {
-          AudioStreamPlayer3D player = (AudioStreamPlayer3D)CurrentCharacter.GetChild(1);
-          player.Play();
           CurrentCharacter.AttackCharacter(TargetTile);
         }
       }

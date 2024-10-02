@@ -16,6 +16,8 @@ script = ExtResource("4_do7ow")
 [node name="Level" type="Level" parent="."]
 m_level_file_location = "res://Configuration/Testing/test.yml"
 
+[node name="@TileGrid@32013" type="TileGrid" parent="Level"]
+
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
 script = ExtResource("1_pyq38")
@@ -29,8 +31,8 @@ fov = 110.0
 
 [node name="UnitControl" type="Node3D" parent="pivot"]
 script = ExtResource("2_ggfwn")
-movementTime = 0.1
-rotationDuration = 0.01
+movementTime = 0.01
+rotationDuration = 0.001
 
 [node name="input_handler" type="Node" parent="."]
 script = ExtResource("3_af0co")
@@ -50,8 +52,3 @@ transform = Transform3D(303.201, 0, 0, 0, 59.6518, 0, 0, 0, 204.587, 0.0458783, 
 texture = ExtResource("6_1dwfk")
 
 [node name="Control" parent="." instance=ExtResource("6_qmqhf")]
-
-[node name="TileMeshGenerator" type="TileMeshGenerator" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.53838, 0.464576, 3.56119)
-mesh = ExtResource("5_7frrk")
-skeleton = NodePath("")

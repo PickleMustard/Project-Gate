@@ -153,7 +153,7 @@ public partial class CharacterTurnController : Node
     foreach (Character c in AliveCharacterList)
     {
       c.ResetPriority();
-      PriorityUpdateHeap.Enqueue(c, c.CurrentHeapPriority);
+      PriorityUpdateHeap.Enqueue(c, c.GetCurrentHeapPriority());
     }
 
     while (PriorityUpdateHeap.Count > 0)
@@ -163,7 +163,7 @@ public partial class CharacterTurnController : Node
       if (ShouldRequeue)
       {
         calculatingCharacter.RequeueingCharacter();
-        PriorityUpdateHeap.Enqueue(calculatingCharacter, calculatingCharacter.CurrentHeapPriority);
+        PriorityUpdateHeap.Enqueue(calculatingCharacter, calculatingCharacter.GetCurrentHeapPriority());
       }
     }
 

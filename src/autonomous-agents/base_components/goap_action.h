@@ -13,7 +13,6 @@ class GoapAction : public Resource {
 private:
 	Dictionary preconditions;
 	Dictionary effects;
-	bool in_range = false;
   Variant target_enemy;
   Variant target_tile;
   String m_name;
@@ -27,8 +26,6 @@ public:
 	~GoapAction();
 
 	void DoReset();
-	bool GetInRange();
-	void SetInRange(bool range);
 	void AddPrecondition(String key, Variant value);
 	void RemovePrecondition(String key);
 	void AddEffect(String key, Variant value);
@@ -37,6 +34,7 @@ public:
 	Dictionary GetEffects();
   String GetActionName();
 	virtual void Reset();
+  virtual bool GetInRange(Node *goap_agent, Dictionary world_data);
 	virtual bool IsDone(Node *goap_agent);
   virtual bool InProgress(Node *goap_agent);
 	virtual bool CheckProceduralPrecondition(Node *goap_agent, Dictionary world_data);

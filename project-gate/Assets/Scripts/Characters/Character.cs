@@ -40,6 +40,8 @@ public partial class Character : Node3D
   [Export]
   public string CharacterName { get; private set; } = "Temp";
   [Export]
+  public int TotalActionPoints { get; private set; }
+  [Export]
   public int TotalDistance { get; private set; } = 5;
   [Export]
   public int TotalHealth { get; private set; } = 5;
@@ -60,10 +62,11 @@ public partial class Character : Node3D
   public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
   public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
-  public int currentHealth { get; private set; }
-  public float CurrentHeapPriority { get; private set; } = 1.0f;
-  public bool isMoving { get; set; } = false;
   private float CurrentSpeed;
+  private int currentHealth;
+  private int currentActionPoints;
+  private float CurrentHeapPriority = 1.0f;
+  public bool isMoving { get; set; } = false;
   private Godot.Collections.Array items;
   private Node TileGrid;
   [Export]
@@ -77,6 +80,7 @@ public partial class Character : Node3D
     this.grenade = grenade;
     this.proficiencies = proficiencies;
     this.TotalDistance = movementDistance;
+    this.TotalActionPoints = actionPoints;
     this.TotalHealth = health;
     this.BaseSpeedAccumulator = accumulationRate;
     this.SpeedNeededToRequeue = requeueSpeed;
@@ -91,7 +95,8 @@ public partial class Character : Node3D
     }
   }
 
-  public override void _Ready() {
+  public override void _Ready()
+  {
     GenerationCommunicatorSingleton s = (GenerationCommunicatorSingleton)Engine.GetSingleton("GenerationCommunicatorSingleton");
     s.IdentifyStrayNode += IdentifyStray;
   }
@@ -103,6 +108,7 @@ public partial class Character : Node3D
     TileGrid = level.GetChildren()[0];
     CurrentSpeed = StartingSpeed;
     distanceRemaining = TotalDistance;
+    currentActionPoints = TotalActionPoints;
 #if DEBUG
     InputHandler i_handle = GetTree().GetNodesInGroup("InputHandler")[0] as InputHandler;
     i_handle.UpdateCharacter += MakeMainCharacter;
@@ -157,8 +163,16 @@ public partial class Character : Node3D
   public void AttackCharacter(Resource target)
   {
     GD.Print("Attac Character Calculations: ", (int)MainWeapon.weaponType, " | ", proficiencies[(int)MainWeapon.weaponType], " | ", (int)proficiencies[(int)MainWeapon.weaponType]);
+    PlayAttackSound();
     MainWeapon.OnHit(this, target, GetTree().GetNodesInGroup("Tilegrid")[0]);
+    currentActionPoints--;
     EmitSignal(SignalName.OnHitPassiveBehavior);
+  }
+
+  public void PlayAttackSound()
+  {
+    AudioStreamPlayer3D player = (AudioStreamPlayer3D)FindChild("weapon_attack");
+    player.Play();
   }
 
   public void RequeueingCharacter()
@@ -199,10 +213,9 @@ public partial class Character : Node3D
   {
     CharacterTurnController.Instance.RemoveCharacterFromTurnController(this);
     CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);
-    AudioStreamPlayer3D player = (AudioStreamPlayer3D)GetChild(1);
+    AudioStreamPlayer3D player = (AudioStreamPlayer3D)FindChild("character_death");
     player.Play();
     Visible = false;
-
   }
 
   public void EndCharacterTurn()
@@ -245,6 +258,26 @@ public partial class Character : Node3D
   public bool GetIsMoving()
   {
     return isMoving;
+  }
+
+  public int GetOptimalWeaponRange()
+  {
+    return MainWeapon.EffectiveRange;
+  }
+
+  public int GetCharacterTeam()
+  {
+    return (int)team;
+  }
+
+  public int GetActionPointsRemaining()
+  {
+    return currentActionPoints;
+  }
+
+  public float GetCurrentHeapPriority()
+  {
+    return CurrentHeapPriority;
   }
 
   public override string ToString()
