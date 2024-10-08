@@ -69,7 +69,7 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 	Vector<Vector2i> room_centers{};
 	m_Room_Tree_Node *rooms_kd_tree = nullptr;
 
-	Vector<uint8_t> tile_bit_map;
+	Vector<uint16_t> tile_bit_map;
 	tile_bit_map.resize(m_maximum_grid_size[0] * m_maximum_grid_size[1]);
 	tile_bit_map.fill(0);
 	Vector2i gridCenter(m_maximum_grid_size[0] / 2, m_maximum_grid_size[1] / 2);
@@ -186,7 +186,7 @@ void LevelGenerator::m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph) {
  * Out variables:
  *    tile_bit_map: Updates the connecting tiles between rooms as ordinary tiles
  */
-void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph) {
+void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms_Graph *graph) {
 	int nums_rooms = graph->vertices.size();
 	for (int i = 0; i < nums_rooms; i++) {
 		String node_hash = vformat("node_%d", i);
@@ -233,8 +233,11 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint8_t> &tile_bit_map, m_Rooms_
  * root: Tile objects are added as children of the root Godot Node
  * No direct returns
  */
-void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations) {
+void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations) {
 	Object *GenerationCommunicator = Engine::get_singleton()->get_singleton("GenerationCommunicatorSingleton");
+	ResourceLoader *m_rl = memnew(ResourceLoader);
+  int counter = 0;
+  m_rl->initialize_class();
 	for (int i = 0; i < tile_map.size(); i++) {
 		if (tile_map.get(i) > 0) {
 			int q = i / m_maximum_grid_size[1];
@@ -251,10 +254,16 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 			CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
 			TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
 
-			String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%s.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), m_is_flat_topped, tile_map.get(i));
-			String mesh_material_names[] = { "res://Assets/Materials/test_tile_material.tres", "res://Assets/Materials/test_interactable_tile_material.tres", "res://Assets/Materials/test_interactable_tile_material.tres", "res://Assets/Materials/test_obstacle_tile_material.tres", "res://Assets/Materials/test_spawner_tile_material.tres", "res://Assets/Materials/test_starter_tile_material.tres" };
-			ResourceLoader *m_rl = memnew(ResourceLoader);
-			m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[tile_type - 1], m_tile_mesh_name, tile_type);
+			String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%d_%d.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), (int)m_is_flat_topped, tile_map.get(i));
+			String mesh_material_names[] = {
+        "res://Assets/Materials/test_tile_material.tres",
+        "res://Assets/Materials/test_interactable_tile_material.tres",
+        "res://Assets/Materials/test_interactable_tile_material.tres",
+        "res://Assets/Materials/test_obstacle_tile_material.tres",
+        "res://Assets/Materials/test_spawner_tile_material.tres",
+        "res://Assets/Materials/test_starter_tile_material.tres" };
+			m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[(tile_type &0xFF) - 1], m_tile_mesh_name, tile_type);
+      counter++;
 			m_collision_body->set_name(vformat("Hex %d,%d", q, r));
 			root->add_child(m_collision_body, true, Node::INTERNAL_MODE_BACK);
 			m_collision_body->set_owner(root->get_owner());
@@ -269,9 +278,10 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
 			//m_mesh_generator->create_convex_collision();
 			m_collision_shape->make_convex_from_siblings();
 			m_collision_body->set_position(location);
-			memdelete(m_rl);
 		}
 	}
+  UtilityFunctions::print("deleted m_rl");
+  memdelete(m_rl);
 }
 
 /*  Tile Creation Factory Method to instantiate a Reference to a Tile Resource given a certain set of criteria
@@ -290,9 +300,10 @@ void LevelGenerator::m_GenerateRoom(Vector<uint8_t> &tile_map, HashMap<String, R
  * Out Variables:
  *    spawnable_locations: If the instantiated tile has the ability to spawn enemies, it is added to the list of spawnable locations
  */
-Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, int tile_type) {
+Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, uint16_t tile_type) {
 	Object *daemon = Engine::get_singleton()->get_singleton("Daemon");
 	Ref<Tile> new_tile;
+  tile_type &= 0x00FF;
 	switch (tile_type) {
 		case 1:
 			new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
@@ -315,6 +326,7 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 		case 5:
 			new_tile = Ref<UnitSpawner>(memnew(UnitSpawner(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
 			if (daemon->has_method("AddEnemySpawnLocation")) {
+        UtilityFunctions::print("Adding spawn location");
 				daemon->call("AddEnemySpawnLocation", new_tile);
 			}
 			//spawnable_locations.push_back(new_tile);
@@ -352,7 +364,7 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
  * Returns:
  *    No Direct Returns
  */
-void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, int tile_type) {
+void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, uint16_t tile_type) {
 	Ref<Mesh> m_mesh;
 	Ref<ShaderMaterial> m_mesh_material;
 	if (rl->exists(tile_mesh_name)) {
@@ -369,9 +381,9 @@ void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator,
 		int surface_count = m_mesh->get_surface_count();
 		for (int i = 0; i < surface_count; i++) {
 			m_mesh->surface_set_material(i, m_mesh_material);
-      m_mesh_material->set_local_to_scene(true);
+			m_mesh_material->set_local_to_scene(true);
 		}
-    m_mesh->set_local_to_scene(true);
+		m_mesh->set_local_to_scene(true);
 	}
 }
 
@@ -483,7 +495,7 @@ void LevelGenerator::m_GenerateNeighborsForNode(m_Room_Tree_Node *current_node, 
  * tile_bit_map: Filled with all locations of tiles
  * root_room: Pointer to the root_room of the k-d tree spanning all generated rooms
  */
-LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<uint8_t> &tile_bit_map, m_Room_Tree_Node *root_room, int &num_of_rooms_remaining, int current_level, int max_level, Vector2i max_grid_size) {
+LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<uint16_t> &tile_bit_map, m_Room_Tree_Node *root_room, int &num_of_rooms_remaining, int current_level, int max_level, Vector2i max_grid_size) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	int grid_center_q = max_grid_size[0];
 	int grid_center_r = max_grid_size[1];
@@ -551,7 +563,7 @@ LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<ui
  * Out Variables:
  *    tile_bit_map: Tile positions corresponding to the locations within rooms in the graph are filled out with their tile types
  */
-void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin) {
+void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m_Rooms_Graph *graph, Vector2i grid_origin) {
 	SeededRandomAccess *rnd = SeededRandomAccess::GetInstance();
 	int num_of_rooms = graph->vertices.size();
 	for (int i = 0; i < num_of_rooms; i++) {
@@ -576,9 +588,21 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 								((Math::abs(q) == radius / 4) && (Math::abs(r) == radius / 4)) ||
 								((Math::abs(q) == radius / 2) && (Math::abs(-q - r) == Math::round(radius / 3.0f))) ||
 								((Math::abs(-q - r) == Math::round(radius / 3.0f)) && Math::abs(r) == radius / 2)) {
-							tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 5);
+							if (Math::abs(q) == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8105);
+							} else if (Math::abs(r) == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8205);
+							} else {
+                tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
+              }
 						} else {
-							tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
+							if (Math::abs(q) == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8301);
+							} else if (Math::abs(r) == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8401);
+							} else {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
+							}
 						}
 					}
 				}
@@ -596,7 +620,17 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint8_t> &tile_bit_map, m_
 						q = rnd->GetInteger(-radius, radius);
 						r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
 					}
-					tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1 + interactables[i]);
+					if (q == radius) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8101 + interactables[i]);
+					} else if(q == -radius) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8201 + interactables[i]);
+          } else if (r == radius) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8301 + interactables[i]);
+					} else if (r == -radius) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8401 + interactables[i]);
+          }else {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001 + interactables[i]);
+					}
 				}
 
 				break;
@@ -731,7 +765,7 @@ void LevelGenerator::m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_r
  * Returns:
  * overlapping_room_exists: Boolean : Returns true if there is a room that is found to overlap the current one, otherwise returns false
  */
-bool LevelGenerator::m_OverlappingRooms(const Vector<uint8_t> &tile_bit_map, Vector2i center, int radius) {
+bool LevelGenerator::m_OverlappingRooms(const Vector<uint16_t> &tile_bit_map, Vector2i center, int radius) {
 	Vector2i directions[] = { Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
 		Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1) };
 	Vector2i curr_hex = Vector2i(center[0] - radius, center[1] + radius);
@@ -762,7 +796,7 @@ bool LevelGenerator::m_OverlappingRooms(const Vector<uint8_t> &tile_bit_map, Vec
  * tile_bit_map: Tiles that should have a 3D model generated are flipped to a value of 1
  * No Direct Returns
  */
-void LevelGenerator::m_FillBitMap(Vector<uint8_t> &tile_bit_map, int q_center, int r_center, int radius) {
+void LevelGenerator::m_FillBitMap(Vector<uint16_t> &tile_bit_map, int q_center, int r_center, int radius) {
 	for (int q = -radius; q <= radius; q++) {
 		int r1 = Math::max(-radius, -q - radius);
 		int r2 = Math::min(radius, -q + radius);
@@ -783,7 +817,7 @@ void LevelGenerator::m_FillBitMap(Vector<uint8_t> &tile_bit_map, int q_center, i
  * tile_bit_map: Tiles that should have a 3D model generated are flipped to a value of 1
  * No direct returns
  */
-void LevelGenerator::m_ConnectTiles(Vector<uint8_t> &tile_bit_map, Vector<Vector2i> room_neighbors) {
+void LevelGenerator::m_ConnectTiles(Vector<uint16_t> &tile_bit_map, Vector<Vector2i> room_neighbors) {
 	for (int i = 0; i < room_neighbors.size() - 1; i += 3) {
 		m_DrawLineTiles(tile_bit_map, room_neighbors[i], room_neighbors[i + 1]);
 		m_DrawLineTiles(tile_bit_map, room_neighbors[i], room_neighbors[i + 2]);
@@ -802,7 +836,7 @@ void LevelGenerator::m_ConnectTiles(Vector<uint8_t> &tile_bit_map, Vector<Vector
  *  tile_bit_map: Locations that should have a connecting tile flipped to a value of 1
  *  No direct returns
  */
-void LevelGenerator::m_DrawLineTiles(Vector<uint8_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center) {
+void LevelGenerator::m_DrawLineTiles(Vector<uint16_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center) {
 	int distance = m_HexDistance(first_room_center, second_room_center);
 	for (int i = 0; i <= distance; i++) {
 		Vector2i location = m_HexRound(first_room_center, second_room_center, distance, i);

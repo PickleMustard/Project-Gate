@@ -62,9 +62,9 @@ public partial class Daemon : Node {
     List<int> used_locations = new List<int>();
     GodotObject rnd = Engine.GetSingleton("GlobalSeededRandom");
     for(int i = 0; i < 4; i++) {
-      int location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count);
+      int location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count - 1);
       while(used_locations.Contains(location)) {
-        location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count);
+        location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count - 1);
       }
       GD.Print("Attemptin to spawn something at ", location);
       Character generatedEnemy = e_generator.GenerateEnemy("BasicRuffian");

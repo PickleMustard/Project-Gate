@@ -143,7 +143,9 @@ void TileGrid::GenerateTileGrid(bool test_flag, String file) {
 		UtilityFunctions::print(vformat("Constructing New Grid with %d num rooms", m_grid_num_rooms));
 		m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
 		m_grid_num_rooms = m_showrooms->GetNumRooms();
+    UtilityFunctions::print("Attempting to generate level");
 		m_tile_grid = m_showrooms->GenerateLevel(this, spawnable_locations, file);
+    UtilityFunctions::print("Generated Level, sending out notification");
 		TileNotifier::getInstance()->GridCreationNotification(this);
 		UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
 		//call_deferred("SetEnemiesOnGrid");

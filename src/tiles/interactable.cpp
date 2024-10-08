@@ -6,7 +6,7 @@ godot::Interactable::Interactable() :
 		Tile() {
 }
 
-godot::Interactable::Interactable(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t tile_type, int interactable_type) :
+godot::Interactable::Interactable(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint16_t tile_type, int interactable_type) :
 		Tile(position, r, c, flat_topped, outer_size, inner_size, height, tile_type) {
 	m_interactable_type = interactable_type;
 }

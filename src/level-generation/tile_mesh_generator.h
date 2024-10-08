@@ -32,7 +32,7 @@ private:
 	bool m_is_flat_topped;
 	Array m_surface_arrays;
 
-	void _DrawFaces(uint8_t type);
+	void _DrawFaces(uint16_t type);
 	void _CombineFaces();
 	Face _CreateFace(float inner_radius, float outer_radius, float height_a, float height_b, int point, bool reverse = false);
 	Vector3 _GetPoint(float size, float height, int index);
@@ -42,7 +42,7 @@ public:
 	TileMeshGenerator(float inner_size, float outer_size, float height, bool is_flat_topped);
 	~TileMeshGenerator();
 
-	Ref<ArrayMesh> DrawMesh(uint8_t type);
+	Ref<ArrayMesh> DrawMesh(uint16_t type);
 
 protected:
 	static void _bind_methods();

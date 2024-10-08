@@ -45,7 +45,7 @@ Tile::Tile() {
  *
  * Functions exactly the same as default constructor
  */
-Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
+Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint16_t type) {
   m_position = position;
 	m_tile_row = r;
 	m_tile_column = c;
