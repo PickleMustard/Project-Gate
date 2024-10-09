@@ -115,6 +115,7 @@ private:
 	void m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level);
 	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
 	int m_HexDistance(Vector2i first_room, Vector2i second_room);
+  bool m_HasNeighbors(Vector<uint16_t> &tile_map, int q, int r);
 };
 } //namespace godot
 #endif

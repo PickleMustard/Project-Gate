@@ -61,7 +61,7 @@ public partial class Daemon : Node {
   private void GenerateStartingEnemies() {
     List<int> used_locations = new List<int>();
     GodotObject rnd = Engine.GetSingleton("GlobalSeededRandom");
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 0; i++) {
       int location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count - 1);
       while(used_locations.Contains(location)) {
         location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count - 1);

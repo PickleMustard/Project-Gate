@@ -35,7 +35,9 @@ private:
 	void _DrawFaces(uint16_t type);
 	void _CombineFaces();
 	Face _CreateFace(float inner_radius, float outer_radius, float height_a, float height_b, int point, bool reverse = false);
+	Face _CreateExternalFace(float inner_radius, float outer_radius, float height_a, float height_b, int point, bool reverse = false);
 	Vector3 _GetPoint(float size, float height, int index);
+	Vector3 _GetExternalPoint(float size, float height, int index);
 
 public:
 	TileMeshGenerator();

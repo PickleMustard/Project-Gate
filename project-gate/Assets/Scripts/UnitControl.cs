@@ -146,7 +146,7 @@ public partial class UnitControl : Node3D
       {
         string potential_formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
         found_tile = GetNodeOrNull<Node>(potential_formated_tile_name);
-        if (found_tile != null)
+        if (found_tile != null && found_tile.GetChildCount() > 0)
         {
           GodotObject TileReference = new GodotObject();
           Character possibleCharacter = null;
@@ -187,7 +187,7 @@ public partial class UnitControl : Node3D
       {
         string potential_formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
         found_tile = GetNodeOrNull<Node>(potential_formated_tile_name);
-        if (found_tile != null)
+        if (found_tile != null && found_tile.GetChildCount() > 0)
         {
           MovementRange.Add(found_tile.GetChildren()[1]);
         }
@@ -227,13 +227,14 @@ public partial class UnitControl : Node3D
     if (tempObject.HasMethod("GetCharacterOnTile"))
     {
       tempChar = tempObject.Call("GetCharacterOnTile");
-      GD.Print(tempChar.AsGodotObject());
       if (tempChar.AsGodotObject() != null)
       {
+        GD.Print("Attacking");
         AttackTile(DesiredTileLocation, CurrentUnitLocation, CurrentCharacter);
       }
       else
       {
+        GD.Print("Moving");
         MoveCharacter(tile_collider);
       }
     }

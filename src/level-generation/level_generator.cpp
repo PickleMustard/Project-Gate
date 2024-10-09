@@ -236,8 +236,8 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms
 void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations) {
 	Object *GenerationCommunicator = Engine::get_singleton()->get_singleton("GenerationCommunicatorSingleton");
 	ResourceLoader *m_rl = memnew(ResourceLoader);
-  int counter = 0;
-  m_rl->initialize_class();
+	int counter = 0;
+	m_rl->initialize_class();
 	for (int i = 0; i < tile_map.size(); i++) {
 		if (tile_map.get(i) > 0) {
 			int q = i / m_maximum_grid_size[1];
@@ -247,41 +247,61 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 			//
 			int tile_type = tile_map.get(i);
 			//
-			Ref<Tile> new_tile = m_InstantiateTile(GenerationCommunicator, spawnable_locations, location, q, r, tile_type);
-			grid_of_tiles->insert(vformat("hex %d,%d", q, r), new_tile);
+			if (!(tile_type & 0x8000)) {
+				Ref<Tile> new_tile = m_InstantiateTile(GenerationCommunicator, spawnable_locations, location, q, r, tile_type);
+				grid_of_tiles->insert(vformat("hex %d,%d", q, r), new_tile);
 
-			TileCollision *m_collision_body = memnew(TileCollision);
-			CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
-			TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
+				TileCollision *m_collision_body = memnew(TileCollision);
+				CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
+				TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
 
-			String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%d_%d.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), (int)m_is_flat_topped, tile_map.get(i));
-			String mesh_material_names[] = {
-        "res://Assets/Materials/test_tile_material.tres",
-        "res://Assets/Materials/test_interactable_tile_material.tres",
-        "res://Assets/Materials/test_interactable_tile_material.tres",
-        "res://Assets/Materials/test_obstacle_tile_material.tres",
-        "res://Assets/Materials/test_spawner_tile_material.tres",
-        "res://Assets/Materials/test_starter_tile_material.tres" };
-			m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[(tile_type &0xFF) - 1], m_tile_mesh_name, tile_type);
-      counter++;
-			m_collision_body->set_name(vformat("Hex %d,%d", q, r));
-			root->add_child(m_collision_body, true, Node::INTERNAL_MODE_BACK);
-			m_collision_body->set_owner(root->get_owner());
+				String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%d_%d.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), (int)m_is_flat_topped, tile_map.get(i));
+				String mesh_material_names[] = {
+					"res://Assets/Materials/test_tile_material.tres",
+					"res://Assets/Materials/test_interactable_tile_material.tres",
+					"res://Assets/Materials/test_interactable_tile_material.tres",
+					"res://Assets/Materials/test_obstacle_tile_material.tres",
+					"res://Assets/Materials/test_spawner_tile_material.tres",
+					"res://Assets/Materials/test_starter_tile_material.tres"
+				};
+				m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[(tile_type & 0xFF) - 1], m_tile_mesh_name, tile_type);
+				counter++;
+				m_collision_body->set_name(vformat("Hex %d,%d", q, r));
+				root->add_child(m_collision_body, true, Node::INTERNAL_MODE_BACK);
+				m_collision_body->set_owner(root->get_owner());
 
-			m_collision_body->add_child(m_collision_shape);
-			m_collision_shape->set_owner(root->get_owner());
+				m_collision_body->add_child(m_collision_shape);
+				m_collision_shape->set_owner(root->get_owner());
 
-			m_collision_body->add_child(m_mesh_generator);
-			m_mesh_generator->set_owner(root->get_owner());
+				m_collision_body->add_child(m_mesh_generator);
+				m_mesh_generator->set_owner(root->get_owner());
 
-			m_collision_body->set_ray_pickable(true);
-			//m_mesh_generator->create_convex_collision();
-			m_collision_shape->make_convex_from_siblings();
-			m_collision_body->set_position(location);
+				m_collision_body->set_ray_pickable(true);
+				//m_mesh_generator->create_convex_collision();
+				m_collision_shape->make_convex_from_siblings();
+				m_collision_body->set_position(location);
+			} else {
+				TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
+
+				String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%d_%d.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), (int)m_is_flat_topped, tile_map.get(i));
+				String mesh_material_names[] = {
+					"res://Assets/Materials/test_tile_material.tres",
+					"res://Assets/Materials/test_interactable_tile_material.tres",
+					"res://Assets/Materials/test_interactable_tile_material.tres",
+					"res://Assets/Materials/test_obstacle_tile_material.tres",
+					"res://Assets/Materials/test_spawner_tile_material.tres",
+					"res://Assets/Materials/test_starter_tile_material.tres"
+				};
+				m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[(tile_type & 0xFF) - 1], m_tile_mesh_name, tile_type);
+				m_mesh_generator->set_name(vformat("Hex %d,%d", q, r));
+				root->add_child(m_mesh_generator, true, Node::INTERNAL_MODE_BACK);
+				m_mesh_generator->set_owner(root->get_owner());
+				m_mesh_generator->set_position(location);
+			}
 		}
 	}
-  UtilityFunctions::print("deleted m_rl");
-  memdelete(m_rl);
+	UtilityFunctions::print("deleted m_rl");
+	memdelete(m_rl);
 }
 
 /*  Tile Creation Factory Method to instantiate a Reference to a Tile Resource given a certain set of criteria
@@ -303,7 +323,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, uint16_t tile_type) {
 	Object *daemon = Engine::get_singleton()->get_singleton("Daemon");
 	Ref<Tile> new_tile;
-  tile_type &= 0x00FF;
+	tile_type &= 0x00FF;
 	switch (tile_type) {
 		case 1:
 			new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
@@ -326,7 +346,6 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 		case 5:
 			new_tile = Ref<UnitSpawner>(memnew(UnitSpawner(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
 			if (daemon->has_method("AddEnemySpawnLocation")) {
-        UtilityFunctions::print("Adding spawn location");
 				daemon->call("AddEnemySpawnLocation", new_tile);
 			}
 			//spawnable_locations.push_back(new_tile);
@@ -367,15 +386,15 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, uint16_t tile_type) {
 	Ref<Mesh> m_mesh;
 	Ref<ShaderMaterial> m_mesh_material;
-	if (rl->exists(tile_mesh_name)) {
-		m_mesh = rl->load(tile_mesh_name, "Mesh");
-		mesh_generator->set_mesh(m_mesh);
-	} else {
-		m_mesh = mesh_generator->DrawMesh(tile_type);
-		ResourceSaver *m_rs = memnew(ResourceSaver);
-		m_rs->save(m_mesh, tile_mesh_name, ResourceSaver::FLAG_COMPRESS);
-		memdelete(m_rs);
-	}
+	//if (rl->exists(tile_mesh_name)) {
+	//	m_mesh = rl->load(tile_mesh_name, "Mesh");
+	//mesh_generator->set_mesh(m_mesh);
+	//} else {
+	m_mesh = mesh_generator->DrawMesh(tile_type);
+	ResourceSaver *m_rs = memnew(ResourceSaver);
+	m_rs->save(m_mesh, tile_mesh_name, ResourceSaver::FLAG_COMPRESS);
+	memdelete(m_rs);
+	//}
 	if (rl->exists(mesh_material_name)) {
 		m_mesh_material = rl->load(mesh_material_name)->duplicate();
 		int surface_count = m_mesh->get_surface_count();
@@ -550,6 +569,17 @@ LevelGenerator::m_Room_Tree_Node *LevelGenerator::m_GenerateTileBitMap(Vector<ui
 	//
 }
 
+bool LevelGenerator::m_HasNeighbors(Vector<uint16_t> &tile_map, int q, int r) {
+	bool neighbor_exists =
+			tile_map.get(q * m_maximum_grid_size[1] + r + 1) > 0 ||
+			tile_map.get((q + 1) * m_maximum_grid_size[1] + r) > 0 ||
+			tile_map.get((q + 1) * m_maximum_grid_size[1] + r - 1) > 0 ||
+			tile_map.get(q * m_maximum_grid_size[1] + r - 1) > 0 ||
+			tile_map.get((q - 1) * m_maximum_grid_size[1] + r) > 0 ||
+			tile_map.get((q - 1) * m_maximum_grid_size[1] + r + 1) > 0;
+	return neighbor_exists;
+}
+
 /* For a given graph of room nodes, fill the tile bit map with the corresponding tiles and types in the rooms
  *
  * Arguments:
@@ -588,18 +618,36 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 								((Math::abs(q) == radius / 4) && (Math::abs(r) == radius / 4)) ||
 								((Math::abs(q) == radius / 2) && (Math::abs(-q - r) == Math::round(radius / 3.0f))) ||
 								((Math::abs(-q - r) == Math::round(radius / 3.0f)) && Math::abs(r) == radius / 2)) {
-							if (Math::abs(q) == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8105);
+							/*if (Math::abs(q) == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
+								tile_bit_map.set((room_location[0] + q - 3) * m_maximum_grid_size[1] + (room_location[1] + r), 0xB100);
+							} else if (Math::abs(q) == -radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
+								tile_bit_map.set((room_location[0] + q + 3) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8200);
 							} else if (Math::abs(r) == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8205);
-							} else {
-                tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
-              }
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8405);
+							} else if (Math::abs(r) == -radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8805);
+							} else {*/
+							tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
+							//}
 						} else {
-							if (Math::abs(q) == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8301);
-							} else if (Math::abs(r) == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8401);
+							if (q == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
+								if (tile_bit_map.get((room_location[0] + q + 1) * m_maximum_grid_size[1] + room_location[1] + r) == 0 ||
+										tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + room_location[1] + r - 2) == 0 ||
+										tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + room_location[1] + r - 1) == 0) {
+									tile_bit_map.set((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r), 0xA100);
+								}
+							} else if (q == -radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
+								tile_bit_map.set((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8C01);
+							} else if (r == radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
+								tile_bit_map.set((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r + 1), 0x8601);
+							} else if (r == -radius) {
+								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
+								tile_bit_map.set((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r - 1), 0xB001);
 							} else {
 								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
 							}
@@ -621,14 +669,14 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 						r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
 					}
 					if (q == radius) {
-						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8101 + interactables[i]);
-					} else if(q == -radius) {
-						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8201 + interactables[i]);
-          } else if (r == radius) {
-						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8301 + interactables[i]);
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001 + interactables[i]);
+					} else if (q == -radius) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001 + interactables[i]);
+					} else if (r == radius) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001 + interactables[i]);
 					} else if (r == -radius) {
-						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8401 + interactables[i]);
-          }else {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001 + interactables[i]);
+					} else {
 						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001 + interactables[i]);
 					}
 				}
