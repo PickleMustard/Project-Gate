@@ -10,7 +10,7 @@ Adjacency:
 
 Nodes:
   - node_0:
-      room_type: 2 #Hexagon
+      room_type: 2
       room_size_extents:
         - 8
         - 12
@@ -90,6 +90,17 @@ Nodes:
         - "purple"
       purpose: 2
   - node_7:
+      room_type: 1
+      room_size_extents:
+        - 10
+        - 12
+      room_bounding_zone:
+        - 10
+      color_possibilities:
+        - "red"
+        - "purple"
+      purpose: 2
+  - node_8:
       room_type: 1
       room_size_extents:
         - 10
@@ -180,4 +191,25 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
-
+  - edge_10:
+      from: "node_7"
+      to: "node_5"
+  - edge_11:
+      from: "node_7"
+      to: "node_8"
+      direction:
+        - 1
+        - -2
+      distance_extents:
+        - 5
+        - 7
+      distance_constraint: 1
+  - edge_12:
+      from: "node_5"
+      to: "node_8"
+  - edge_13:
+      from: "node_8"
+      to: "node_6"
+  - edge_14:
+      from: "node_8"
+      to: "node_3"

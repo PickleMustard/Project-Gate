@@ -41,40 +41,53 @@ void godot::TileMeshGenerator::_DrawFaces(uint16_t type) {
 	/*If is a wall type tile*/
 	if (type & 0x8000) {
 		uint8_t direction = type >> 8;
-		UtilityFunctions::print(vformat("%X", direction));
 		if (direction & 0x01) {
-			m_faces.push_back(_CreateFace(-m_outer_size, -m_outer_size, m_height * 3.0f, -m_height / 2.0f, 0));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size / 2.0f, m_height * 3.0f, -m_height / 2.0f, 0, true));
+      /*
+			for (int point = 0; point < 6; point++) {
+				m_faces.push_back(_CreateFace(m_inner_size / 2.0f, m_outer_size, m_height / 2.0f, m_height / 2.0f, point));
+			}
+			/*Outside Plane */
+      /*
+			for (int point = 0; point < 6; point++) {
+				m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height / 2.0f, -m_height / 2.0f, point));
+			}
+			/*Inside Plane */
+      /*
+			for (int point = 0; point < 6; point++) {
+				m_faces.push_back(_CreateFace(m_inner_size, m_inner_size, -m_height / 2.0f, m_height / 2.0f, point));
+			}*/
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 3));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 3, true));
 			//m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 0));
 			//m_faces.push_back(_CreateExternalFace(-m_outer_size, -m_outer_size * 2.0f, m_height * 3.0f, m_height * 3.0f, 0));
-			m_faces.push_back(_CreateExternalFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 0));
+			//m_faces.push_back(_CreateExternalFace(m_outer_size, m_outer_size, m_height * 3.0f, m_height * 3.0f, 3));
 			//m_faces.push_back(_CreateFace(-m_inner_size, -m_outer_size, -m_height * 3.0f,  -m_height / 2.0f,  0));
 		}
 		if (direction & 0x02) {
-			m_faces.push_back(_CreateFace(-m_outer_size, -m_outer_size, m_height * 3.0f, -m_height / 2.0f, 1));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size / 2.0f, m_height * 3.0f, -m_height / 2.0f, 1, true));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 1));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 4));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size , m_height * 3.0f, -m_height / 2.0f, 4, true));
+			//m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, m_height * 3.0f, 4));
 		}
 		if (direction & 0x04) {
-			m_faces.push_back(_CreateFace(-m_outer_size, -m_outer_size, m_height * 3.0f, -m_height / 2.0f, 2));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size / 2.0f, m_height * 3.0f, -m_height / 2.0f, 2, true));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 2));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 5));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 5, true));
+			//m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, m_height * 3.0f, 5));
 		}
 		if (direction & 0x08) {
-			m_faces.push_back(_CreateFace(-m_outer_size, -m_outer_size, m_height * 3.0f, -m_height / 2.0f, 3));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size / 2.0f, m_height * 3.0f, -m_height / 2.0f, 3, true));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 3));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 0));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 0, true));
+			//m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, m_height * 3.0f, 0));
 		}
 		if (direction & 0x10) {
-			m_faces.push_back(_CreateFace(-m_outer_size, -m_outer_size, m_height * 3.0f, -m_height / 2.0f, 4));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size / 2.0f, m_height * 3.0f, -m_height / 2.0f, 4, true));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 4));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 1));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 1, true));
+			//m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, m_height * 3.0f, 1));
 		}
 		if (direction & 0x20) {
-			m_faces.push_back(_CreateFace(-m_outer_size, -m_outer_size, m_height * 3.0f, -m_height / 2.0f, 5));
-			m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size / 2.0f, m_height * 3.0f, -m_height / 2.0f, 5, true));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 2));
+			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height * 3.0f, -m_height / 2.0f, 2, true));
 			//m_faces.push_back(_CreateFace(-m_outer_size / 2.0f, -m_outer_size, m_height * 3.0f, m_height * 3.0f, 5));
-			m_faces.push_back(_CreateExternalFace(-m_outer_size / 2.0f, -m_outer_size , m_height * 3.0f, m_height * 3.0f, 5, false));
+			//m_faces.push_back(_CreateExternalFace(m_outer_size, m_outer_size, m_height * 3.0f, m_height * 3.0f, 2, false));
 		}
 	} else {
 		/* Top Plane */
@@ -85,10 +98,10 @@ void godot::TileMeshGenerator::_DrawFaces(uint16_t type) {
 		for (int point = 0; point < 6; point++) {
 			m_faces.push_back(_CreateFace(m_inner_size, m_outer_size, -m_height / 2.0f, -m_height / 2.0f, point));
 		}
-		/*Outside Plane */
+		/*Outside Plane
 		for (int point = 0; point < 6; point++) {
 			m_faces.push_back(_CreateFace(m_outer_size, m_outer_size, m_height / 2.0f, -m_height / 2.0f, point));
-		}
+		}*/
 		/*Inside Plane */
 		for (int point = 0; point < 6; point++) {
 			m_faces.push_back(_CreateFace(m_inner_size, m_inner_size, -m_height / 2.0f, m_height / 2.0f, point));
@@ -144,15 +157,15 @@ godot::Face godot::TileMeshGenerator::_CreateExternalFace(float inner_radius, fl
 	Vector3 point_b = _GetPoint(inner_radius, height_a, (point < 5) ? point + 1 : 0);
 	Vector3 point_c = _GetPoint(outer_radius, height_b, (point < 5) ? point + 1 : 0);
 	Vector3 point_d = _GetPoint(outer_radius, height_b, point);
-  if(point % 2) {
-    point_a += Vector3(-inner_radius * .87f, 0, -inner_radius * .87f );
-  } else {
-    point_b += Vector3(-inner_radius * .87f , 0, inner_radius * .87f);
-  }
+	if (point % 2) {
+		point_a += Vector3(-inner_radius * .87f, 0, -inner_radius * .87f);
+	} else {
+		point_b += Vector3(-inner_radius * .87f, 0, inner_radius * .87f);
+	}
 
-	PackedVector3Array vertices{ point_a , point_b, point_c, point_d };
+	PackedVector3Array vertices{ point_a, point_b, point_c, point_d };
 	PackedVector3Array normals{ point_a.normalized(), point_b.normalized(), point_c.normalized(), point_d.normalized() };
-	PackedInt32Array indices{2, 1, 0, 0, 3, 2 };
+	PackedInt32Array indices{ 2, 1, 0, 0, 3, 2 };
 	/*if (reverse) {
 		indices = { 0, 3, 2 };
 	} else {

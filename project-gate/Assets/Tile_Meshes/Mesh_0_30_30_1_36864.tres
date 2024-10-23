@@ -2,7 +2,7 @@
 
 [resource]
 _surfaces = [{
-"aabb": AABB(-3, -1.5, -2.59808, 1.5, 10.5, 2.59808),
+"aabb": AABB(-1.5, -1.5, 2.59808, 3, 10.5, 1e-05),
 "attribute_data": PackedByteArray("AAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAACAPw=="),
 "format": 34359742487,
 "index_count": 12,
@@ -10,5 +10,5 @@ _surfaces = [{
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 8,
-"vertex_data": PackedByteArray("AABAwAAAEEHizYy0/v+/vwAAEEHiRibA/v+/vwAAwL/iRibAAABAwAAAwL/izYy0AABAwAAAwL/izYy0/v+/vwAAwL/iRibA/v+/vwAAEEHiRibAAABAwAAAEEHizYy0/1//32InOrHzV1bxhhQGq0wiTCIlUdmuqipUVbZtSNL/X//fYic6sfNXVvGGFAarTCJMIiVR2a6qKlRVtm1I0g==")
+"vertex_data": PackedByteArray("//+/PwAAEEHiRiZAAgDAvwAAEEHhRiZAAgDAvwAAwL/hRiZA//+/PwAAwL/iRiZA//+/PwAAwL/iRiZAAgDAvwAAwL/hRiZAAgDAvwAAEEHhRiZA//+/PwAAEEHiRiZAqI7y11cjrsNWcfLXwC91tbNds10YtoWNS6KzXZhEbJeojvLXVyOuw1Zx8tfAL3W1s12zXRi2hY1LorNdmERslw==")
 }]

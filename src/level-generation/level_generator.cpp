@@ -83,7 +83,7 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 	m_Rooms_Graph *rooms_graph = m_GenerateRoomGraph(gridCenter, file);
 	UtilityFunctions::print("Generating Bitmap");
 	m_ConnectGraphNodes(tile_bit_map, rooms_graph);
-	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
+	//m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
 	UtilityFunctions::print("Generated Bitmap");
 	m_GenerateRoom(tile_bit_map, tile_grid, root, spawnable_locations);
 	UtilityFunctions::print("Tile Grid Before Return: ", tile_grid->size());
@@ -196,24 +196,38 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms
 			String edge_hash = vformat("node_%d_edge_%d", i, j);
 			float dist = m_HexDistance(graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location) / 2.0f;
 			for (int i = 0; i < 5; i++) {
-				int x = Math::round((graph->vertices[node_hash]->location.x - graph->vertices[node_hash]->edges[edge_hash]->destination->location.x) / dist);
-				int y = Math::round((graph->vertices[node_hash]->location.y - graph->vertices[node_hash]->edges[edge_hash]->destination->location.y) / dist);
+				int x = -1 * Math::floor((graph->vertices[node_hash]->location.x - graph->vertices[node_hash]->edges[edge_hash]->destination->location.x) / dist);
+				int y = -1 * Math::floor((graph->vertices[node_hash]->location.y - graph->vertices[node_hash]->edges[edge_hash]->destination->location.y) / dist);
+				UtilityFunctions::print("Info: Room: ", node_hash, ",", dist, ", (", x, ",", y, "), ", graph->vertices[node_hash]->location, " ", graph->vertices[node_hash]->edges[edge_hash]->destination->location);
 				int mult = Math::max(Math::abs(x), Math::abs(y));
 				int inverse = i - mult;
-				x *= inverse;
-				y *= inverse;
-				UtilityFunctions::print("Info: ", dist, ", (", x, ",", y, ")");
-				UtilityFunctions::print("Notted: (", x ^ x, ", ", y ^ y, ")");
+				int x_prime = x * inverse;
+				int y_prime = y * inverse;
+				UtilityFunctions::print("Info: ", dist, ", (", x_prime, ",", y_prime, ")");
 				UtilityFunctions::print(graph->vertices[node_hash]->edges[edge_hash]->direction);
+        UtilityFunctions::print(graph->vertices[node_hash]->location + Vector2i(x_prime, -y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, -y_prime));
 
 				if (num_edges > 0) {
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x, y));
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x, 0));
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y));
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(-x, -y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(-x, -y));
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(-x, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(-x, 0));
-					m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, -y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, -y));
+					if (Math::abs(x) == Math::abs(y)) {
+						m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
+            m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x_prime, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, y_prime));
+            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(y - 1, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(y - 1, y));
+            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y_prime));
+            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x_prime, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, 0));
+					} else if (x > y) {
+						m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
+            m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y_prime));
+            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location - Vector2i(0, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location - Vector2i(0, y_prime));
+          } else {
+						m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
+            m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x_prime, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, 0));
+            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location - Vector2i(x_prime, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location - Vector2i(x_prime, 0));
+          }
+
+					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y));
+					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(-x, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(-x, y));
+					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(-x, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(-x, 0));
+					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, -y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, -y));
 				}
 			}
 		}
@@ -324,6 +338,7 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 	Object *daemon = Engine::get_singleton()->get_singleton("Daemon");
 	Ref<Tile> new_tile;
 	tile_type &= 0x00FF;
+	//UtilityFunctions::print("Tile Type: ", tile_type);
 	switch (tile_type) {
 		case 1:
 			new_tile = Ref<Ordinary>(memnew(Ordinary(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type)));
@@ -618,40 +633,42 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 								((Math::abs(q) == radius / 4) && (Math::abs(r) == radius / 4)) ||
 								((Math::abs(q) == radius / 2) && (Math::abs(-q - r) == Math::round(radius / 3.0f))) ||
 								((Math::abs(-q - r) == Math::round(radius / 3.0f)) && Math::abs(r) == radius / 2)) {
-							/*if (Math::abs(q) == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
-								tile_bit_map.set((room_location[0] + q - 3) * m_maximum_grid_size[1] + (room_location[1] + r), 0xB100);
-							} else if (Math::abs(q) == -radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
-								tile_bit_map.set((room_location[0] + q + 3) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8200);
-							} else if (Math::abs(r) == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8405);
-							} else if (Math::abs(r) == -radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8805);
-							} else {*/
 							tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0005);
-							//}
 						} else {
-							if (q == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
-								if (tile_bit_map.get((room_location[0] + q + 1) * m_maximum_grid_size[1] + room_location[1] + r) == 0 ||
-										tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + room_location[1] + r - 2) == 0 ||
-										tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + room_location[1] + r - 1) == 0) {
-									tile_bit_map.set((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r), 0xA100);
+							//UtilityFunctions::print("tile bit map size: ", tile_bit_map.size());
+							//UtilityFunctions::print((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r));
+							//UtilityFunctions::print(tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)));
+							//UtilityFunctions::print(tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)) | 0x0001);
+							tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r),
+									/*tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)) | */ 0x0001);
+							if (Math::abs(q) == radius || Math::abs(r) == radius || (Math::abs(q) + Math::abs(r)) == radius) {
+								if ((tile_bit_map.get((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r)) & 0x00FF) == 0) {
+									tile_bit_map.set((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r),
+											tile_bit_map.get((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r)) | 0x8100);
 								}
-							} else if (q == -radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
-								tile_bit_map.set((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r), 0x8C01);
-							} else if (r == radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
-								tile_bit_map.set((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r + 1), 0x8601);
-							} else if (r == -radius) {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
-								tile_bit_map.set((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r - 1), 0xB001);
-							} else {
-								tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 0x0001);
+								if ((tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r + 1)) & 0x00FF) == 0) {
+									tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r + 1),
+											tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r + 1)) | 0x8200);
+								}
+								if ((tile_bit_map.get((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r + 1)) & 0x00FF) == 0) {
+									tile_bit_map.set((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r + 1),
+											tile_bit_map.get((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r + 1)) | 0x8400);
+								}
+								if ((tile_bit_map.get((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r)) & 0x00FF) == 0) {
+									tile_bit_map.set((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r),
+											tile_bit_map.get((room_location[0] + q - 1) * m_maximum_grid_size[1] + (room_location[1] + r)) | 0x8800);
+								}
+								if ((tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r - 1)) & 0x00FF) == 0) {
+									tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r - 1),
+											tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r - 1)) | 0x9000);
+								}
+								if ((tile_bit_map.get((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r - 1)) & 0x00FF) == 0) {
+									tile_bit_map.set((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r - 1),
+											tile_bit_map.get((room_location[0] + q + 1) * m_maximum_grid_size[1] + (room_location[1] + r - 1)) | 0xA000);
+								}
 							}
 						}
+						//UtilityFunctions::print("Tile Type: ", tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)));
 					}
 				}
 				//				q = rnd->GetInteger(-radius, radius);
@@ -664,7 +681,7 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 				for (int i = 0; i < interactables.size(); i++) {
 					q = rnd->GetInteger(-radius, radius);
 					r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
-					while ((tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)) > 1)) {
+					while (((tile_bit_map.get((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r)) & 0x000F) > 1)) {
 						q = rnd->GetInteger(-radius, radius);
 						r = rnd->GetInteger(Math::max(-radius, -q - radius), Math::min(radius, -q + radius));
 					}
