@@ -78,6 +78,39 @@ Nodes:
         - "red"
         - "purple"
       purpose: 2
+  - node_6:
+      room_type: 1
+      room_size_extents:
+        - 10
+        - 12
+      room_bounding_zone:
+        - 10
+      color_possibilities:
+        - "red"
+        - "purple"
+      purpose: 2
+  - node_7:
+      room_type: 1
+      room_size_extents:
+        - 10
+        - 12
+      room_bounding_zone:
+        - 10
+      color_possibilities:
+        - "red"
+        - "purple"
+      purpose: 2
+  - node_8:
+      room_type: 1
+      room_size_extents:
+        - 10
+        - 12
+      room_bounding_zone:
+        - 10
+      color_possibilities:
+        - "red"
+        - "purple"
+      purpose: 2
 Edges:
   - edge_0:
       from: "node_0"
@@ -113,12 +146,12 @@ Edges:
       from: "node_2"
       to: "node_4"
       direction:
-        - 13
-        - 5
+        - -2
+        - 1
       distance_extents:
         - 5
         - 7
-      distance_constraint: 4
+      distance_constraint: 1
   - edge_4:
       from: "node_1"
       to: "node_5"
@@ -130,56 +163,53 @@ Edges:
         - 20
       distance_constraint: 2
   - edge_5:
-      from: "node_0"
-      to: "node_4"
-  #  - edge_5:
-  #      from: "node_2"
-  #      to: "node_5"
-  #  - edge_6:
-  #      from: "node_3"
-  #      to: "node_5"
-  #  - edge_7:
-  #      from: "node_4"
-  #      to: "node_5"
-  #  - edge_8:
-  #      from: "node_4"
-  #      to: "node_7"
-  #      direction:
-  #        - -1
-  #        - -1
-  #      distance_extents:
-  #        - 5
-  #        - 7
-  #      distance_constraint: 1
-  #  - edge_9:
-  #      from: "node_3"
-  #      to: "node_6"
-  #      direction:
-  #        - -1
-  #        - -1
-  #      distance_extents:
-  #        - 5
-  #        - 7
-  #      distance_constraint: 1
-  #  - edge_10:
-  #      from: "node_7"
-  #      to: "node_5"
-  #  - edge_11:
-  #      from: "node_7"
-  #      to: "node_8"
-  #      direction:
-  #        - 1
-  #        - -2
-  #      distance_extents:
-  #        - 5
-  #        - 7
-  #      distance_constraint: 1
-  #  - edge_12:
-  #      from: "node_5"
-  #      to: "node_8"
-  #  - edge_13:
-  #      from: "node_8"
-  #      to: "node_6"
-  #  - edge_14:
-  #      from: "node_8"
-  #      to: "node_3"
+      from: "node_2"
+      to: "node_5"
+  - edge_6:
+      from: "node_3"
+      to: "node_5"
+  - edge_7:
+      from: "node_4"
+      to: "node_5"
+  - edge_8:
+      from: "node_4"
+      to: "node_7"
+      direction:
+        - -1
+        - -1
+      distance_extents:
+        - 5
+        - 7
+      distance_constraint: 1
+  - edge_9:
+      from: "node_3"
+      to: "node_6"
+      direction:
+        - -1
+        - -1
+      distance_extents:
+        - 5
+        - 7
+      distance_constraint: 1
+  - edge_10:
+      from: "node_7"
+      to: "node_5"
+  - edge_11:
+      from: "node_7"
+      to: "node_8"
+      direction:
+        - 1
+        - -2
+      distance_extents:
+        - 5
+        - 7
+      distance_constraint: 1
+  - edge_12:
+      from: "node_5"
+      to: "node_8"
+  - edge_13:
+      from: "node_8"
+      to: "node_6"
+  - edge_14:
+      from: "node_8"
+      to: "node_3"

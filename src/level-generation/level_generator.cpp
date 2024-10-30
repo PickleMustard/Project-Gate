@@ -83,7 +83,7 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 	m_Rooms_Graph *rooms_graph = m_GenerateRoomGraph(gridCenter, file);
 	UtilityFunctions::print("Generating Bitmap");
 	m_ConnectGraphNodes(tile_bit_map, rooms_graph);
-	//m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
+	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
 	UtilityFunctions::print("Generated Bitmap");
 	m_GenerateRoom(tile_bit_map, tile_grid, root, spawnable_locations);
 	UtilityFunctions::print("Tile Grid Before Return: ", tile_grid->size());
@@ -185,6 +185,50 @@ void LevelGenerator::m_ReplaceNodesInPattern(m_Rooms_Graph *rooms_graph) {
  *
  * Out variables:
  *    tile_bit_map: Updates the connecting tiles between rooms as ordinary tiles
+ *
+ *
+ * Let me explain wtf I'm doing here because it might not make sense in the future
+ * Each node has an understanding of where its center tile is and what edges extend from it
+ * Each edge knows the destination node which, like above, knows its center
+ * To draw a line of tiles from one room to another, we need to know the direction
+ * Some directions are stated in the definition YAML file and are used to generate a new edge
+ * Some edges, however, connect two tiles that already have a defined parent edge
+ * There is no need to define another parent edge and mess up the calculations
+ * This will come into importance in a bit
+ *
+ * To connect two rooms, we use the draw line of tiles function, which calculates an interpolated line of tiles between
+ *  the set points
+ * To beef out the line between rooms, we need to define which axis to move along. Otherwise, the interpolated points
+ *  will intersect and will make lines of inconsistent width that should have consistent width
+ * On rooms with lines that move along a cardinal, hexagonal direction, we can move along the axis that direction isn't in
+ *  I.E. if the direction is (-1, 0), we are moving along the R-axis, changing Q
+ *  Therefore, new lines can either change the R position or the S position
+ * Rooms that don't move along a cardinal hexagonal direction need a bit more work
+ *  These will only have a single repositioning direction that will work
+ *  I.E. (-2, 1) will only accept movement in the +- R directions
+ *  The general rule is that more movement in Q requires changing R
+ *  More movement in R requires changing Q
+ *  More movement in S requires changing Q and R in opposite directions (+Q, -R) or (-Q, +R)
+ * Finally, rooms that don't have defined directions will sometimes have some quirks in their calculated direction
+ *  This is normal given that distances are randomized from parent to child room
+ *  Since the directions can be decimals, they are rounded to find the closest direction value
+ *  ****TEST THIS****
+ *
+ * The way this is implemented is the following
+ * 1. The Q,R coordinates are calculated by getting the vector between the 2 rooms and dividing by the scalar distance between them.
+ * 2. The Q,R coordinates are rounded to the nearest integer
+ * 3. The S coordinate is calculated from the 2 Axial coordinates
+ * 4. The coordinates are minimized by the Largest Common Denominator
+ *  4.1. This changes for example, a (2, -2) direction vector into a (1, -1) vector for consistency
+ * 5. Find the max of Q, R, and S
+ * 6. If the max is still 1, we are on a cardinal direction
+ *  6.1. If Q is moving more than R => Change the R value
+ *  6.2. Otherwise, Change the Q value
+ *  ** Don't have to worry about S value as we use Axial coordinates for most things, Cubic is used here to distinguish direction
+ * 7. Otherwise, if the max is greater than 1,
+ *  7.1. If the greatest value of the 3 is R => Change the Q value
+ *  7.2. If the greatest value of the 3 is S => Change the Q and R values in opposite directions
+ *  7.3. Otherwise, if the greatest value of the 3 is Q => Change the R value
  */
 void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms_Graph *graph) {
 	int nums_rooms = graph->vertices.size();
@@ -195,34 +239,48 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms
 		for (int j = 0; j < num_edges; j++) {
 			String edge_hash = vformat("node_%d_edge_%d", i, j);
 			float dist = m_HexDistance(graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location) / 2.0f;
-			for (int i = 0; i < 5; i++) {
-				int x = -1 * Math::floor((graph->vertices[node_hash]->location.x - graph->vertices[node_hash]->edges[edge_hash]->destination->location.x) / dist);
-				int y = -1 * Math::floor((graph->vertices[node_hash]->location.y - graph->vertices[node_hash]->edges[edge_hash]->destination->location.y) / dist);
-				UtilityFunctions::print("Info: Room: ", node_hash, ",", dist, ", (", x, ",", y, "), ", graph->vertices[node_hash]->location, " ", graph->vertices[node_hash]->edges[edge_hash]->destination->location);
-				int mult = Math::max(Math::abs(x), Math::abs(y));
+			float x = Math::round((graph->vertices[node_hash]->location.x - graph->vertices[node_hash]->edges[edge_hash]->destination->location.x) / dist);
+			float y = Math::round((graph->vertices[node_hash]->location.y - graph->vertices[node_hash]->edges[edge_hash]->destination->location.y) / dist);
+			Vector3 coordinate = TileGrid::AxialToCube(Vector2i(x, y));
+
+      UtilityFunctions::print("Before Transform: ", coordinate, "| (", x, ", ", y, ")");
+      int mult = Math::max(Math::abs(x), Math::max(Math::abs(y), Math::abs(coordinate[2])));
+      coordinate = coordinate.normalized() * mult;
+      coordinate = coordinate.round();
+			UtilityFunctions::print("Info: Room: ", node_hash, ",", dist, ",", coordinate, ", ", graph->vertices[node_hash]->location, " ", graph->vertices[node_hash]->edges[edge_hash]->destination->location);
+			UtilityFunctions::print("Mult: ", mult);
+			for (int i = -2; i < 3; i++) {
 				int inverse = i - mult;
 				int x_prime = x * inverse;
 				int y_prime = y * inverse;
-				UtilityFunctions::print("Info: ", dist, ", (", x_prime, ",", y_prime, ")");
-				UtilityFunctions::print(graph->vertices[node_hash]->edges[edge_hash]->direction);
-        UtilityFunctions::print(graph->vertices[node_hash]->location + Vector2i(x_prime, -y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, -y_prime));
+
+				//UtilityFunctions::print("Info: ", dist, ", ", coordinate);
+				//UtilityFunctions::print(graph->vertices[node_hash]->edges[edge_hash]->direction);
+				//UtilityFunctions::print(graph->vertices[node_hash]->location + Vector2i(x_prime, -y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, -y_prime));
 
 				if (num_edges > 0) {
-					if (Math::abs(x) == Math::abs(y)) {
-						m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
-            m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x_prime, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, y_prime));
-            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(y - 1, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(y - 1, y));
-            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y_prime));
-            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x_prime, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, 0));
-					} else if (x > y) {
-						m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
-            m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y_prime));
-            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location - Vector2i(0, y_prime), graph->vertices[node_hash]->edges[edge_hash]->destination->location - Vector2i(0, y_prime));
-          } else {
-						m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
-            m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(x_prime, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(x_prime, 0));
-            //m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location - Vector2i(x_prime, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location - Vector2i(x_prime, 0));
-          }
+					float test_value = Math::max(Math::max(Math::abs(coordinate[0]), Math::abs(coordinate[1])), Math::abs(coordinate[2]));
+					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location, graph->vertices[node_hash]->edges[edge_hash]->destination->location);
+					if (test_value == 1) {
+						if (Math::abs(coordinate[0]) > Math::abs(coordinate[1])) {
+							UtilityFunctions::print("Axial Add R");
+							m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, i), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, i));
+						} else {
+							UtilityFunctions::print("Axial Add Q");
+							m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(i, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(i, 0));
+						}
+					} else {
+						if (Math::abs(coordinate[1]) > Math::abs(coordinate[0]) && Math::abs(coordinate[1]) > Math::abs(coordinate[2])) {
+							UtilityFunctions::print("Non-Axial Move Along R-axis, Change Q");
+							m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(i, 0), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(i, 0));
+						} else if (Math::abs(coordinate[2]) > Math::abs(coordinate[0]) && Math::abs(coordinate[2]) > Math::abs(coordinate[1])) {
+							UtilityFunctions::print("Non-Axial Move Along S-axis, Change Q and R in opposite directions");
+							m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(i, -i), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(i, -i));
+						} else {
+							UtilityFunctions::print("Non-Axial Move Along Q-axis, Change R");
+							m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, i), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, i));
+						}
+					}
 
 					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(0, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(0, y));
 					//m_DrawLineTiles(tile_bit_map, graph->vertices[node_hash]->location + Vector2i(-x, y), graph->vertices[node_hash]->edges[edge_hash]->destination->location + Vector2i(-x, y));
