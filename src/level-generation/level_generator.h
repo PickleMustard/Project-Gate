@@ -111,7 +111,8 @@ private:
 	bool m_OverlappingRooms(const Vector<uint16_t> &tile_bit_map, Vector2i center, int radius);
 	void m_FillBitMap(Vector<uint16_t> &tile_bit_map, int q_center, int r_center, int radius);
 	void m_ConnectTiles(Vector<uint16_t> &tile_bit_map, Vector<Vector2i> room_neighbors);
-	void m_DrawLineTiles(Vector<uint16_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center);
+	void m_DrawLineTiles(Vector<uint16_t> &tile_bit_map, Vector2i first_room_center, Vector2i second_room_center, bool external_tile);
+  void m_AddPotentialWalls(Vector<uint16_t> &tile_bit_map, Vector2i location);
 	void m_AddNodeToTree(m_Room_Tree_Node *root_room, Vector2i new_room, int level);
 	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
 	int m_HexDistance(Vector2i first_room, Vector2i second_room);

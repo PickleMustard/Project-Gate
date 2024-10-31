@@ -10,7 +10,7 @@ Adjacency:
 
 Nodes:
   - node_0:
-      room_type: 2
+      room_type: 4
       room_size_extents:
         - 8
         - 12
