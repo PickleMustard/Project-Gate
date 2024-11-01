@@ -724,8 +724,36 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 					}
 				}
 				break;
-			//Parallelogram
+      //Ellipse Top Left -> Bottom Right
 			case 3:
+				for (int r = -radius; r <= radius; r++) {
+					int q1 = Math::max(-(radius * 2), -r - (radius * 2));
+					int q2 = Math::min((radius * 2), -r + (radius * 2));
+					for (int q = q1; q <= q2; q++) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
+						if (Math::abs(q) == radius * 2 || Math::abs(r) == radius || (Math::abs(q) + Math::abs(r)) == radius * 2) {
+							Vector2i tile_location = room_location + Vector2i(q, r);
+							m_AddPotentialWalls(tile_bit_map, tile_location);
+						}
+					}
+				}
+				break;
+      //Ellipse Top Right -> Bottom Left
+			case 4:
+				for (int q = -(radius * 2); q <= (radius * 2); q++) {
+          int r1 = Math::max(-q - radius, -2 * radius);
+          int r2 = Math::min(-q + radius, 2 * radius);
+					for (int r = r1; r <= r2; r++) {
+						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
+						if (Math::abs(q) == radius * 2 || Math::abs(r) == radius * 2 || Math::abs(-q - r) == radius) {
+							Vector2i tile_location = room_location + Vector2i(q, r);
+							m_AddPotentialWalls(tile_bit_map, tile_location);
+						}
+					}
+				}
+				break;
+			//Parallelogram
+			case 5:
 				for (int q = -(radius * 2); q <= (radius * 2); q++) {
 					int r1 = Math::max(-radius, -q - radius);
 					int r2 = Math::min(radius, -q + radius);
@@ -739,33 +767,24 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 				}
 				break;
 				//Rectangle
-			case 4:
+			case 6:
 				for (int q = -radius; q <= radius; q++) {
 					int r1 = Math::max(-radius, (-q * 2) - radius);
 					int r2 = Math::min(radius, (-q * 2) + radius);
 					for (int r = r1; r <= r2; r++) {
 						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
-						if (Math::abs(q) == radius || Math::abs(r) == radius || (Math::abs(q) + Math::abs(r)) == radius) {
+						if (Math::abs(-(q * 2) - r) == radius || Math::abs(r) == radius || Math::abs(-(q * 2) - r) == radius - 1) {
 							Vector2i tile_location = room_location + Vector2i(q, r);
 							m_AddPotentialWalls(tile_bit_map, tile_location);
 						}
 					}
 				}
 				break;
-			case 5:
+			case 7:
 				for (int q = -radius; q <= radius; q++) {
 					int r1 = Math::max(-radius, (-q * 2) - radius);
 					int r2 = Math::min(radius, (-q * 2) + radius);
 					for (int r = r1; r <= r2; r++) {
-						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
-					}
-				}
-				break;
-			case 6:
-				for (int r = -radius; r <= radius; r++) {
-					int q1 = Math::max(-(radius * 2), -r - (radius * 2));
-					int q2 = Math::min((radius * 2), -r + (radius * 2));
-					for (int q = q1; q <= q2; q++) {
 						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
 					}
 				}
