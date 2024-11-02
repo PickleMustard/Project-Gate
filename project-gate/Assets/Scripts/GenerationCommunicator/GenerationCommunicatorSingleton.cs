@@ -15,7 +15,7 @@ public partial class GenerationCommunicatorSingleton : Node
   private Callable GenerateItemCall;
 
   private Node TileGrid;
-  private Node3D Top;
+  private Node3D Level;
 
   public override void _EnterTree()
   {
@@ -29,7 +29,7 @@ public partial class GenerationCommunicatorSingleton : Node
 
   public override void _Ready()
   {
-    Top = GetNodeOrNull<Node3D>("/root/Top");
+    Level = GetNodeOrNull<Node3D>("/root/Level");
   }
 
   public Callable GetGenerateItemSignal()
@@ -60,7 +60,7 @@ public partial class GenerationCommunicatorSingleton : Node
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     WeaponGenerator weaponGenerator = new WeaponGenerator();
     Weapon startingWeapon = weaponGenerator.GenerateWeapon("res://Configuration/Weapons/testweapon.yml");
-    Top.AddChild(character, true);
+    Level.AddChild(character, true);
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
     bannerMargin.AddChild(characterBanner, true);
@@ -81,7 +81,7 @@ public partial class GenerationCommunicatorSingleton : Node
   {
     Node3D character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Node3D;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
-    Top.AddChild(character, true);
+    Level.AddChild(character, true);
 
     string name = character.Name;
     character.ReplaceBy(generatedCharacter, true);
@@ -107,7 +107,7 @@ public partial class GenerationCommunicatorSingleton : Node
   public void SpawnEnemy(Resource Tile, Character generatedCharacter)
   {
     Character enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as Character;
-    Top.AddChild(enemy, true);
+    Level.AddChild(enemy, true);
     enemy.ReplaceBy(generatedCharacter);
     generatedCharacter.AddToGroup("Enemies");
     generatedCharacter.Name = generatedCharacter.CharacterName;

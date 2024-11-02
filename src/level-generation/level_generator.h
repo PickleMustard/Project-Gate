@@ -41,6 +41,7 @@ private:
   struct m_Room_Edge {
     int weight;
     int constraint;
+    int width;
     Vector2i direction;
     m_Room_Vertex *destination;
   };

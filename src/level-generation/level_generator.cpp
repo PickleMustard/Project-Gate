@@ -145,12 +145,14 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 		String edge_dict_name = vformat("edge_%d", i);
 
 		Dictionary edge_meta = edge[edge_dict_name];
+    int width = edge_meta["width"];
+    UtilityFunctions::print("Width: ", width);
 		if (edge_meta.has("direction")) {
 			Array edge_direction_meta = edge_meta["direction"];
 			Array edge_distance_extents = edge_meta["distance_extents"];
 			int distance_constraint = edge_meta["distance_constraint"];
 			Vector2i direction{ edge_direction_meta[0], edge_direction_meta[1] };
-			m_Room_Edge *new_edge = new m_Room_Edge{ rnd->GetInteger(edge_distance_extents[0], edge_distance_extents[1]), distance_constraint, direction, rooms_graph->vertices[edge_meta["to"]] };
+			m_Room_Edge *new_edge = new m_Room_Edge{ rnd->GetInteger(edge_distance_extents[0], edge_distance_extents[1]), distance_constraint, width, direction, rooms_graph->vertices[edge_meta["to"]] };
 			String edge_hash_name = vformat("%s_edge_%d", edge_meta["from"], rooms_graph->vertices[edge_meta["from"]]->edges.size());
 			Vector2i from_radius{ rooms_graph->vertices[edge_meta["from"]]->radius, rooms_graph->vertices[edge_meta["from"]]->radius };
 			Vector2i to_radius{ rooms_graph->vertices[edge_meta["to"]]->radius, rooms_graph->vertices[edge_meta["to"]]->radius };
@@ -158,7 +160,7 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 			rooms_graph->vertices[edge_meta["from"]]->edges.insert(edge_hash_name, new_edge);
 		} else {
 			String edge_hash_name = vformat("%s_edge_%d", edge_meta["from"], rooms_graph->vertices[edge_meta["from"]]->edges.size());
-			m_Room_Edge *new_edge = new m_Room_Edge{ 0, 0, Vector2i(0, 0), rooms_graph->vertices[edge_meta["to"]] };
+			m_Room_Edge *new_edge = new m_Room_Edge{ 0, 0, width, Vector2i(0, 0), rooms_graph->vertices[edge_meta["to"]] };
 			rooms_graph->vertices[edge_meta["from"]]->edges.insert(edge_hash_name, new_edge);
 		}
 	}
@@ -245,7 +247,7 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms
 
 			UtilityFunctions::print("Before Transform: ", coordinate, "| (", x, ", ", y, ")");
 			int mult = Math::max(Math::abs(x), Math::max(Math::abs(y), Math::abs(coordinate[2])));
-			int width = 2;
+			int width = graph->vertices[node_hash]->edges[edge_hash]->width;
 			coordinate = coordinate.normalized() * mult;
 			coordinate = coordinate.round();
 			UtilityFunctions::print("Info: Room: ", node_hash, ",", dist, ",", coordinate, ", ", graph->vertices[node_hash]->location, " ", graph->vertices[node_hash]->edges[edge_hash]->destination->location);

@@ -34,7 +34,7 @@ public partial class CharacterTurnController : Node
     MovementQueue = new Queue<Character>();
     AliveCharacterList = new List<Character>();
     PriorityUpdateHeap = new PriorityQueue<Character, float>();
-    unitControl = GetNodeOrNull<UnitControl>("/root/Top/pivot/UnitControl");
+    UnitControl UnitMovement = GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl;
     Node Daemon = (Node)Engine.GetSingleton("Daemon");
     Daemon.Connect("StartTurnController", StartLevelTurnController);
     AddToGroup("TurnController");

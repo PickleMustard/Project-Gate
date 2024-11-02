@@ -2,7 +2,7 @@ using System.Collections;
 using Godot;
 using HCoroutines;
 
-public partial class UnitControl : Node3D
+public partial class UnitControl : Node
 {
   [Signal]
   public delegate void UpdateSelectedCharacterEventHandler();
@@ -30,14 +30,14 @@ public partial class UnitControl : Node3D
   {
     Callable notify = new Callable(this, "NotifyLog");
     UpdateCharacter = new Callable(this, "UpdateCurrentCharacter");
-    InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
+    InputHandler i_handle = GetTree().GetNodesInGroup("InputHandler")[0] as InputHandler;
     i_handle.DisplayDestinations += DisplayPotentialDestinations;
     i_handle.HideDestinations += HidePotentialDestinations;
-    //capsule = GetNode<Node3D>("/root/Top/character");
+    //capsule = GetNode<Node3D>("/root/Level/character");
     test = Engine.GetSingleton("GlobalTileNotifier");
     var signals = test.GetSignalList();
     test.Connect(signals[0]["name"].ToString(), notify);
-    level = GetNode<Node>("/root/Top/Level");
+    level = GetNode<Node>("/root/Level/Level");
     unit_location = new Vector2I(0, 0);
     AddToGroup("UnitControl");
   }
@@ -136,7 +136,7 @@ public partial class UnitControl : Node3D
   public Godot.Collections.Array CalculateCharacterMovementRange(Vector2I center_tile, int radius)
   {
     Godot.Collections.Array MovementRange = new Godot.Collections.Array();
-    string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
+    string formated_tile_name = string.Format("/root/Level/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
     Node found_tile = GetNode<Node>(formated_tile_name);
     for (int q = -radius; q <= radius; q++)
     {
@@ -144,7 +144,7 @@ public partial class UnitControl : Node3D
       int r2 = Mathf.Min(radius, -q + radius);
       for (int r = r1; r <= r2; r++)
       {
-        string potential_formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
+        string potential_formated_tile_name = string.Format("/root/Level/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
         found_tile = GetNodeOrNull<Node>(potential_formated_tile_name);
         if (found_tile != null && found_tile.GetChildCount() > 0)
         {
@@ -177,7 +177,7 @@ public partial class UnitControl : Node3D
   public Godot.Collections.Array CalculateMovementRange(Vector2I center_tile, int radius)
   {
     Godot.Collections.Array MovementRange = new Godot.Collections.Array();
-    string formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
+    string formated_tile_name = string.Format("/root/Level/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
     Node found_tile = GetNode<Node>(formated_tile_name);
     for (int q = -radius; q <= radius; q++)
     {
@@ -185,7 +185,7 @@ public partial class UnitControl : Node3D
       int r2 = Mathf.Min(radius, -q + radius);
       for (int r = r1; r <= r2; r++)
       {
-        string potential_formated_tile_name = string.Format("/root/Top/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
+        string potential_formated_tile_name = string.Format("/root/Level/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0] + q, center_tile[1] + r);
         found_tile = GetNodeOrNull<Node>(potential_formated_tile_name);
         if (found_tile != null && found_tile.GetChildCount() > 0)
         {
@@ -368,7 +368,7 @@ public partial class UnitControl : Node3D
       {
         timeElapsed += Co.DeltaTime;
         float lerpStep = timeElapsed / rotationDuration;
-        CurrentCharacter.Quaternion = Quaternion.Slerp(endQuat, lerpStep);
+        CurrentCharacter.Quaternion = CurrentCharacter.Quaternion.Slerp(endQuat, lerpStep);
         yield return null;
       }
       CurrentCharacter.Quaternion = endQuat;

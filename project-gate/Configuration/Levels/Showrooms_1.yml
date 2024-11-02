@@ -122,6 +122,7 @@ Edges:
         - 10
         - 15
       distance_constraint: 2
+      width: 3
   - edge_1:
       from: "node_1"
       to: "node_2"
@@ -132,6 +133,7 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
+      width: 2
   - edge_2:
       from: "node_1"
       to: "node_3"
@@ -142,6 +144,7 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
+      width: 2
   - edge_3:
       from: "node_2"
       to: "node_4"
@@ -152,6 +155,7 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
+      width: 2
   - edge_4:
       from: "node_1"
       to: "node_5"
@@ -162,15 +166,19 @@ Edges:
         - 16
         - 20
       distance_constraint: 2
+      width: 3
   - edge_5:
       from: "node_2"
       to: "node_5"
+      width: 3
   - edge_6:
       from: "node_3"
       to: "node_5"
+      width: 3
   - edge_7:
       from: "node_4"
       to: "node_5"
+      width: 3
   - edge_8:
       from: "node_4"
       to: "node_7"
@@ -181,6 +189,7 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
+      width: 2
   - edge_9:
       from: "node_3"
       to: "node_6"
@@ -191,9 +200,11 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
+      width: 2
   - edge_10:
       from: "node_7"
       to: "node_5"
+      width: 3
   - edge_11:
       from: "node_7"
       to: "node_8"
@@ -204,12 +215,16 @@ Edges:
         - 5
         - 7
       distance_constraint: 1
+      width: 2
   - edge_12:
       from: "node_5"
       to: "node_8"
+      width: 3
   - edge_13:
       from: "node_8"
       to: "node_6"
+      width: 2
   - edge_14:
       from: "node_8"
       to: "node_3"
+      width: 2

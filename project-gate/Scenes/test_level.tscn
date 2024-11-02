@@ -8,15 +8,25 @@
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
 [ext_resource type="PackedScene" uid="uid://c8yim1xd3mn7o" path="res://User-Interface/user_interface.tscn" id="6_qmqhf"]
 
-[node name="Top" type="Node3D"]
+[node name="Level" type="Node3D"]
 
-[node name="CharacterTurnController" type="Node" parent="."]
+[node name="Services" type="Node" parent="."]
+
+[node name="InputHandler" type="Node" parent="Services"]
+script = ExtResource("3_af0co")
+
+[node name="UnitControl" type="Node" parent="Services"]
+script = ExtResource("2_ggfwn")
+movementTime = 0.01
+rotationDuration = 0.001
+
+[node name="CharacterTurnController" type="Node" parent="Services"]
 script = ExtResource("4_do7ow")
 
 [node name="Level" type="Level" parent="."]
-m_level_file_location = "res://Configuration/Testing/test.yml"
+m_level_file_location = "res://Configuration/Levels/Showrooms_1.yml"
 
-[node name="@TileGrid@17479" type="TileGrid" parent="Level"]
+[node name="Characters" type="Node" parent="."]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)
@@ -28,14 +38,6 @@ current_camera_position = 3
 transform = Transform3D(1, 0, 0, 0, 0.173644, 0.984786, 0, -0.984786, 0.173644, 0, 24, 0)
 rotation_edit_mode = 2
 fov = 110.0
-
-[node name="UnitControl" type="Node3D" parent="pivot"]
-script = ExtResource("2_ggfwn")
-movementTime = 0.01
-rotationDuration = 0.001
-
-[node name="input_handler" type="Node" parent="."]
-script = ExtResource("3_af0co")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 2164.84, 610.057, 3926.68)
