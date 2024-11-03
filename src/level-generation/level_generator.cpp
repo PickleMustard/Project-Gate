@@ -298,7 +298,7 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms
  * No direct returns
  */
 void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations) {
-	Object *GenerationCommunicator = Engine::get_singleton()->get_singleton("GenerationCommunicatorSingleton");
+	Object *CommunicationBus = Engine::get_singleton()->get_singleton("CommunicationBus");
 	ResourceLoader *m_rl = memnew(ResourceLoader);
 	int counter = 0;
 	m_rl->initialize_class();
@@ -312,7 +312,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 			int tile_type = tile_map.get(i);
 			//
 			if (!(tile_type & 0x8000)) {
-				Ref<Tile> new_tile = m_InstantiateTile(GenerationCommunicator, spawnable_locations, location, q, r, tile_type);
+				Ref<Tile> new_tile = m_InstantiateTile(CommunicationBus, spawnable_locations, location, q, r, tile_type);
 				grid_of_tiles->insert(vformat("hex %d,%d", q, r), new_tile);
 
 				TileCollision *m_collision_body = memnew(TileCollision);
@@ -384,7 +384,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
  * Out Variables:
  *    spawnable_locations: If the instantiated tile has the ability to spawn enemies, it is added to the list of spawnable locations
  */
-Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, uint16_t tile_type) {
+Ref<Tile> LevelGenerator::m_InstantiateTile(Object *CommunicationBus, Vector<Ref<Tile>> &spawnable_locations, Vector3 location, int q, int r, uint16_t tile_type) {
 	Object *daemon = Engine::get_singleton()->get_singleton("Daemon");
 	Ref<Tile> new_tile;
 	tile_type &= 0x00FF;
@@ -395,14 +395,14 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 			break;
 		case 2:
 			new_tile = Ref<Interactable>(memnew(Interactable(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 2)));
-			if (GenerationCommunicator) {
-				new_tile->call("AddStepOnEvent", GenerationCommunicator->call("GetGenerateItemSignal"));
+			if (CommunicationBus) {
+				new_tile->call("AddStepOnEvent", CommunicationBus->call("GetGenerateItemSignal"));
 			}
 			break;
 		case 3:
 			new_tile = Ref<Interactable>(memnew(Interactable(location, q, r, m_is_flat_topped, m_outer_size, m_inner_size, m_height, tile_type, 4)));
-			if (GenerationCommunicator) {
-				new_tile->call("AddStepOnEvent", GenerationCommunicator->call("GetGenerateItemSignal"));
+			if (CommunicationBus) {
+				new_tile->call("AddStepOnEvent", CommunicationBus->call("GetGenerateItemSignal"));
 			}
 			break;
 		case 4:
@@ -414,8 +414,8 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 				daemon->call("AddEnemySpawnLocation", new_tile);
 			}
 			//spawnable_locations.push_back(new_tile);
-			if (GenerationCommunicator) {
-				Callable signal = GenerationCommunicator->call("GetSpawnEnemySignal");
+			if (CommunicationBus) {
+				Callable signal = CommunicationBus->call("GetSpawnEnemySignal");
 				new_tile->call("SetSpawnerCallable", signal);
 			}
 			break;
@@ -424,8 +424,8 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *GenerationCommunicator, Vect
 			if (daemon->has_method("AddPlayerSpawnLocation")) {
 				daemon->call("AddPlayerSpawnLocation", new_tile);
 			}
-			if (GenerationCommunicator) {
-				Callable signal = GenerationCommunicator->call("GetSpawnCharacterSignal");
+			if (CommunicationBus) {
+				Callable signal = CommunicationBus->call("GetSpawnCharacterSignal");
 				new_tile->call("SetSpawnerCallable", signal);
 			}
 			break;

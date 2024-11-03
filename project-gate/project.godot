@@ -18,8 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
-GenerationCommunicatorSingleton="*res://Assets/Scripts/GenerationCommunicator/GenerationCommunicatorSingleton.cs"
 Daemon="*res://Assets/Scripts/Daemon/Daemon.cs"
+CommunicationBus="*res://Assets/Scripts/Services/CommunicationBus.cs"
 
 [display]
 

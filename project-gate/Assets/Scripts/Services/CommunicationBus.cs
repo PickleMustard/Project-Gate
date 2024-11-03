@@ -1,11 +1,11 @@
 using Godot;
 
-public partial class GenerationCommunicatorSingleton : Node
+public partial class CommunicationBus : Node
 {
   [Signal]
   public delegate void IdentifyStrayNodeEventHandler();
 
-  public static GenerationCommunicatorSingleton Instance { get; private set; }
+  public static CommunicationBus Instance { get; private set; }
 
   public Character CurrentCharacter { get; set; }
 
@@ -20,7 +20,7 @@ public partial class GenerationCommunicatorSingleton : Node
   public override void _EnterTree()
   {
     Instance = this;
-    Engine.RegisterSingleton("GenerationCommunicatorSingleton", this);
+    Engine.RegisterSingleton("CommunicationBus", this);
     UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
     GenerateItemCall = new Callable(this, "GenerateItem");
     SpawnEnemyCall = new Callable(this, "SpawnEnemy");

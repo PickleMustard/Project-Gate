@@ -97,13 +97,13 @@ public partial class Character : Node3D
 
   public override void _Ready()
   {
-    GenerationCommunicatorSingleton s = (GenerationCommunicatorSingleton)Engine.GetSingleton("GenerationCommunicatorSingleton");
+    CommunicationBus s = (CommunicationBus)Engine.GetSingleton("CommunicationBus");
     s.IdentifyStrayNode += IdentifyStray;
   }
 
   public void SetupCharacter()
   {
-    //Connect(GenerationCommunicatorSingleton.SignalName.IdentifyStrayNode, new Callable(this, "IdentifyStray"));
+    //Connect(CommunicationBus.SignalName.IdentifyStrayNode, new Callable(this, "IdentifyStray"));
     Node level = GetTree().GetNodesInGroup("Level")[0];
     TileGrid = level.GetChildren()[0];
     CurrentSpeed = StartingSpeed;
@@ -120,7 +120,7 @@ public partial class Character : Node3D
     {
       Connect(SignalName.UpdateMainCharacter, (Callable)UnitMovement.Call("GetUpdateCharacterSignal"));
     }
-    Connect(SignalName.UpdateMainCharacter, GenerationCommunicatorSingleton.Instance.GetUpdateCharacterSignal());
+    Connect(SignalName.UpdateMainCharacter, CommunicationBus.Instance.GetUpdateCharacterSignal());
     EmitSignal(SignalName.UpdateMainCharacter, this);
     CharacterTurnController.Instance.AddUpdateCharacterMovementCallable(updateMovementCalcs);
     CharacterTurnController.Instance.AddCharacterToTurnController(this);

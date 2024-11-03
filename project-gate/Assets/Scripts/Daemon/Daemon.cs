@@ -8,7 +8,7 @@ public partial class Daemon : Node {
 
   private CharacterGenerator generator;
   private EnemyGenerator e_generator;
-  private GenerationCommunicatorSingleton communicator;
+  private CommunicationBus communicator;
 
   private Node Level; //Takes the level generated signal to start its background processes
 
@@ -26,7 +26,7 @@ public partial class Daemon : Node {
     PlayerTeamSpawnLocations = new Godot.Collections.Array();
     generator = new CharacterGenerator();
     e_generator = new EnemyGenerator();
-    communicator = Engine.GetSingleton("GenerationCommunicatorSingleton") as GenerationCommunicatorSingleton;
+    communicator = Engine.GetSingleton("CommunicationBus") as CommunicationBus;
     Level = GetTree().GetNodesInGroup("Level")[0];
     Level.Connect("LevelGenerated", new Callable(this, "LevelStartProcesses"));
   }

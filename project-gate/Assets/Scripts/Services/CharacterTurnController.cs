@@ -80,8 +80,8 @@ public partial class CharacterTurnController : Node
    */
   public void EndTurn()
   {
-    GenerationCommunicatorSingleton s = (GenerationCommunicatorSingleton)Engine.GetSingleton("GenerationCommunicatorSingleton");
-    s.EmitSignal(GenerationCommunicatorSingleton.SignalName.IdentifyStrayNode);
+    CommunicationBus s = (CommunicationBus)Engine.GetSingleton("CommunicationBus");
+    s.EmitSignal(CommunicationBus.SignalName.IdentifyStrayNode);
     PrintOrphanNodes();
 
     //GD.Print("Ending ", CurrentCharacter.ToString(), "'s turn");
