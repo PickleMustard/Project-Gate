@@ -7,6 +7,7 @@
 #include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
 #include "level-generation/tilegrid.h"
+#include "seeded_random_access.h"
 #include "tiles/tile.h"
 
 using namespace godot;
@@ -48,43 +49,56 @@ void BaseEnemy::ActionsFinished() { UtilityFunctions::print("Finished action!");
 void BaseEnemy::PlanAborted(Ref<GoapAction> aborter) {}
 
 bool BaseEnemy::MoveAgent(Ref<GoapAction> next_action) {
-  UtilityFunctions::print("In data provider move action");
+	UtilityFunctions::print("In data provider move action");
 	//next_action has a target tile to move to
 	//move towards it using the unitcontroller
-  Dictionary world_data = GetWorldState();
+	Dictionary world_data = GetWorldState();
 	TypedArray<Node> unitcontrols = get_tree()->get_nodes_in_group("UnitControl");
-	Node *unitcontroller = cast_to<Node>(unitcontrols[0]);
+	Node *unit_controller = cast_to<Node>(unitcontrols[0]);
 	TypedArray<Node> potential_grid = get_tree()->get_nodes_in_group("Tilegrid");
 	TileGrid *tilegrid = cast_to<TileGrid>(potential_grid[0]);
-  Vector2i target_location = tilegrid->call("GetCoordinateFromPosition", next_action->target->call("get_position"), tilegrid->call("GetOuterSize"));
-  Node3D *unit = cast_to<Node3D>(get_parent());
+	Vector2i target_location = tilegrid->call("GetCoordinateFromPosition", next_action->target->call("get_position"), tilegrid->call("GetOuterSize"));
+	Node3D *unit = cast_to<Node3D>(get_parent());
 	Vector2i unit_location = tilegrid->call("GetCoordinateFromPosition", unit->get_position(), tilegrid->call("GetOuterSize"));
-  int distance = tilegrid->CalculateDistanceStatic(target_location, unit_location);
-  Vector2 direction = unit_location - target_location;
-  UtilityFunctions::print("Direction between AI and target: ", direction / direction.length());
+	int distance = tilegrid->CalculateDistanceStatic(target_location, unit_location);
+	Vector2 direction = unit_location - target_location;
+	UtilityFunctions::print("Direction between AI and target: ", direction / direction.length(), "| ", direction);
 
-  //If the distance between the enemy and the target is less than the enemies remaining movement
-  //Move to a tile close to the enemy
-  if(distance < (int)world_data["movement_remaining"]) {
-    UtilityFunctions::print("Don't think I should be in here");
+	//If the distance between the enemy and the target is less than the enemies remaining movement
+	//Move to a tile close to the enemy
+	if (distance < (int)world_data["movement_remaining"]) {
+		UtilityFunctions::print("Don't think I should be in here");
 
-  } else {
-    Vector2i desired_location = (int)world_data["movement_remaining"] * direction;
-    UtilityFunctions::print("Desired Location: ", desired_location, "| Movement Remaining: ", (int)world_data["movement_remaining"]);
-    Ref<Tile> possible_tile = tilegrid->FindTileOnGrid(desired_location);
-    UtilityFunctions::print("Is that a possible tile: ", possible_tile);
-  }
+	} else {
+		Vector2i desired_location = unit_location + (int)world_data["movement_remaining"] * (-direction / Math::abs(direction.length()));
+    UtilityFunctions::print("Current Location: ", unit_location);
+		UtilityFunctions::print("Desired Location: ", desired_location, "| Movement Remaining: ", (int)world_data["movement_remaining"]);
+		Ref<Tile> possible_tile = tilegrid->FindTileOnGrid(desired_location);
+		UtilityFunctions::print("Is that a possible tile: ", possible_tile);
+		String potential_formated_tile_name = vformat("/root/Level/Level/%s/Hex %d,%d", tilegrid->get_name(), desired_location[0], desired_location[1]);
+    UtilityFunctions::print("Formatted Name: ", potential_formated_tile_name);
+		Node *found_tile = get_node_or_null(potential_formated_tile_name);
+    UtilityFunctions::print("Node: ", found_tile->get_name());
+
+		//Array destinations = unit_controller->call("GetPotentialDestinations");
+		//SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
+		//int location = instance->GetWholeNumber(destinations.size() - 1);
+		//Dictionary meshDict = destinations[location];
+		//Node *tile = cast_to<Node>(meshDict["TileMesh"]);
+		unit_controller->call("MoveCharacter", found_tile);
+		//return true;
+	}
 
 	return true;
-  //
-//	UtilityFunctions::print("Performing action: ", GetActionName());
-//	Node *unit_controller = cast_to<Node>(goap_agent->call("GetUnitController"));
-//	Array destinations = unit_controller->call("GetPotentialDestinations");
-//	SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
-//	int location = instance->GetWholeNumber(destinations.size() - 1);
-//	Dictionary meshDict = destinations[location];
-//	Node *tile = cast_to<Node>(meshDict["TileMesh"]);
-//	unit_controller->call("MoveCharacter", tile->get_parent());
+	//
+	//	UtilityFunctions::print("Performing action: ", GetActionName());
+	//	Node *unit_controller = cast_to<Node>(goap_agent->call("GetUnitController"));
+	//	Array destinations = unit_controller->call("GetPotentialDestinations");
+	//	SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
+	//	int location = instance->GetWholeNumber(destinations.size() - 1);
+	//	Dictionary meshDict = destinations[location];
+	//	Node *tile = cast_to<Node>(meshDict["TileMesh"]);
+	//	unit_controller->call("MoveCharacter", tile->get_parent());
 }
 
 void BaseEnemy::CheckForEnemies() {

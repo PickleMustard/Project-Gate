@@ -27,6 +27,10 @@ public partial class CharacterTurnController : Node
   Node level;
   Callable StartLevelTurnController;
 
+  public override void _EnterTree() {
+    AddToGroup("TurnController");
+  }
+
   public override void _Ready()
   {
     StartLevelTurnController = new Callable(this, "StartLevel");
@@ -34,10 +38,9 @@ public partial class CharacterTurnController : Node
     MovementQueue = new Queue<Character>();
     AliveCharacterList = new List<Character>();
     PriorityUpdateHeap = new PriorityQueue<Character, float>();
-    UnitControl UnitMovement = GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl;
+    unitControl = GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl;
     Node Daemon = (Node)Engine.GetSingleton("Daemon");
     Daemon.Connect("StartTurnController", StartLevelTurnController);
-    AddToGroup("TurnController");
     Instance = this;
   }
 
@@ -89,6 +92,7 @@ public partial class CharacterTurnController : Node
     if (CurrentCharacter != null)
     {
       GD.Print("Another Character Available");
+      GD.Print(unitControl, "| ", CurrentCharacter);
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
     }
     else

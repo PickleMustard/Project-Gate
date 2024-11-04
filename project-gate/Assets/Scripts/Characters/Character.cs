@@ -6,7 +6,7 @@ using Godot.Collections;
 [GlobalClass]
 public partial class Character : Node3D
 {
-  private const float INTITIAL_REQUEUE_PRIORITY = 1.0f;
+  protected const float INTITIAL_REQUEUE_PRIORITY = 1.0f;
   public enum CHARACTER_TEAM
   {
     player,
@@ -38,13 +38,13 @@ public partial class Character : Node3D
   public delegate void PickUpItemPassiveBehaviorEventHandler();
 
   [Export]
-  public string CharacterName { get; private set; } = "Temp";
+  public string CharacterName { get; protected set; } = "Temp";
   [Export]
-  public int TotalActionPoints { get; private set; }
+  public int TotalActionPoints { get; protected set; }
   [Export]
-  public int TotalDistance { get; private set; } = 5;
+  public int TotalDistance { get; protected set; } = 5;
   [Export]
-  public int TotalHealth { get; private set; } = 5;
+  public int TotalHealth { get; protected set; } = 5;
   [Export]
   public float BaseSpeedAccumulator = 1.0f;
   [Export]
@@ -54,24 +54,24 @@ public partial class Character : Node3D
   [Export]
   public float HeapPriority = 1;
   [Export]
-  public Weapon MainWeapon { get; private set; }
+  public Weapon MainWeapon { get; protected set; }
   [Export]
-  public Grenade grenade { get; private set; }
+  public Grenade grenade { get; protected set; }
   [Export]
   public CHARACTER_TEAM team;
   public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
   public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
-  private float CurrentSpeed;
-  private int currentHealth;
-  private int currentActionPoints;
-  private float CurrentHeapPriority = 1.0f;
+  protected float CurrentSpeed;
+  protected int currentHealth;
+  protected int currentActionPoints;
+  protected float CurrentHeapPriority = 1.0f;
   public bool isMoving { get; set; } = false;
-  private Godot.Collections.Array items;
-  private Node TileGrid;
+  protected Godot.Collections.Array items;
+  protected Node TileGrid;
   [Export]
   public int distanceRemaining { get; set; }
-  private Callable updateMovementCalcs;
+  protected internal Callable updateMovementCalcs;
 
   public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority)
   {
@@ -129,7 +129,7 @@ public partial class Character : Node3D
     ResetPriority();
   }
 
-  private void SetupHealthbar()
+  protected void SetupHealthbar()
   {
     currentHealth = TotalHealth;
     Healthbar hb = FindChild("Healthbar") as Healthbar;
@@ -138,7 +138,7 @@ public partial class Character : Node3D
       hb.SetupHealthBar(TotalHealth);
     }
   }
-  private void UpdateHealthbar()
+  protected void UpdateHealthbar()
   {
     Healthbar hb = FindChild("Healthbar") as Healthbar;
     if (hb != null)
@@ -209,7 +209,7 @@ public partial class Character : Node3D
     CurrentHeapPriority = -HeapPriority;
   }
 
-  private void KillCharacter()
+  protected virtual void KillCharacter()
   {
     CharacterTurnController.Instance.RemoveCharacterFromTurnController(this);
     CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);

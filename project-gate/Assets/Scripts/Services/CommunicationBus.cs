@@ -5,6 +5,7 @@ public partial class CommunicationBus : Node
   [Signal]
   public delegate void IdentifyStrayNodeEventHandler();
 
+
   public static CommunicationBus Instance { get; private set; }
 
   public Character CurrentCharacter { get; set; }
@@ -13,6 +14,7 @@ public partial class CommunicationBus : Node
   private Callable SpawnCharacterCall;
   private Callable UpdateCharacterCall;
   private Callable GenerateItemCall;
+  public Callable EnemyKilledCall;
 
   private Node TileGrid;
   private Node3D Level;
@@ -25,6 +27,7 @@ public partial class CommunicationBus : Node
     GenerateItemCall = new Callable(this, "GenerateItem");
     SpawnEnemyCall = new Callable(this, "SpawnEnemy");
     SpawnCharacterCall = new Callable(this, "SpawnPlayerCharacter");
+    EnemyKilledCall = new Callable(this, "EnemyKilled");
   }
 
   public override void _Ready()
@@ -52,6 +55,9 @@ public partial class CommunicationBus : Node
   public Callable GetSpawnEnemySignal()
   {
     return SpawnEnemyCall;
+  }
+  public Callable GetEnemyKilledEventCallable() {
+    return EnemyKilledCall;
   }
   public void SpawnCharacter(Resource Tile, Character generatedCharacter, Node resourceProvider, Godot.Collections.Array<Resource> Actions)
   {
@@ -130,6 +136,10 @@ public partial class CommunicationBus : Node
   public void UpdateCurrentCharacter(Character UpdateCharacter)
   {
     CurrentCharacter = UpdateCharacter;
+  }
+
+  private void EnemyKilled(Character enemy) {
+    GD.Print("Enemy Has Been Killed: ", enemy.Name);
   }
 
 }

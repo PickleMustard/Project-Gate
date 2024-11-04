@@ -26,6 +26,10 @@ public partial class UnitControl : Node
   Godot.GodotObject test;
   Node3D capsule;
 
+  public override void _EnterTree() {
+    AddToGroup("UnitControl");
+  }
+
   public override void _Ready()
   {
     Callable notify = new Callable(this, "NotifyLog");
@@ -39,7 +43,6 @@ public partial class UnitControl : Node
     test.Connect(signals[0]["name"].ToString(), notify);
     level = GetNode<Node>("/root/Level/Level");
     unit_location = new Vector2I(0, 0);
-    AddToGroup("UnitControl");
   }
 
   public Callable GetUpdateCharacterSignal()
@@ -137,7 +140,7 @@ public partial class UnitControl : Node
   {
     Godot.Collections.Array MovementRange = new Godot.Collections.Array();
     string formated_tile_name = string.Format("/root/Level/Level/{0}/Hex {1},{2}", TileGrid.Name, center_tile[0], center_tile[1]);
-    Node found_tile = GetNode<Node>(formated_tile_name);
+    Node found_tile;// = GetNode<Node>(formated_tile_name);
     for (int q = -radius; q <= radius; q++)
     {
       int r1 = Mathf.Max(-radius, -q - radius);
@@ -283,7 +286,7 @@ public partial class UnitControl : Node
 
   public void MoveCharacter(Node tile_collider)
   {
-    GD.Print("Main Weapon:", CurrentCharacter.GetMainWeapon());
+    GD.Print("Current Character: ", CurrentCharacter.Name, "| Distance Remaining: ", CurrentCharacter.GetDistanceRemaining());
     if (!CurrentCharacter.isMoving)
     {
       unit_location = new Vector2I(0, 0);
@@ -301,6 +304,7 @@ public partial class UnitControl : Node
       HidePotentialDestinations();
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       tile = tile_collider.GetParent();
+      GD.Print("TileGrid? ", tile.Name);
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))
       {
         desired_location = new Vector2I(q, r);
@@ -316,8 +320,10 @@ public partial class UnitControl : Node
       var outside_range = tile_collider.GetChildren()[1];
       if (MovementRange.Contains(outside_range))
       {
+        GD.Print("Contains");
         if (path.Count > 0)
         {
+          GD.Print("Path Found");
           Variant current_tile_var = path[0];
           path.Remove(current_tile_var);
           GodotObject current_tile = current_tile_var.AsGodotObject();
