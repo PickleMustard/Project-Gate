@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 
+
 def getSubdirs(abs_path_dir):
     lst = []
     dir_list = os.listdir(abs_path_dir)
@@ -20,16 +21,30 @@ def normalize_path(val, env):
 
 def validate_parent_dir(key, val, env):
     if not os.path.isdir(normalize_path(os.path.dirname(val), env)):
-        raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
+        raise UserError("'%s' is not a directory: %s" %
+                        (key, os.path.dirname(val)))
 
-def install(package) :
-    subprocess.check_call(["sudo", "dnf", "install", package])
+
+def validate_library(lib_path):
+    if not os.path.exists(lib_path):
+        print(f"Library not found at {lib_path}")
+        exit(1)
+
+
+# def install(package):
+    # subprocess.check_call(["sudo", "dnf", "install", package])
+
+# def install_dep(package):
+    # print(sys.executable)
+    # subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 
 libname = "Scalad_Low_Level_Library"
 projectdir = "project-gate"
 
-install("rapidyaml-devel")
+# install("rapidyaml-devel")
+# install_dep("rapidyaml")
+validate_library("lib/ryml/libryml.a")
 
 localEnv = Environment(tools=["default"], PLATFORM="")
 
@@ -66,20 +81,29 @@ compilation_db = env.CompilationDatabase(
 env.Alias("compiledb", compilation_db)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
+print(env.Dump())
 
 corePath = "src/"
 modules = getSubdirs(corePath)
+Library('libryml', ['lib/ryml/libryml'])
+env.Append(CPPPATH=["src/", 'lib/ryml/include/'])
+env.Append(LIBS=['libryml'])
+env.Append(LIBPATH='./lib/ryml/lib')
 
-env.Append(CPPPATH=["src/"])
-env.Append(LIBS=["libryml"])
 
 sources = Glob(os.path.join(corePath, '*.cpp'))
 for module in modules:
-    if(module == "rapidyaml") :
+    if (module == "rapidyaml"):
         print(os.path.join(corePath, module, '*.cpp'))
-        #exec(open(os.path.join(corePath, module, 'setup.py')).read())
-    else :
+        # exec(open(os.path.join(corePath, module, 'setup.py')).read())
+    else:
         sources += Glob(os.path.join(module, '*.cpp'))
+
+# sources += Glob(os.path.join(rymlPath, '*.cpp'))
+# modules = getSubdirs(rymlPath)
+
+# for module in modules:
+    # sources += Glob(os.path.join(module, '*.cpp'))
 
 
 file = "{}{}{}".format(libname, env["suffix"], env["SHLIBSUFFIX"])
@@ -94,10 +118,10 @@ library = env.SharedLibrary(
     source=sources,
 )
 
-copy = env.InstallAs("{}/bin/{}/lib{}".format(projectdir, env["platform"], file), library)
+copy = env.InstallAs("{}/bin/{}/lib{}".format(projectdir,
+                     env["platform"], file), library)
 
 default_args = [library, copy]
 if localEnv.get("compiledb", False):
     default_args += [compilation_db]
 Default(*default_args)
-
