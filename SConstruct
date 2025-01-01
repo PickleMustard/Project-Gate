@@ -25,26 +25,39 @@ def validate_parent_dir(key, val, env):
                         (key, os.path.dirname(val)))
 
 
+def build_rapidyaml(env):
+    ryml_build_dir = os.path.join(ryml_dir, 'build')
+    if not os.path.exists(ryml_build_dir):
+        os.makedirs(ryml_build_dir)
+
+    cmake_config = [
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DRYML_BUILD_TESTS=OFF',
+        '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
+    ]
+    cmake_cmd = f'cd {
+        ryml_build_dir} && cmake .. {" ".join(cmake_config)}'
+    make_cmd = f'cd {ryml_build_dir} && make'
+
+    env.Execute(cmake_cmd)
+    env.Execute(make_cmd)
+
+    return os.path.join(ryml_build_dir, 'libc4core.a')
+
+
 def validate_library(lib_path):
     if not os.path.exists(lib_path):
         print(f"Library not found at {lib_path}")
         exit(1)
 
 
-# def install(package):
-    # subprocess.check_call(["sudo", "dnf", "install", package])
-
-# def install_dep(package):
-    # print(sys.executable)
-    # subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-
 libname = "Scalad_Low_Level_Library"
 projectdir = "project-gate"
+ryml_dir = "extern/rapidyaml"
 
 # install("rapidyaml-devel")
 # install_dep("rapidyaml")
-validate_library("lib/ryml/libryml.a")
+# validate_library("lib/ryml/libryml.a")
 
 localEnv = Environment(tools=["default"], PLATFORM="")
 
@@ -81,15 +94,18 @@ compilation_db = env.CompilationDatabase(
 env.Alias("compiledb", compilation_db)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
-print(env.Dump())
+# print(env.Dump())
 
 corePath = "src/"
 modules = getSubdirs(corePath)
-Library('libryml', ['lib/ryml/libryml'])
-env.Append(CPPPATH=["src/", 'lib/ryml/include/'])
+ryml_lib = build_rapidyaml(env)
+ryml_lib_dir = os.path.dirname(ryml_lib)
+env.Append(CPPPATH=["src/", os.path.join(ryml_dir, 'src'),
+           os.path.join(ryml_dir, 'ext/c4core/src')])
+env.Append(RPATH=[ryml_lib_dir])
 env.Append(LIBS=['libryml'])
-env.Append(LIBPATH='./lib/ryml/lib')
-
+print(os.path.dirname(ryml_lib))
+env.Append(LIBPATH=ryml_lib_dir)
 
 sources = Glob(os.path.join(corePath, '*.cpp'))
 for module in modules:
@@ -99,18 +115,21 @@ for module in modules:
     else:
         sources += Glob(os.path.join(module, '*.cpp'))
 
+env.Depends(ryml_lib, env["target"])
+
 # sources += Glob(os.path.join(rymlPath, '*.cpp'))
 # modules = getSubdirs(rymlPath)
 
 # for module in modules:
-    # sources += Glob(os.path.join(module, '*.cpp'))
-
+# sources += Glob(os.path.join(module, '*.cpp'))
 
 file = "{}{}{}".format(libname, env["suffix"], env["SHLIBSUFFIX"])
 
 if env["platform"] == "macos":
-    platlibname = "{}.{}.{}".format(libname, env["platform"], env["target"])
-    file = "{}.framework/{}".format(env["platform"], platlibname, platlibname)
+    platlibname = "{}.{}.{}".format(
+        libname, env["platform"], env["target"])
+    file = "{}.framework/{}".format(env["platform"],
+                                    platlibname, platlibname)
 
 libraryfile = "bin/{}/{}".format(env["platform"], file)
 library = env.SharedLibrary(
@@ -118,8 +137,10 @@ library = env.SharedLibrary(
     source=sources,
 )
 
+print(library)
+
 copy = env.InstallAs("{}/bin/{}/lib{}".format(projectdir,
-                     env["platform"], file), library)
+                                              env["platform"], file), library)
 
 default_args = [library, copy]
 if localEnv.get("compiledb", False):
