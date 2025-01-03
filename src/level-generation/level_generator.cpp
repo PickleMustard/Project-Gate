@@ -145,8 +145,8 @@ LevelGenerator::m_Rooms_Graph *LevelGenerator::m_GenerateRoomGraph(Vector2i star
 		String edge_dict_name = vformat("edge_%d", i);
 
 		Dictionary edge_meta = edge[edge_dict_name];
-    int width = edge_meta["width"];
-    UtilityFunctions::print("Width: ", width);
+		int width = edge_meta["width"];
+		UtilityFunctions::print("Width: ", width);
 		if (edge_meta.has("direction")) {
 			Array edge_direction_meta = edge_meta["direction"];
 			Array edge_distance_extents = edge_meta["distance_extents"];
@@ -298,6 +298,7 @@ void LevelGenerator::m_ConnectGraphNodes(Vector<uint16_t> &tile_bit_map, m_Rooms
  * No direct returns
  */
 void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, Ref<Tile>> *grid_of_tiles, TileGrid *root, Vector<Ref<Tile>> &spawnable_locations) {
+	//UtilityFunctions::print("Is this getting called?");
 	Object *CommunicationBus = Engine::get_singleton()->get_singleton("CommunicationBus");
 	ResourceLoader *m_rl = memnew(ResourceLoader);
 	int counter = 0;
@@ -345,6 +346,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 				m_collision_shape->make_convex_from_siblings();
 				m_collision_body->set_position(location);
 			} else {
+				//UtilityFunctions::print("m1");
 				TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
 
 				String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%d_%d.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), (int)m_is_flat_topped, tile_map.get(i));
@@ -356,10 +358,20 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 					"res://Assets/Materials/test_spawner_tile_material.tres",
 					"res://Assets/Materials/test_starter_tile_material.tres"
 				};
-				m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[(tile_type & 0xFF) - 1], m_tile_mesh_name, tile_type);
+				UtilityFunctions::print(vformat("Output: %x | %x | %x", tile_type, 0xff, (tile_type & 0xff)));
+				int tile_mesh_string_position = tile_type & 0xff;
+				//UtilityFunctions::print("m2");
+				if (tile_mesh_string_position > 0) {
+					m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[tile_mesh_string_position], m_tile_mesh_name, tile_type);
+				} else {
+					m_SetTileMeshAndMaterial(m_mesh_generator, m_rl, mesh_material_names[0], m_tile_mesh_name, tile_type);
+				}
+				//UtilityFunctions::print("m3");
 				m_mesh_generator->set_name(vformat("Hex %d,%d", q, r));
+				//UtilityFunctions::print("m4");
 				root->add_child(m_mesh_generator, true, Node::INTERNAL_MODE_BACK);
 				m_mesh_generator->set_owner(root->get_owner());
+				//UtilityFunctions::print("WHY?");
 				m_mesh_generator->set_position(location);
 			}
 		}
@@ -449,6 +461,8 @@ Ref<Tile> LevelGenerator::m_InstantiateTile(Object *CommunicationBus, Vector<Ref
  *    No Direct Returns
  */
 void LevelGenerator::m_SetTileMeshAndMaterial(TileMeshGenerator *mesh_generator, ResourceLoader *rl, String mesh_material_name, String tile_mesh_name, uint16_t tile_type) {
+	//UtilityFunctions::print("Mesh Material Name: ", mesh_material_name);
+	//UtilityFunctions::print("Tile Mesh Name: ", tile_mesh_name);
 	Ref<Mesh> m_mesh;
 	Ref<ShaderMaterial> m_mesh_material;
 	//if (rl->exists(tile_mesh_name)) {
@@ -726,7 +740,7 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 					}
 				}
 				break;
-      //Ellipse Top Left -> Bottom Right
+				//Ellipse Top Left -> Bottom Right
 			case 3:
 				for (int r = -radius; r <= radius; r++) {
 					int q1 = Math::max(-(radius * 2), -r - (radius * 2));
@@ -740,11 +754,11 @@ void LevelGenerator::m_GenerateGraphTileBitMap(Vector<uint16_t> &tile_bit_map, m
 					}
 				}
 				break;
-      //Ellipse Top Right -> Bottom Left
+				//Ellipse Top Right -> Bottom Left
 			case 4:
 				for (int q = -(radius * 2); q <= (radius * 2); q++) {
-          int r1 = Math::max(-q - radius, -2 * radius);
-          int r2 = Math::min(-q + radius, 2 * radius);
+					int r1 = Math::max(-q - radius, -2 * radius);
+					int r2 = Math::min(-q + radius, 2 * radius);
 					for (int r = r1; r <= r2; r++) {
 						tile_bit_map.set((room_location[0] + q) * m_maximum_grid_size[1] + (room_location[1] + r), 1);
 						if (Math::abs(q) == radius * 2 || Math::abs(r) == radius * 2 || Math::abs(-q - r) == radius) {

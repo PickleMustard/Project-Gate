@@ -38,6 +38,7 @@ version_control/autoload_on_startup=true
 [global_group]
 
 PlayerCharacters="Player Characters to be controlled"
+CurrencyDisplay="Holds the Text Box for displaying player currency"
 
 [input]
 

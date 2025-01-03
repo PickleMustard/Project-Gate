@@ -5,6 +5,7 @@ Action-Points: 3
 Accumulation-Rate: 1.0
 Requeue-Speed: 1.0
 Turn-Priority: 6
+Currency-Drop-Rate: 5
 Enemy-Weapon: "BasicRuffianPistol"
 Enemy-Grenade: "None"
 IGOAP: "BaseEnemy"
