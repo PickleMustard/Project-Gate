@@ -17,7 +17,9 @@ class SeededRandomAccess : public Object {
 public:
 	static SeededRandomAccess *GetInstance();
 	int GetWholeNumber(int upper_limit);
+  float GetWholeFloat(float upper_limit);
 	int GetInteger(int lower_limit, int upper_limit);
+  float GetFloatRange(float lower_limit, float upper_limit);
 	SeededRandomAccess();
 	SeededRandomAccess(uint32_t seed);
 	SeededRandomAccess(uint64_t seed);

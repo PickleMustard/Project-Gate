@@ -34,13 +34,15 @@ public:
   void AddAction(Ref<GoapAction> action);
   Ref<GoapAction> GetAction(String type);
   void RunAI();
+  void EndTurn();
   void RemoveAction(Ref<GoapAction> action);
   void Update();
   void _ready() override;
   void _process(double p_delta) override;
+  void _physics_process(double p_delta) override;
 
   TileGrid *GetTileGrid();
-  Node3D *GetUnitController();
+  Node *GetUnitController();
   void SetAvailableActions(Dictionary actions);
   Dictionary GetAvailableActions();
 protected:
@@ -54,7 +56,8 @@ private:
   void LoadActions();
 
   bool should_continue = false;
-  int counter = 0;
+  long frame_counter = 0;
+  bool attempt_to_end_turn = false;
 
 
 };

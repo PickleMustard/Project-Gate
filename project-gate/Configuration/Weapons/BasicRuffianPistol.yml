@@ -1,0 +1,12 @@
+Name: "Basic Ruffian Pistol"
+Max-Range: 8
+Effective-Range: 5
+Base-Damage: 5
+Weapon-Type: "handgun"
+Ignores-LOS: false
+Can-Ricochet: false
+Can-Pierce: false
+On-Hit-Behavior: "SimpleDamageBehavior"
+Start-Turn-Behavior: "none"
+End-Turn-Behavior: "none"
+Targeting-Behavior: "LinearTargeting"

@@ -18,7 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 CoroutineManager="*res://addons/HCoroutines/CoroutineManager.cs"
-GenerationCommunicatorSingleton="*res://Assets/Scripts/GenerationCommunicator/GenerationCommunicatorSingleton.cs"
+Daemon="*res://Assets/Scripts/Daemon/Daemon.cs"
+CommunicationBus="*res://Assets/Scripts/Services/CommunicationBus.cs"
 
 [display]
 
@@ -33,6 +34,11 @@ project/assembly_name="Gate Of Scalad"
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+
+[global_group]
+
+PlayerCharacters="Player Characters to be controlled"
+CurrencyDisplay="Holds the Text Box for displaying player currency"
 
 [input]
 
@@ -85,6 +91,10 @@ reset_character={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":113,"location":0,"echo":false,"script":null)
 ]
+}
+mouse_right_up={
+"deadzone": 0.5,
+"events": []
 }
 
 [rendering]

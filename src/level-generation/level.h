@@ -3,6 +3,7 @@
 
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
+#include "godot_cpp/variant/string.hpp"
 #include "level_generator.h"
 #include "tilegrid.h"
 
@@ -12,7 +13,10 @@ class Level : public Node {
 
 public:
 	Level();
+  Level(bool should_generate, String file);
 	~Level();
+  void _ready() override;
+  void _enter_tree() override;
   void ReadyLevel();
 	void GenerateLevel();
 
@@ -26,6 +30,8 @@ public:
 
   void SetShouldGenerateLevel(bool decision);
   bool GetShouldGenerateLevel();
+  void SetFileLocation(String file);
+  String GetFileLocation();
 
 
 protected:
@@ -37,7 +43,8 @@ private:
 	TileGrid *m_tile_grid;
   //For now, just stores a single tile grid,
   Dictionary m_level_grid_def;
-  bool m_should_generate_level = false;
+  bool m_level_should_generate_level = false;
+  String m_level_file_location;
 };
 } //namespace godot
 

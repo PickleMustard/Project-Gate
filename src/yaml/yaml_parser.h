@@ -13,8 +13,6 @@ public:
   YamlParser();
   ~YamlParser();
 
-  void _init() {};
-
   static void test_yaml_caller();
   static void test_yaml(godot::CharString text);
   static godot::Dictionary parse_file(godot::String file);

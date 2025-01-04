@@ -1,56 +1,70 @@
 using Godot;
 using Godot.Collections;
-using System;
 
 public partial class Enemy : Character
 {
-  Node TileGrid;
-  Node level;
+    [Signal]
+    public delegate void EnemyKilledEventHandler();
 
-  Func<Node> test;
-  public override void _Ready()
-  {
-    SetupCharacter();
-    Callable SetPositionCall = new Callable(this, "SetPosition");
-    level = GetNode<Node>("/root/Top/Level");
-    TileGrid = level.GetChildren()[0];
-    if (TileGrid.HasMethod("AddEnemyCall"))
-    {
-      TileGrid.Call("AddEnemyCall", SetPositionCall);
-    }
-    HealCharacter(TotalHealth);
-    AddToGroup("Enemies");
-    //GD.Print("Health at beninging ", currentHealth);
-  }
+    Node level;
 
-  public void SetPosition(Resource Tile)
-  {
-    Vector2I location = new Vector2I();
-    //GD.Print("Finished Awaiting");
-    if (Tile.HasMethod("GetLocation"))
-    {
-      //GD.Print("Location ", Tile.Call("GetLocation"));
-      location = (Vector2I)Tile.Call("GetLocation");
-    }
-    if (TileGrid.HasMethod("GetPositionForHexFromCoordinate"))
-    {
-      //GD.Print("Position: ", TileGrid.Call("GetPositionForHexFromCoordinate", location, (int)Tile.Call("GetSize"), true));
-      Position = (Vector3)TileGrid.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
-    }
-    if (Tile.HasMethod("SetCharacterOnTile"))
-    {
-      Tile.Call("SetCharacterOnTile", this);
-      //GD.Print("Setting object");
-    }
-  }
+    private int m_AmountCurrencyDroppedOnKill;
 
-  public void RunAI()
-  {
-    Array<Node> children = GetChildren();
-    GD.Print("Enemy children: ", children);
-    if (children[1].HasMethod("RunAI"))
+    public override void _Ready()
     {
-      children[1].Call("RunAI");
+        Connect(SignalName.EnemyKilled, CommunicationBus.Instance.GetEnemyKilledEventCallable());
+        team = Character.CHARACTER_TEAM.enemy;
+        Callable SetPositionCall = new Callable(this, "SetPosition");
+        var test = ResourceLoader.Load("res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs") as CSharpScript;
     }
-  }
+
+    public void GenerateCharacter(string name,
+        Weapon weapon, Grenade grenade,
+        Array<WEAPON_PROFICIENCIES> proficiencies,
+        int movementDistance, int actionPoints,
+        int health, float accumulationRate,
+        float requeueSpeed, int turnPriority, int CurrencyDropRate)
+    {
+        this.CharacterName = name;
+        this.MainWeapon = weapon;
+        this.grenade = grenade;
+        this.proficiencies = proficiencies;
+        this.TotalDistance = movementDistance;
+        this.TotalActionPoints = actionPoints;
+        this.TotalHealth = health;
+        this.BaseSpeedAccumulator = accumulationRate;
+        this.SpeedNeededToRequeue = requeueSpeed;
+        this.HeapPriority = turnPriority;
+        this.m_AmountCurrencyDroppedOnKill = CurrencyDropRate;
+    }
+
+    //Needs to set the behaviors of the Goap agent underneath the node
+    public void SetAIBehaviors(Godot.Collections.Array behaviors)
+    {
+
+    }
+
+    public void RunAI()
+    {
+        Node aiAgent = this.FindChild("agent", true, false);
+        if (aiAgent.HasMethod("RunAI"))
+        {
+            aiAgent.Call("RunAI");
+        }
+    }
+
+    protected override void KillCharacter()
+    {
+        CharacterTurnController.Instance.RemoveCharacterFromTurnController(this);
+        CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);
+        AudioStreamPlayer3D player = (AudioStreamPlayer3D)FindChild("character_death");
+        player.Play();
+        Visible = false;
+        EmitSignal(SignalName.EnemyKilled, this);
+    }
+
+    public int GetAmountOfCurrencyDroppedOnKill()
+    {
+        return m_AmountCurrencyDroppedOnKill;
+    }
 }

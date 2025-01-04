@@ -24,14 +24,14 @@ private:
 	float m_tile_outer_size;
 	float m_tile_inner_size;
 	float m_tile_height;
-	uint8_t m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
+	uint16_t m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
   Node3D *m_character_on_tile;
 	Ref<Tile> m_path_parent;
 	void (*TileSelected)(Tile *);
 
 public:
 	Tile();
-	Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type);
+	Tile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint16_t type);
 	~Tile();
 
 	Vector2i GetLocation();

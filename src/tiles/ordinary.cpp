@@ -6,7 +6,7 @@ godot::Ordinary::Ordinary() : Tile() {
 }
 
 
-godot::Ordinary::Ordinary(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) : Tile(position, r, c, flat_topped, outer_size, inner_size, height, type) {
+godot::Ordinary::Ordinary(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint16_t type) : Tile(position, r, c, flat_topped, outer_size, inner_size, height, type) {
 
 }
 

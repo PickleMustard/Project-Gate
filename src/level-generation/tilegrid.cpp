@@ -104,9 +104,6 @@ void TileGrid::_notification(int p_what) {
  * Returns:
  *    No Direct Returns
  */
-void TileGrid::AddEnemyCall(Callable addition) {
-	call_set_enemy_start_positions.push_back(addition);
-}
 
 /* When the level has finished creation, spawn the given number of enemies at random spawnable locations across the TileGrid
  *
@@ -130,10 +127,6 @@ void TileGrid::SetEnemiesOnGrid() {
 		used_locations.push_back(location);
 	}
 	spawnable_locations[50]->call("SpawnCharacter");
-	UtilityFunctions::print("Setting enemies on list of size: ", call_set_enemy_start_positions.size());
-	// for (int i = 0; i < call_set_enemy_start_positions.size(); i++) {
-	//   call_set_enemy_start_positions[i].call(m_tile_grid->begin()->value);
-	// }
 }
 
 void TileGrid::SetPlayerTeamOnGrid() {
@@ -144,15 +137,18 @@ void TileGrid::SetPlayerTeamOnGrid() {
 /*
  * Devoted Function to generate the tile_grid
  */
-void TileGrid::GenerateTileGrid(bool test_flag) {
+void TileGrid::GenerateTileGrid(bool test_flag, String file) {
+  m_file_location = file;
 	if (test_flag) {
 		UtilityFunctions::print(vformat("Constructing New Grid with %d num rooms", m_grid_num_rooms));
 		m_showrooms = memnew(LevelGenerator(m_tile_outer_size, m_tile_inner_size, m_tile_height, m_tile_is_flat_topped, m_grid_num_rooms, Vector2i(1000, 1000)));
 		m_grid_num_rooms = m_showrooms->GetNumRooms();
-		m_tile_grid = m_showrooms->GenerateLevel(this, spawnable_locations);
+    UtilityFunctions::print("Attempting to generate level");
+		m_tile_grid = m_showrooms->GenerateLevel(this, spawnable_locations, file);
+    UtilityFunctions::print("Generated Level, sending out notification");
 		TileNotifier::getInstance()->GridCreationNotification(this);
 		UtilityFunctions::print("Tile Grid Size: ", m_tile_grid->size());
-		call_deferred("SetEnemiesOnGrid");
+		//call_deferred("SetEnemiesOnGrid");
 		memdelete(m_showrooms);
 	}
 }
@@ -533,7 +529,7 @@ int TileGrid::GetNumRooms() {
 
 void TileGrid::SetNumRooms(int num_rooms) {
 	m_grid_num_rooms = num_rooms;
-	GenerateTileGrid(false);
+	GenerateTileGrid(false, m_file_location);
 }
 
 void TileGrid::_bind_methods() {
@@ -554,7 +550,6 @@ void TileGrid::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("SetEnemiesOnGrid"), &TileGrid::SetEnemiesOnGrid);
-	godot::ClassDB::bind_method(godot::D_METHOD("AddEnemyCall", "addition"), &TileGrid::AddEnemyCall);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetNeighborsInRadius", "starting_tile", "radius"), &TileGrid::GetNeighborsInRadius);

@@ -1,4 +1,5 @@
 #include "goap_action.h"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/dictionary.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/variant.hpp"
@@ -20,12 +21,13 @@ godot::GoapAction::~GoapAction() {
 }
 
 void godot::GoapAction::_bind_methods() {
+  godot::ClassDB::bind_method(godot::D_METHOD("GetActionName"),&GoapAction::GetActionName);
+  godot::ClassDB::bind_method(godot::D_METHOD("DoReset"), &GoapAction::DoReset);
 	//godot::ClassDB::bind_method(godot::D_METHOD("CheckProceduralPrecondition", "goap_agent", "world_data"), &GoapAction::CheckProceduralPrecondition);
 	//godot::ClassDB::bind_method(godot::D_METHOD("Perform", "goap_agent"), &GoapAction::Perform);
 }
 
 void godot::GoapAction::DoReset() {
-	in_range = false;
 	target = nullptr;
 	Reset();
 }
@@ -35,6 +37,10 @@ void godot::GoapAction::Reset() {
 
 bool godot::GoapAction::IsDone(Node *goap_agent) {
 	return false;
+}
+
+bool godot::GoapAction::GetInRange(Node *goap_agent, Dictionary world_data) {
+  return false;
 }
 
 bool godot::GoapAction::InProgress(Node *goap_agent) {
@@ -48,14 +54,6 @@ bool godot::GoapAction::Perform(Node *goap_agent) {
 }
 bool godot::GoapAction::RequiresInRange() {
   return true;
-}
-
-bool godot::GoapAction::GetInRange() {
-	return in_range;
-}
-
-void godot::GoapAction::SetInRange(bool range) {
-	in_range = range;
 }
 
 void godot::GoapAction::AddPrecondition(String key, Variant value) {

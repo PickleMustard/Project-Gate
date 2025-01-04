@@ -45,7 +45,7 @@ Tile::Tile() {
  *
  * Functions exactly the same as default constructor
  */
-Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint8_t type) {
+Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint16_t type) {
   m_position = position;
 	m_tile_row = r;
 	m_tile_column = c;
@@ -175,12 +175,12 @@ godot::Variant Tile::GetCharacterOnTile() {
 }
 
 bool Tile::HasCharacterOnTile() {
-  UtilityFunctions::print("Tile has character: ", m_character_on_tile != nullptr);
+  //UtilityFunctions::print("Tile has character: ", m_character_on_tile != nullptr);
   return m_character_on_tile != nullptr;
 }
 
 void Tile::SetCharacterOnTile(Variant character) {
-  UtilityFunctions::print("Can Convert Character Variant: ",character.can_convert_strict(character.get_type(), Variant::OBJECT) );
+  //UtilityFunctions::print("Can Convert Character Variant: ",character.can_convert_strict(character.get_type(), Variant::OBJECT) );
   if(character.can_convert_strict(character.get_type(), Variant::OBJECT)) {
     m_character_on_tile = Object::cast_to<Node3D>(character);
   }

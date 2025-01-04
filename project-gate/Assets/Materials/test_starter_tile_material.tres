@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bqaseg60cvlwv"]
 
-[ext_resource type="Shader" path="res://Assets/Textures/Shaders/starter_tile_shader.gdshader" id="1_yj7i2"]
+[ext_resource type="Shader" path="res://Assets/Textures/Shaders/test_tile_shader.gdshader" id="1_w1h31"]
 
 [resource]
 render_priority = 0
-shader = ExtResource("1_yj7i2")
+shader = ExtResource("1_w1h31")

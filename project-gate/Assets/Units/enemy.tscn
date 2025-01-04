@@ -1,22 +1,53 @@
-[gd_scene load_steps=5 format=3 uid="uid://2bswkiikpwx4"]
+[gd_scene load_steps=8 format=3 uid="uid://2bswkiikpwx4"]
 
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/Enemy.cs" id="1_k8ecc"]
-
-[sub_resource type="AttackEnemyAction" id="AttackEnemyAction_n30qs"]
-
-[sub_resource type="AttemptToDiscoverEnemyAction" id="AttemptToDiscoverEnemyAction_h21s8"]
+[ext_resource type="AudioStream" uid="uid://dq57eheww3cd1" path="res://Assets/Sound-Effects/Dev-Only/Death_Sound.mp3" id="3_m1hy7"]
+[ext_resource type="Script" path="res://Assets/Scripts/User-Interface/Healthbar.cs" id="4_iculo"]
+[ext_resource type="Texture2D" uid="uid://bg6fhem324yn0" path="res://Assets/Textures/User-Interface/barHorizontal_green_mid 200.png" id="4_jsanq"]
+[ext_resource type="Script" path="res://Assets/Scripts/User-Interface/HealthbarTexture.cs" id="6_yb7xx"]
+[ext_resource type="AudioStream" uid="uid://d4ao63nnk7xvy" path="res://Assets/Sound-Effects/Dev-Only/Explosion3_modified.mp3" id="7_hnkry"]
 
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
+team = 1
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material_override = ExtResource("1_b2i4i")
 
-[node name="GoapAgent" type="GoapAgent" parent="."]
-m_available_actions = {
-"Attack Enemy": SubResource("AttackEnemyAction_n30qs"),
-"Discover Enemy": SubResource("AttemptToDiscoverEnemyAction_h21s8")
-}
+[node name="Healthbar" type="Sprite3D" parent="."]
+transform = Transform3D(2.7, 0, 0, 0, 2.7, 0, 0, 0, 2.7, 0, 1.20144, 0)
+billboard = 1
+double_sided = false
+script = ExtResource("4_iculo")
 
-[node name="data_provider" type="BaseEnemy" parent="."]
+[node name="SubViewport" type="SubViewport" parent="Healthbar"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(200, 26)
+
+[node name="TextureProgressBar" type="TextureProgressBar" parent="Healthbar/SubViewport"]
+top_level = true
+offset_right = 200.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+value = 100.0
+texture_progress = ExtResource("4_jsanq")
+script = ExtResource("6_yb7xx")
+
+[node name="Audio-Container" type="Node" parent="."]
+
+[node name="character_death" type="AudioStreamPlayer3D" parent="Audio-Container"]
+stream = ExtResource("3_m1hy7")
+volume_db = 16.97
+max_db = 6.0
+bus = &"Enemy Sound Effects"
+
+[node name="weapon_attack" type="AudioStreamPlayer3D" parent="Audio-Container"]
+stream = ExtResource("7_hnkry")
+volume_db = 16.97
+max_db = 6.0
+bus = &"Enemy Sound Effects"

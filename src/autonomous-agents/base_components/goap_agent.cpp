@@ -2,6 +2,7 @@
 #include "autonomous-agents/base_components/finite_state_machine_base.h"
 #include "autonomous-agents/base_components/goap_action.h"
 #include "autonomous-agents/base_components/goap_planner.h"
+#include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/core/class_db.hpp"
@@ -44,14 +45,29 @@ void godot::GoapAgent::_ready() {
 }
 
 void godot::GoapAgent::_process(double p_delta) {
-	if (should_continue) {
+	/*if (should_continue) {
 		should_continue = state_machine->Update(this);
-    counter++;
+    if(!should_continue) {
+      EndTurn();
+    }
 	}
 	/*UtilityFunctions::print("Updating State machine");
 	  state_machine->Update(this);
 	UtilityFunctions::print("State machine updated");*/
 }
+
+void godot::GoapAgent::_physics_process(double p_delta) {
+	if (should_continue) {
+		should_continue = state_machine->Update(this);
+    if(!should_continue) {
+      EndTurn();
+    }
+	}
+	/*UtilityFunctions::print("Updating State machine");
+	  state_machine->Update(this);
+	UtilityFunctions::print("State machine updated");*/
+}
+
 
 void godot::GoapAgent::RunAI() {
 	//Create a plan, then run through the plan while action / movement points remain
@@ -60,6 +76,13 @@ void godot::GoapAgent::RunAI() {
 	UtilityFunctions::print("Got Parent");
 	Update();
 	UtilityFunctions::print("Updated");
+}
+
+void godot::GoapAgent::EndTurn() {
+	SceneTree *tree = get_tree();
+	TypedArray<Node> turn_controllers = tree->get_nodes_in_group("TurnController");
+	Node *turn_controller = cast_to<Node>(turn_controllers[0]);
+  turn_controller->call_deferred("EndTurn");
 }
 
 void godot::GoapAgent::AddAction(Ref<GoapAction> action) {
@@ -80,10 +103,10 @@ godot::TileGrid *godot::GoapAgent::GetTileGrid() {
 	return tilegrid_obj;
 }
 
-godot::Node3D *godot::GoapAgent::GetUnitController() {
+godot::Node *godot::GoapAgent::GetUnitController() {
 	SceneTree *tree = get_tree();
 	TypedArray<Node> unit_control_group = tree->get_nodes_in_group("UnitControl");
-	Node3D *unit_controller = cast_to<Node3D>(unit_control_group[0]);
+	Node *unit_controller = cast_to<Node>(unit_control_group[0]);
 	return unit_controller;
 }
 
@@ -117,6 +140,7 @@ bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
 	} else {
 		UtilityFunctions::print("Plan not found");
 		data_provider->PlanFailed(goal);
+    should_continue = false;
 		return false;
 		//fsm->call_deferred("PopState");
 		//fsm->call_deferred("PushState", idle_state);
@@ -126,6 +150,7 @@ bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
 
 bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
+  UtilityFunctions::print("Moving state: ", action);
 	if (action->RequiresInRange() && action->target == nullptr) {
 		fsm->PopState();
 		fsm->PopState();
@@ -142,7 +167,6 @@ bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	UtilityFunctions::print("Performing an action | ", HasActionPlan());
 	if (!HasActionPlan()) {
-		UtilityFunctions::print("1");
 		fsm->PopState();
 		fsm->PushState(idle_state);
 		data_provider->ActionsFinished();
@@ -152,21 +176,23 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
 	UtilityFunctions::print("Is Done? ", action->IsDone(this));
 	UtilityFunctions::print("name: ", action->GetActionName());
-	if (action->IsDone(this)) {
-		current_actions.remove_at(0);
-	}
   if(action->InProgress(this)) {
     return true;
+  }
+  if (action->IsDone(this)) {
+    current_actions.remove_at(0);
   }
 
 	if (HasActionPlan()) {
 		UtilityFunctions::print("2");
 		action = current_actions[0];
 		UtilityFunctions::print("Requires in Range? ", action->RequiresInRange());
-		bool in_range = action->RequiresInRange() ? action->GetInRange() : true;
+	  Dictionary world_state = data_provider->GetWorldState();
+		bool in_range = action->RequiresInRange() ? action->GetInRange(this, world_state) : true;
 
 		if (in_range) {
 			bool success = action->Perform(this);
+      UtilityFunctions::print("Success? ", success);
 
 			if (!success) {
 				fsm->PopState();
@@ -187,13 +213,13 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 void godot::GoapAgent::FindDataProvider() {
 	Node *parent = get_parent();
 	UtilityFunctions::print("Parent: ", parent);
-	Node *potential_provider = parent->find_child("data_provider");
+	Node *potential_provider = parent->find_child("data_provider", true, false);
 	UtilityFunctions::print("Data provider: ", potential_provider);
 	data_provider = cast_to<IGoap>(potential_provider);
 }
 
 void godot::GoapAgent::SetAvailableActions(Dictionary actions) {
-	m_available_actions.clear();
+	//m_available_actions.clear();
 	Array action_keys = actions.keys();
 	for (int i = 0; i < action_keys.size(); i++) {
 		UtilityFunctions::print("Value Type: ", actions[action_keys[i]].get_type(), "| ", actions[action_keys[i]].get_type_name(actions[action_keys[i]].get_type()));

@@ -35,7 +35,7 @@ public partial class camera_movement : Node3D
   private int[] camera_FOV = { 70, 70, 70, 80, 90, 110 };
   public override void _Ready()
   {
-    InputHandler i_handle = GetNode<Node>("/root/Top/input_handler") as InputHandler;
+    InputHandler i_handle = GetTree().GetNodesInGroup("InputHandler")[0] as InputHandler;
     camera = GetNode<Camera3D>("Camera");
     //GD.Print("Test");
     //GD.Print(i_handle.GetSignalList());
