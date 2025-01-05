@@ -50,4 +50,4 @@ compile_commands.json
 !.vscode/extensions.json
 
 #Assets that should not be uploaded
-Temporary-Assets/*
+Temporary-Assets/
