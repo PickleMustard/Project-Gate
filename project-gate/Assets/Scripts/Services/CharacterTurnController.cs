@@ -17,7 +17,7 @@ public partial class CharacterTurnController : Node
   //Characters current alive on the level
   List<Character> AliveCharacterList;
   //Callable to the movement calculation function under each alive character
-  List<Callable> UpdateMovementCalcs;
+  List<Callable> CharacterMovementUpdateFunctions;
   //Current Character in the turn order | Updates the movement controller
   [Export]
   Character CurrentCharacter;
@@ -27,14 +27,15 @@ public partial class CharacterTurnController : Node
   Node level;
   Callable StartLevelTurnController;
 
-  public override void _EnterTree() {
+  public override void _EnterTree()
+  {
     AddToGroup("TurnController");
   }
 
   public override void _Ready()
   {
     StartLevelTurnController = new Callable(this, "StartLevel");
-    UpdateMovementCalcs = new List<Callable>();
+    CharacterMovementUpdateFunctions = new List<Callable>();
     MovementQueue = new Queue<Character>();
     AliveCharacterList = new List<Character>();
     PriorityUpdateHeap = new PriorityQueue<Character, float>();
@@ -64,7 +65,7 @@ public partial class CharacterTurnController : Node
       next_character.MakeMainCharacter();
       if (next_character.IsInGroup("Enemies"))
       {
-        PrintOrphanNodes();
+        //PrintOrphanNodes();
         next_character.Call("RunAI");
       }
       return next_character;
@@ -81,7 +82,7 @@ public partial class CharacterTurnController : Node
    * If it doesn't exist, all characters for the Global turn have moved
    * Thus, all movement stats should be rerolled
    */
-  public void EndTurn()
+  public void EndCharacterTurn()
   {
     CommunicationBus s = (CommunicationBus)Engine.GetSingleton("CommunicationBus");
     s.EmitSignal(CommunicationBus.SignalName.IdentifyStrayNode);
@@ -104,7 +105,8 @@ public partial class CharacterTurnController : Node
     }
   }
 
-  public Callable GetEndTurnCall() {
+  public Callable GetEndTurnCall()
+  {
     return new Callable(this, "EndTurn");
   }
 
@@ -151,6 +153,11 @@ public partial class CharacterTurnController : Node
 
   }
 
+  private void FinalizeMovementQueue()
+  {
+
+  }
+
   private void CalculateMovementQueue()
   {
     PriorityUpdateHeap.Clear();
@@ -175,12 +182,12 @@ public partial class CharacterTurnController : Node
 
   public void AddUpdateCharacterMovementCallable(Callable updateFunction)
   {
-    UpdateMovementCalcs.Add(updateFunction);
+    CharacterMovementUpdateFunctions.Add(updateFunction);
   }
 
   public void RemoveUpdateCharacterMovementCallable(Callable updateFunction)
   {
-    UpdateMovementCalcs.Remove(updateFunction);
+    CharacterMovementUpdateFunctions.Remove(updateFunction);
   }
 
   public void AddCharacterToTurnController(Character character)

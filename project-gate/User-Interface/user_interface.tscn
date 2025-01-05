@@ -10,6 +10,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 1
 
 [node name="End-Turn" type="Button" parent="."]
@@ -68,3 +70,13 @@ offset_bottom = 208.0
 [node name="CurrencyLabel" type="Label" parent="CurrencyContainer" groups=["CurrencyDisplay"]]
 layout_mode = 2
 script = ExtResource("2_3acg4")
+
+[node name="CharacterTurnBanner" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -372.5
+offset_right = 372.5
+offset_bottom = 193.0
+grow_horizontal = 2

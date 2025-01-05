@@ -3,49 +3,63 @@ using System;
 
 public partial class GenericCharacterBanner : Control
 {
-  Texture2D unitIcon;
-  String characterName;
-  int movementRemaining;
-  float heapPriority;
+  private Texture2D m_UnitIcon;
+  private String m_CharacterName;
+  private int m_MovementRemaining;
+  private float m_HeapPriority;
 
-  Label CharacterInfo;
-  TextureRect UnitIconDisplay;
+  private Label m_CharacterInfo;
+  private TextureRect m_UnitIconDisplay;
 
-  Callable updateMovementRemainingCall;
-  Callable UpdateHeapPriorityCall;
+  Callable m_UpdateMovementRemainingCall;
+  Callable m_UpdateHeapPriorityCall;
 
-  public override void _EnterTree() {
-    updateMovementRemainingCall = new Callable(this, "UpdateMovementRemaining");
-    UpdateHeapPriorityCall = new Callable(this, "UpdateHeapPriority");
-    UnitIconDisplay = (TextureRect)GetChildren()[0].GetChildren()[0];
-    CharacterInfo = (Label)GetChildren()[0].GetChildren()[1];
-    CharacterInfo.Text = GenerateCharacterBannerText();
+  public override void _EnterTree()
+  {
+    m_UpdateMovementRemainingCall = new Callable(this, "UpdateMovementRemaining");
+    m_UpdateHeapPriorityCall = new Callable(this, "UpdateHeapPriority");
+    m_UnitIconDisplay = (TextureRect)GetChildren()[0].GetChildren()[0];
+    m_CharacterInfo = (Label)GetChildren()[0].GetChildren()[1];
+    m_CharacterInfo.Text = GenerateCharacterBannerText();
 
-  }
-  public void UpdateMovementRemaining(int newValue) {
-    movementRemaining = newValue;
-    CharacterInfo.Text = GenerateCharacterBannerText();
+    m_UnitIconDisplay.Texture = m_UnitIcon;
   }
 
-  public void UpdateHeapPriority(float newValue) {
-    heapPriority = newValue;
-    CharacterInfo.Text = GenerateCharacterBannerText();
+  public void UpdateIconBanner(Texture2D UnitIcon)
+  {
+    this.m_UnitIcon = UnitIcon;
+    m_UnitIconDisplay.Texture = m_UnitIcon;
+  }
+  public void UpdateMovementRemaining(int NewValue)
+  {
+    m_MovementRemaining = NewValue;
+    m_CharacterInfo.Text = GenerateCharacterBannerText();
   }
 
-  public void UpdateCharacterName(String newName) {
-    characterName = newName;
-    CharacterInfo.Text = GenerateCharacterBannerText();
+  public void UpdateHeapPriority(float NewValue)
+  {
+    m_HeapPriority = NewValue;
+    m_CharacterInfo.Text = GenerateCharacterBannerText();
   }
 
-  public Callable GetUpdateMovementCallable() {
-    return updateMovementRemainingCall;
+  public void UpdateCharacterName(String NewName)
+  {
+    m_CharacterName = NewName;
+    m_CharacterInfo.Text = GenerateCharacterBannerText();
   }
 
-  public Callable GetUpdateHeapPriorityCallable() {
-    return UpdateHeapPriorityCall;
+  public Callable GetUpdateMovementCallable()
+  {
+    return m_UpdateMovementRemainingCall;
   }
 
-  private String GenerateCharacterBannerText() {
-    return "Character: " + characterName + "\nMovement Remaining: " + movementRemaining + "\nHeap Priority: " + heapPriority;
+  public Callable GetUpdateHeapPriorityCallable()
+  {
+    return m_UpdateHeapPriorityCall;
+  }
+
+  private String GenerateCharacterBannerText()
+  {
+    return "Character: " + m_CharacterName + "\nMovement Remaining: " + m_MovementRemaining + "\nHeap Priority: " + m_HeapPriority;
   }
 }
