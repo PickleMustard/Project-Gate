@@ -107,7 +107,7 @@ public partial class CharacterTurnController : Node
 
   public Callable GetEndTurnCall()
   {
-    return new Callable(this, "EndTurn");
+    return new Callable(this, "EndCharacterTurn");
   }
 
   public void AddCharacterToMovementQueue(Character SpawnedCharacter)

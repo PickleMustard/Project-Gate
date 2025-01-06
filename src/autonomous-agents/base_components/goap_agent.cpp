@@ -47,9 +47,9 @@ void godot::GoapAgent::_ready() {
 void godot::GoapAgent::_process(double p_delta) {
 	/*if (should_continue) {
 		should_continue = state_machine->Update(this);
-    if(!should_continue) {
-      EndTurn();
-    }
+	if(!should_continue) {
+	  EndTurn();
+	}
 	}
 	/*UtilityFunctions::print("Updating State machine");
 	  state_machine->Update(this);
@@ -59,15 +59,14 @@ void godot::GoapAgent::_process(double p_delta) {
 void godot::GoapAgent::_physics_process(double p_delta) {
 	if (should_continue) {
 		should_continue = state_machine->Update(this);
-    if(!should_continue) {
-      EndTurn();
-    }
+		if (!should_continue) {
+			EndTurn();
+		}
 	}
 	/*UtilityFunctions::print("Updating State machine");
 	  state_machine->Update(this);
 	UtilityFunctions::print("State machine updated");*/
 }
-
 
 void godot::GoapAgent::RunAI() {
 	//Create a plan, then run through the plan while action / movement points remain
@@ -82,7 +81,7 @@ void godot::GoapAgent::EndTurn() {
 	SceneTree *tree = get_tree();
 	TypedArray<Node> turn_controllers = tree->get_nodes_in_group("TurnController");
 	Node *turn_controller = cast_to<Node>(turn_controllers[0]);
-  turn_controller->call_deferred("EndTurn");
+	turn_controller->call_deferred("EndCharacterTurn");
 }
 
 void godot::GoapAgent::AddAction(Ref<GoapAction> action) {
@@ -140,7 +139,7 @@ bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
 	} else {
 		UtilityFunctions::print("Plan not found");
 		data_provider->PlanFailed(goal);
-    should_continue = false;
+		should_continue = false;
 		return false;
 		//fsm->call_deferred("PopState");
 		//fsm->call_deferred("PushState", idle_state);
@@ -150,7 +149,7 @@ bool godot::GoapAgent::IdleState(godot::FiniteStateMachineBase *fsm) {
 
 bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
-  UtilityFunctions::print("Moving state: ", action);
+	UtilityFunctions::print("Moving state: ", action);
 	if (action->RequiresInRange() && action->target == nullptr) {
 		fsm->PopState();
 		fsm->PopState();
@@ -176,23 +175,23 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	Ref<GoapAction> action = current_actions[0];
 	UtilityFunctions::print("Is Done? ", action->IsDone(this));
 	UtilityFunctions::print("name: ", action->GetActionName());
-  if(action->InProgress(this)) {
-    return true;
-  }
-  if (action->IsDone(this)) {
-    current_actions.remove_at(0);
-  }
+	if (action->InProgress(this)) {
+		return true;
+	}
+	if (action->IsDone(this)) {
+		current_actions.remove_at(0);
+	}
 
 	if (HasActionPlan()) {
 		UtilityFunctions::print("2");
 		action = current_actions[0];
 		UtilityFunctions::print("Requires in Range? ", action->RequiresInRange());
-	  Dictionary world_state = data_provider->GetWorldState();
+		Dictionary world_state = data_provider->GetWorldState();
 		bool in_range = action->RequiresInRange() ? action->GetInRange(this, world_state) : true;
 
 		if (in_range) {
 			bool success = action->Perform(this);
-      UtilityFunctions::print("Success? ", success);
+			UtilityFunctions::print("Success? ", success);
 
 			if (!success) {
 				fsm->PopState();

@@ -59,6 +59,8 @@ public partial class Character : Node3D
   public Grenade grenade { get; protected set; }
   [Export]
   public CHARACTER_TEAM team;
+  [Export]
+  public Texture2D Icon;
   public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
   public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
@@ -73,7 +75,7 @@ public partial class Character : Node3D
   public int distanceRemaining { get; set; }
   protected internal Callable updateMovementCalcs;
 
-  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority)
+  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority, Texture2D icon)
   {
     this.CharacterName = name;
     this.MainWeapon = weapon;
@@ -85,6 +87,7 @@ public partial class Character : Node3D
     this.BaseSpeedAccumulator = accumulationRate;
     this.SpeedNeededToRequeue = requeueSpeed;
     this.HeapPriority = turnPriority;
+    this.Icon = icon;
   }
 
   public void IdentifyStray()
@@ -129,6 +132,10 @@ public partial class Character : Node3D
     ResetPriority();
   }
 
+  public Texture2D GetCharacterIcon()
+  {
+    return Icon;
+  }
   protected void SetupHealthbar()
   {
     currentHealth = TotalHealth;

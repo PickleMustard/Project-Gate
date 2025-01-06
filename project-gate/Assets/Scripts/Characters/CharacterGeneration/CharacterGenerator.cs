@@ -41,6 +41,12 @@ public partial class CharacterGenerator : Resource
     Grenade startingGrenade = weaponGenerator.GenerateGrenade(chosenGrenade);
     GD.Print(startingGrenade);
 
+    string PotentialIconsPath = (string)parsedData["Potential-Icons"];
+    toLoad = GENERATED_CHARACTER_BASE_PATH + PotentialIconsPath + ".yml";
+    GD.Print(toLoad);
+    Dictionary PotentialIcons = (Dictionary)yamlParser.Call("parse_file", toLoad);
+    Texture2D CharacterIcon = ChooseCharacterIcon((Array)PotentialIcons["Potential-Icons"]);
+
     Array<Character.WEAPON_PROFICIENCIES> proficiencies = ChooseProficiencies((Array)parsedData["Potential-Proficiencies"]);
 
     int turnPriority = ChooseTurnPriority((Array)parsedData["Turn-Priority-Bounds"]);
@@ -50,7 +56,7 @@ public partial class CharacterGenerator : Resource
     float requeueSpeed = ChooseRequeueSpeed((Array)parsedData["Requeue-Speed-Bounds"]);
     float accumulationRate = ChooseAccumulationRate((Array)parsedData["Accumulation-Rate-Bounds"], requeueSpeed);
 
-    createdCharacter.GenerateCharacter(characterName, startingWeapon, startingGrenade, proficiencies, movementRange, actionPoints, characterHealth, accumulationRate, requeueSpeed, turnPriority);
+    createdCharacter.GenerateCharacter(characterName, startingWeapon, startingGrenade, proficiencies, movementRange, actionPoints, characterHealth, accumulationRate, requeueSpeed, turnPriority, CharacterIcon);
     GD.Print(createdCharacter);
     GD.Print(parsedData["Potential-Proficiencies"]);
 
@@ -96,13 +102,15 @@ public partial class CharacterGenerator : Resource
       int num = (int)RNG.Call("GetInteger", possiblePassableWeapons.Count - 1);
       Weapon.WEAPON_TYPES type = (Weapon.WEAPON_TYPES)System.Enum.Parse(typeof(Weapon.WEAPON_TYPES), (string)possiblePassableWeapons[num]);
       generatedProficiencies[(int)type] = Character.WEAPON_PROFICIENCIES.passable;
-      if(possibleClumsyWeapons.Contains(possiblePassableWeapons[num])) {
+      if (possibleClumsyWeapons.Contains(possiblePassableWeapons[num]))
+      {
         possibleClumsyWeapons.Remove(possiblePassableWeapons[num]);
       }
       possiblePassableWeapons.Remove(possiblePassableWeapons[num]);
     }
 
-    for(int i = 0; i < possibleClumsyWeapons.Count; i++) {
+    for (int i = 0; i < possibleClumsyWeapons.Count; i++)
+    {
       Weapon.WEAPON_TYPES type = (Weapon.WEAPON_TYPES)System.Enum.Parse(typeof(Weapon.WEAPON_TYPES), (string)possibleClumsyWeapons[i]);
       generatedProficiencies[(int)type] = Character.WEAPON_PROFICIENCIES.clumsy;
     }
@@ -113,6 +121,13 @@ public partial class CharacterGenerator : Resource
   {
     int num = (int)RNG.Call("GetWholeNumber", names.Count - 1);
     return (string)names[num];
+  }
+
+  private Texture2D ChooseCharacterIcon(Array icons)
+  {
+    int num = (int)RNG.Call("GetWholeNumber", icons.Count - 1);
+    Texture2D LoadedIcon = ResourceLoader.Load((string)icons[num]) as Texture2D;
+    return LoadedIcon;
   }
 
   private string ChooseCharacterWeapon(Array weapons)

@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://c6824mnasrdsd"]
+[gd_scene load_steps=3 format=3 uid="uid://c6824mnasrdsd"]
 
 [ext_resource type="Theme" uid="uid://byw7jyf0323lm" path="res://User-Interface/Themes/main_ui_theme.tres" id="1_8ud2x"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs" id="2_5lusu"]
-[ext_resource type="Texture2D" uid="uid://clx0s0hede6gf" path="res://Assets/Icons/UnitIcons/Unit_Icon1.png" id="2_utb2u"]
 
 [node name="GenericCharacterBanner" type="Control"]
 layout_mode = 3
@@ -27,7 +26,6 @@ alignment = 1
 auto_translate_mode = 1
 layout_mode = 2
 size_flags_vertical = 3
-texture = ExtResource("2_utb2u")
 expand_mode = 2
 stretch_mode = 5
 

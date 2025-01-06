@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://blamjf42tuppq"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Characters/Character.cs" id="1_v2lf0"]
+[ext_resource type="Script" path="res://Assets/Scripts/Characters/PlayerTeamCharacter.cs" id="1_iabf2"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="2_43rut"]
 [ext_resource type="AudioStream" uid="uid://d4ao63nnk7xvy" path="res://Assets/Sound-Effects/Dev-Only/Explosion3_modified.mp3" id="3_kpyht"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/Healthbar.cs" id="4_wuko7"]
@@ -9,7 +9,7 @@
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/HealthbarTexture.cs" id="6_w6dky"]
 
 [node name="playerteamcharacter" type="Node3D" groups=["PlayerCharacters"]]
-script = ExtResource("1_v2lf0")
+script = ExtResource("1_iabf2")
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
 material = ExtResource("2_43rut")
