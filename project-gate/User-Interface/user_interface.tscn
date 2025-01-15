@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8yim1xd3mn7o"]
+[gd_scene load_steps=4 format=3 uid="uid://c8yim1xd3mn7o"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/EndTurnButton.cs" id="1_43gg1"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/DisplayCurrency.cs" id="2_3acg4"]
+[ext_resource type="Script" path="res://Assets/Scripts/User-Interface/TurnOrderBanner.cs" id="3_jdt4b"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -80,3 +81,4 @@ offset_left = -372.5
 offset_right = 372.5
 offset_bottom = 193.0
 grow_horizontal = 2
+script = ExtResource("3_jdt4b")

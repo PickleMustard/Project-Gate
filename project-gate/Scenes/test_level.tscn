@@ -30,7 +30,7 @@ script = ExtResource("4_ht3ou")
 [node name="Level" type="Level" parent="."]
 m_level_file_location = "res://Configuration/Levels/Showrooms_1.yml"
 
-[node name="@TileGrid@24916" type="TileGrid" parent="Level"]
+[node name="@TileGrid@17479" type="TileGrid" parent="Level"]
 
 [node name="Characters" type="Node" parent="."]
 

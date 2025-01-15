@@ -298,8 +298,9 @@ public partial class Character : Node3D
     EmitSignal(SignalName.UpdatedMovementRemaining, GetDistanceRemaining());
   }
 
-  public bool UpdateMovementCalcs()
+  public (bool, bool) UpdateMovementCalculation()
   {
+    bool enqueue = false;
     bool requeue = false;
     GD.Print("CurrentHeapPriority: ", CurrentHeapPriority, "| Should Requeue: ", requeue, "| CurrentSpeed: ", CurrentSpeed, "| Requeue Speed: ", SpeedNeededToRequeue);
     if (CurrentHeapPriority < 0)
@@ -308,14 +309,16 @@ public partial class Character : Node3D
     }
     if (CurrentSpeed >= SpeedNeededToRequeue)
     {
-      CharacterTurnController.Instance.AddCharacterToMovementQueue(this);
+      //Replace with signal
+      //CharacterTurnController.Instance.AddCharacterToMovementQueue(this);
+      enqueue = true;
       CurrentSpeed -= SpeedNeededToRequeue;
       if (CurrentSpeed >= SpeedNeededToRequeue)
       {
         requeue = true;
       }
     }
-    return requeue;
+    return (enqueue, requeue);
   }
 
   public void SetMainWeapon(Weapon UpdatedWeapon)
