@@ -20,7 +20,7 @@ public partial class CommunicationBus : Node
   private Callable SpawnCharacterCall;
   private Callable UpdateCharacterCall;
   private Callable GenerateItemCall;
-  public Callable EnemyKilledCall;
+  public Callable CharacterKilledCall;
 
   private Node TileGrid;
   private Node3D Level;
@@ -33,7 +33,7 @@ public partial class CommunicationBus : Node
     GenerateItemCall = new Callable(this, "GenerateItem");
     SpawnEnemyCall = new Callable(this, "SpawnEnemy");
     SpawnCharacterCall = new Callable(this, "SpawnPlayerCharacter");
-    EnemyKilledCall = new Callable(this, "EnemyKilled");
+    CharacterKilledCall = new Callable(this, "CharacterKilled");
   }
 
 
@@ -65,14 +65,14 @@ public partial class CommunicationBus : Node
   {
     return SpawnEnemyCall;
   }
-  public Callable GetEnemyKilledEventCallable()
+  public Callable GetCharacterKilledEventCallable()
   {
-    return EnemyKilledCall;
+    return CharacterKilledCall;
   }
 
   public void AddCharacter(Character character, GenericCharacterBanner CharacterBanner = null)
   {
-    //Add Character to the alive list 
+    //Add Character to the alive list
     //
     //Add Character icon to turn banner
     //
@@ -119,6 +119,7 @@ public partial class CommunicationBus : Node
 
     string name = character.Name;
     character.ReplaceBy(generatedCharacter, true);
+    character.QueueFree();
     generatedCharacter.Name = name;
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
@@ -167,10 +168,17 @@ public partial class CommunicationBus : Node
     CurrentCharacter = UpdateCharacter;
   }
 
-  private void EnemyKilled(Enemy enemy)
+  private void CharacterKilled(Character character)
   {
-    GD.Print("Enemy Has Been Killed: ", enemy.Name);
-    EmitSignal(SignalName.AddCurrency, enemy.GetAmountOfCurrencyDroppedOnKill());
+    GD.Print("Enemy Has Been Killed: ", character.Name);
+    if(character.GetCharacterTeam() == (int)Character.CHARACTER_TEAM.enemy) {
+      Enemy enemy = character as Enemy;
+      EmitSignal(SignalName.AddCurrency, enemy.GetAmountOfCurrencyDroppedOnKill());
+    }
+    CharacterTurnController.Instance.RemoveCharacterFromTurnController(character);
+    CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(character.GetUpdateMovementCalculation());
+    (GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl).ResetTileAfterCharacterDeath(character);
+    CharacterTurnController.Instance.UpdateMovementQueue();
   }
 
 }

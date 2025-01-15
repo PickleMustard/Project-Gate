@@ -26,7 +26,8 @@ public partial class UnitControl : Node
   Godot.GodotObject test;
   Node3D capsule;
 
-  public override void _EnterTree() {
+  public override void _EnterTree()
+  {
     AddToGroup("UnitControl");
   }
 
@@ -202,6 +203,7 @@ public partial class UnitControl : Node
 
   public void NotifyLog(Node tile_collider)
   {
+    GD.Print("In NotifyLog Proper");
     unit_location = new Vector2I(0, 0);
     string tile_name = tile_collider.Name;
     tile = tile_collider.GetParent();
@@ -257,6 +259,7 @@ public partial class UnitControl : Node
       TargetTile = TileGrid.Call("FindTileOnGrid", TargetPosition).AsGodotObject() as Resource;
       if (TargetTile.HasMethod("GetCharacterOnTile"))
       {
+        target.QueueFree();
         target = TargetTile.Call("GetCharacterOnTile").AsGodotObject() as Character;
         //GD.Print("Getting character on tile: ", TargetTile, " | ", target);
         if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("Character")))
@@ -282,6 +285,21 @@ public partial class UnitControl : Node
         }
       }
     }
+  }
+
+  public void ResetTileAfterCharacterDeath(Character character)
+  {
+    Vector2I character_location = (Vector2I)TileGrid.Call("GetCoordinateFromPosition", character.Position, 3.0f);
+    if (TileGrid.HasMethod("FindTileOnGrid"))
+    {
+      GodotObject character_tile = TileGrid.Call("FindTileOnGrid", character_location).AsGodotObject();
+      if(character_tile.HasMethod("ResetCharacterOnTile")) {
+        GD.Print("Resetting Tile");
+        character_tile.Call("ResetCharacterOnTile");
+      }
+    }
+
+
   }
 
   public void MoveCharacter(Node tile_collider)

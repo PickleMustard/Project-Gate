@@ -94,6 +94,7 @@ public partial class Daemon : Node
 
     string name = character.Name;
     character.ReplaceBy(generatedCharacter, true);
+    character.QueueFree();
     generatedCharacter.Name = name;
     ((CommunicationBus)Engine.GetSingleton("CommunicationBus")).AddCharacter(character, characterBanner);
 

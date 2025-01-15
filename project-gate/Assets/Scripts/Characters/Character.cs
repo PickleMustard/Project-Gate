@@ -6,6 +6,9 @@ using Godot.Collections;
 [GlobalClass]
 public partial class Character : Node3D
 {
+  [Signal]
+  public delegate void CharacterKilledEventHandler();
+
   protected const float INTITIAL_REQUEUE_PRIORITY = 1.0f;
   public enum CHARACTER_TEAM
   {
@@ -73,7 +76,7 @@ public partial class Character : Node3D
   protected Node TileGrid;
   [Export]
   public int distanceRemaining { get; set; }
-  protected internal Callable updateMovementCalcs;
+  private Callable updateMovementCalcs;
 
   public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority, Texture2D icon)
   {
@@ -100,6 +103,7 @@ public partial class Character : Node3D
 
   public override void _Ready()
   {
+    Connect(SignalName.CharacterKilled, CommunicationBus.Instance.GetCharacterKilledEventCallable());
     CommunicationBus s = (CommunicationBus)Engine.GetSingleton("CommunicationBus");
     s.IdentifyStrayNode += IdentifyStray;
   }
@@ -135,6 +139,10 @@ public partial class Character : Node3D
   public Texture2D GetCharacterIcon()
   {
     return Icon;
+  }
+  public Callable GetUpdateMovementCalculation()
+  {
+    return updateMovementCalcs;
   }
   protected void SetupHealthbar()
   {
@@ -216,13 +224,15 @@ public partial class Character : Node3D
     CurrentHeapPriority = -HeapPriority;
   }
 
-  protected virtual void KillCharacter()
+  protected void KillCharacter()
   {
-    CharacterTurnController.Instance.RemoveCharacterFromTurnController(this);
-    CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);
+    GD.Print("I'm dying here");
     AudioStreamPlayer3D player = (AudioStreamPlayer3D)FindChild("character_death");
     player.Play();
     Visible = false;
+
+    EmitSignal(SignalName.CharacterKilled, this);
+    //QueueFree();
   }
 
   public void EndCharacterTurn()
