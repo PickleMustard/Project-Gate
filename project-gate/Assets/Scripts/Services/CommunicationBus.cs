@@ -70,24 +70,25 @@ public partial class CommunicationBus : Node
     return CharacterKilledCall;
   }
 
-  public void AddCharacter(Character character, GenericCharacterBanner CharacterBanner = null)
+  public void AddCharacter(Character character, GenericCharacterBanner CharacterBanner)
   {
-    //Add Character to the alive list
-    //
-    //Add Character icon to turn banner
-    //
-    //If character is player character, add their banner to team banner
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
     bannerMargin.SizeFlagsStretchRatio = 2;
     bannerMargin.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
     bannerMargin.AddChild(CharacterBanner, true);
     charInf.AddChild(bannerMargin, true);
+    GD.Print("Character Name: ", character.CharacterName);
+    GD.Print("OOOOGA GOOGOASDFAL:KJDFG");
+    CharacterBanner.UpdateCharacterName(character.CharacterName);
+    CharacterBanner.UpdateIconBanner(character.GetCharacterIcon());
+    CharacterBanner.UpdateMovementRemaining(character.GetDistanceRemaining());
+    CharacterBanner.UpdateHeapPriority(character.HeapPriority);
+    CharacterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
   }
 
   public void SpawnCharacter(Resource Tile, Character generatedCharacter, Node resourceProvider, Godot.Collections.Array<Resource> Actions)
   {
-    ResourceLoader.Load<Resource>("AttackEnemyAction");
     Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/character.tscn").Instantiate();
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     WeaponGenerator weaponGenerator = new WeaponGenerator();

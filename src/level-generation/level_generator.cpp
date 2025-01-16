@@ -358,7 +358,7 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 					"res://Assets/Materials/test_spawner_tile_material.tres",
 					"res://Assets/Materials/test_starter_tile_material.tres"
 				};
-				UtilityFunctions::print(vformat("Output: %x | %x | %x", tile_type, 0xff, (tile_type & 0xff)));
+				//UtilityFunctions::print(vformat("Output: %x | %x | %x", tile_type, 0xff, (tile_type & 0xff)));
 				int tile_mesh_string_position = tile_type & 0xff;
 				//UtilityFunctions::print("m2");
 				if (tile_mesh_string_position > 0) {

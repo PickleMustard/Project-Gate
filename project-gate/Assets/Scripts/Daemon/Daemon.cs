@@ -12,6 +12,7 @@ public partial class Daemon : Node
   private CommunicationBus communicator;
 
   private Node Level; //Takes the level generated signal to start its background processes
+  private Node Characters;
 
   public static Daemon Instance;
 
@@ -31,6 +32,7 @@ public partial class Daemon : Node
     e_generator = new EnemyGenerator();
     communicator = Engine.GetSingleton("CommunicationBus") as CommunicationBus;
     Level = GetTree().GetNodesInGroup("Level")[0];
+    Characters = GetTree().GetNodesInGroup("Characters")[0];
     Level.Connect("LevelGenerated", new Callable(this, "LevelStartProcesses"));
   }
 
@@ -88,36 +90,33 @@ public partial class Daemon : Node
 
   public void SpawnPlayerCharacter(Resource Tile, Character generatedCharacter)
   {
-    PlayerTeamCharacter character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as PlayerTeamCharacter;
+    Character character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Character;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
-    Level.AddChild(character, true);
+    Characters.AddChild(character, true);
 
     string name = character.Name;
     character.ReplaceBy(generatedCharacter, true);
     character.QueueFree();
     generatedCharacter.Name = name;
-    ((CommunicationBus)Engine.GetSingleton("CommunicationBus")).AddCharacter(character, characterBanner);
-
-    //characterBanner.UpdateCharacterName(generatedCharacter.CharacterName);
-    //characterBanner.UpdateIconBanner(generatedCharacter.GetCharacterIcon());
-    //characterBanner.UpdateMovementRemaining(generatedCharacter.GetDistanceRemaining());
-    //characterBanner.UpdateHeapPriority(generatedCharacter.HeapPriority);
-    //characterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
-    generatedCharacter.Connect(generatedCharacter.GetSignalList()[1]["name"].ToString(), characterBanner.GetUpdateMovementCallable());
-    generatedCharacter.Connect(generatedCharacter.GetSignalList()[2]["name"].ToString(), characterBanner.GetUpdateHeapPriorityCallable());
+    GD.Print("Character Name Inbetween: ", generatedCharacter.CharacterName);
+    ((CommunicationBus)Engine.GetSingleton("CommunicationBus")).AddCharacter(generatedCharacter, characterBanner);
+    generatedCharacter.Connect(Character.SignalName.UpdatedMovementRemaining, characterBanner.GetUpdateMovementCallable());
+    generatedCharacter.Connect(Character.SignalName.UpdatedHeapPriority, characterBanner.GetUpdateHeapPriorityCallable());
     generatedCharacter.AddToGroup("PlayerTeam");
     generatedCharacter.SetupCharacter();
     generatedCharacter.Call("SetPosition", Tile);
+
   }
   private void AddPlayerTeam()
   {
     List<int> used_location = new List<int>();
     Character generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
-    communicator.SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[0], generatedCharacter);
+    GD.Print("Character Name Before: ", generatedCharacter.CharacterName);
+    SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[0], generatedCharacter);
     generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
-    communicator.SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[1], generatedCharacter);
+    SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[1], generatedCharacter);
     generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
-    communicator.SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[2], generatedCharacter);
+    SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[2], generatedCharacter);
 
     //((GodotObject)PlayerTeamSpawnLocations[0]).Call("SpawnCharacter");
     //((GodotObject)PlayerTeamSpawnLocations[1]).Call("SpawnCharacter");
