@@ -83,7 +83,8 @@ public partial class Daemon : Node
       GD.Print("Attemptin to spawn something at ", location);
       Character generatedEnemy = e_generator.GenerateEnemy("BasicRuffian");
       GD.Print("Generated Enemy: ", generatedEnemy);
-      communicator.SpawnEnemy((Resource)EnemySpawnLocations[location], generatedEnemy);
+      //communicator.SpawnEnemy((Resource)EnemySpawnLocations[location], generatedEnemy);
+      SpawnEnemy((Resource)EnemySpawnLocations[location], generatedEnemy);
       used_locations.Add(location);
     }
   }
@@ -107,6 +108,17 @@ public partial class Daemon : Node
     generatedCharacter.Call("SetPosition", Tile);
 
   }
+
+  public void SpawnEnemy(Resource Tile, Character generatedEnemy) {
+    Character enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as Character;
+    Characters.AddChild(enemy, true);
+    enemy.ReplaceBy(generatedEnemy);
+    generatedEnemy.AddToGroup("Enemies");
+    generatedEnemy.Name = generatedEnemy.CharacterName;
+    generatedEnemy.SetupCharacter();
+    enemy.QueueFree();
+    generatedEnemy.Call("SetPosition", Tile);
+  }
   private void AddPlayerTeam()
   {
     List<int> used_location = new List<int>();
@@ -117,9 +129,5 @@ public partial class Daemon : Node
     SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[1], generatedCharacter);
     generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
     SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[2], generatedCharacter);
-
-    //((GodotObject)PlayerTeamSpawnLocations[0]).Call("SpawnCharacter");
-    //((GodotObject)PlayerTeamSpawnLocations[1]).Call("SpawnCharacter");
-    //((GodotObject)PlayerTeamSpawnLocations[2]).Call("SpawnCharacter");
   }
 }

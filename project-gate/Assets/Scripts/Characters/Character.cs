@@ -64,6 +64,10 @@ public partial class Character : Node3D
   public CHARACTER_TEAM team;
   [Export]
   public Texture2D Icon;
+  [Export]
+  public int distanceRemaining { get; set; }
+  [Export]
+  public Dictionary CharacterAbilities {get; set;}
   public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
   public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
@@ -74,11 +78,11 @@ public partial class Character : Node3D
   public bool isMoving { get; set; } = false;
   protected Godot.Collections.Array items;
   protected Node TileGrid;
-  [Export]
-  public int distanceRemaining { get; set; }
   private Callable updateMovementCalcs;
 
-  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority, Texture2D icon)
+  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies,
+      int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed,
+      int turnPriority, Texture2D icon, Dictionary abilities)
   {
     this.CharacterName = name;
     this.MainWeapon = weapon;
@@ -91,6 +95,7 @@ public partial class Character : Node3D
     this.SpeedNeededToRequeue = requeueSpeed;
     this.HeapPriority = turnPriority;
     this.Icon = icon;
+    this.CharacterAbilities = abilities;
   }
 
   public void IdentifyStray()
