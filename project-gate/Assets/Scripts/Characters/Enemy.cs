@@ -17,7 +17,7 @@ public partial class Enemy : Character
   }
 
   public void GenerateCharacter(string name,
-      Weapon weapon, Grenade grenade,
+      BaseWeapon weapon, BaseGrenade grenade,
       Array<WEAPON_PROFICIENCIES> proficiencies,
       int movementDistance, int actionPoints,
       int health, float accumulationRate,

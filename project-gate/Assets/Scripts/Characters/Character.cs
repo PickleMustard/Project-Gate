@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using Godot.Collections;
+using ProjGate.Pickups;
 
 [GlobalClass]
 public partial class Character : Node3D
@@ -57,9 +58,9 @@ public partial class Character : Node3D
   [Export]
   public float HeapPriority = 1;
   [Export]
-  public Weapon MainWeapon { get; protected set; }
+  public BaseWeapon MainWeapon { get; protected set; }
   [Export]
-  public Grenade grenade { get; protected set; }
+  public BaseGrenade grenade { get; protected set; }
   [Export]
   public CHARACTER_TEAM team;
   [Export]
@@ -80,7 +81,7 @@ public partial class Character : Node3D
   protected Node TileGrid;
   private Callable updateMovementCalcs;
 
-  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies,
+  public void GenerateCharacter(string name, BaseWeapon weapon, BaseGrenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies,
       int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed,
       int turnPriority, Texture2D icon, Dictionary abilities)
   {
@@ -336,12 +337,12 @@ public partial class Character : Node3D
     return (enqueue, requeue);
   }
 
-  public void SetMainWeapon(Weapon UpdatedWeapon)
+  public void SetMainWeapon(BaseWeapon UpdatedWeapon)
   {
     MainWeapon = UpdatedWeapon;
   }
 
-  public Weapon GetMainWeapon()
+  public BaseWeapon GetMainWeapon()
   {
     return MainWeapon;
   }

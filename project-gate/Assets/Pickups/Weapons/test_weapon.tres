@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Weapon" load_steps=2 format=3 uid="uid://cbqdotqukeccr"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/PickUps/Weapon.cs" id="2_2aqyu"]
+
+[resource]
+script = ExtResource("2_2aqyu")
+WeaponIndex = 0
+WeaponName = "temp 2"
+MaxRange = 0
+EffectiveRange = 0
+IgnoresLineSight = false
+BaseDamage = 0
+weaponType = 0
+OnHitBehaviorLocation = "res://Assets/Scripts/PickUps/WeaponBehaviors/SimpleDamageBehavior.cs"
+StartTurnBehaviorLocation = ""
+EndTurnBehaviorLocation = ""
+TargetingBehaviorLocation = ""

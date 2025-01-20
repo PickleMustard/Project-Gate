@@ -52,7 +52,7 @@ public partial class CommunicationBus : Node
   {
     WeaponGenerator weaponGenerator = new WeaponGenerator();
     weaponGenerator.GenerateWeapon("testweapon");
-    Weapon weapon = new Weapon();
+    BaseWeapon weapon = new BaseWeapon();
     weapon.SetWeaponName("Ooga Booga Gun");
     CurrentCharacter.SetMainWeapon(weapon);
   }
@@ -92,7 +92,7 @@ public partial class CommunicationBus : Node
     Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/character.tscn").Instantiate();
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     WeaponGenerator weaponGenerator = new WeaponGenerator();
-    Weapon startingWeapon = weaponGenerator.GenerateWeapon("res://Configuration/Weapons/testweapon.yml");
+    BaseWeapon startingWeapon = weaponGenerator.GenerateWeapon("res://Configuration/Weapons/testweapon.yml");
     Level.AddChild(character, true);
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();

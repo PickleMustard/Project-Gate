@@ -1,8 +1,11 @@
 using Godot;
-public partial class LinearTargeting : Resource, IGetTargetingBehavior
+namespace ProjGate.Pickups
 {
-  void IGetTargetingBehavior.GetTargetingInformation()
+  public partial class LinearTargeting : Resource, IGetTargetingBehavior
   {
+    void IGetTargetingBehavior.GetTargetingInformation()
+    {
 
+    }
   }
 }

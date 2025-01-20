@@ -32,13 +32,13 @@ public partial class CharacterGenerator : Resource
     toLoad = CONFIGURATION_BASE_PATH + (string)parsedData["Potential-Starting-Weapons"] + ".yml";
     Dictionary potentialWeapons = (Dictionary)yamlParser.Call("parse_file", toLoad);
     string chosenWeapon = ChooseCharacterWeapon((Array)potentialWeapons["Potential-Weapons"]);
-    Weapon startingWeapon = weaponGenerator.GenerateWeapon(chosenWeapon);
+    BaseWeapon startingWeapon = weaponGenerator.GenerateWeapon(chosenWeapon);
     GD.Print(startingWeapon);
 
     toLoad = CONFIGURATION_BASE_PATH + (string)parsedData["Potential-Starting-Grenades"] + ".yml";
     Dictionary potentialGrenades = (Dictionary)yamlParser.Call("parse_file", toLoad);
     string chosenGrenade = ChooseCharacterGrenade((Array)potentialGrenades["Potential-Grenades"]);
-    Grenade startingGrenade = weaponGenerator.GenerateGrenade(chosenGrenade);
+    BaseGrenade startingGrenade = weaponGenerator.GenerateGrenade(chosenGrenade);
     GD.Print(startingGrenade);
 
     string PotentialIconsPath = (string)parsedData["Potential-Icons"];
@@ -55,8 +55,9 @@ public partial class CharacterGenerator : Resource
     int characterHealth = ChooseCharacterHealth((Array)parsedData["Health-Range-Bounds"]);
     float requeueSpeed = ChooseRequeueSpeed((Array)parsedData["Requeue-Speed-Bounds"]);
     float accumulationRate = ChooseAccumulationRate((Array)parsedData["Accumulation-Rate-Bounds"], requeueSpeed);
+    Dictionary Abilities = null;
 
-    createdCharacter.GenerateCharacter(characterName, startingWeapon, startingGrenade, proficiencies, movementRange, actionPoints, characterHealth, accumulationRate, requeueSpeed, turnPriority, CharacterIcon);
+    createdCharacter.GenerateCharacter(characterName, startingWeapon, startingGrenade, proficiencies, movementRange, actionPoints, characterHealth, accumulationRate, requeueSpeed, turnPriority, CharacterIcon, Abilities);
     GD.Print(createdCharacter);
     GD.Print(parsedData["Potential-Proficiencies"]);
 
@@ -67,7 +68,7 @@ public partial class CharacterGenerator : Resource
   {
     Array<Character.WEAPON_PROFICIENCIES> generatedProficiencies = new Array<Character.WEAPON_PROFICIENCIES>();
     Array<string> usedProficiencies = new Array<string>();
-    generatedProficiencies.Resize(System.Enum.GetNames(typeof(Weapon.WEAPON_TYPES)).Length);
+    generatedProficiencies.Resize(System.Enum.GetNames(typeof(BaseWeapon.WEAPON_TYPES)).Length);
     GD.Print(Proficiencies);
     Array numberOfEachProficiency = (Array)((Dictionary)(Proficiencies[0]))["Number-Proficiencies"];
     int proficientAmount = (int)((Dictionary)(numberOfEachProficiency[0]))["Proficient"];
@@ -83,7 +84,7 @@ public partial class CharacterGenerator : Resource
     for (int i = 0; i < proficientAmount; i++)
     {
       int num = (int)RNG.Call("GetInteger", possibleProficientWeapons.Count - 1);
-      Weapon.WEAPON_TYPES type = (Weapon.WEAPON_TYPES)System.Enum.Parse(typeof(Weapon.WEAPON_TYPES), (string)possibleProficientWeapons[num]);
+      BaseWeapon.WEAPON_TYPES type = (BaseWeapon.WEAPON_TYPES)System.Enum.Parse(typeof(BaseWeapon.WEAPON_TYPES), (string)possibleProficientWeapons[num]);
       generatedProficiencies[(int)type] = Character.WEAPON_PROFICIENCIES.skilled;
       if (possiblePassableWeapons.Contains(possibleProficientWeapons[num]))
       {
@@ -100,7 +101,7 @@ public partial class CharacterGenerator : Resource
     for (int i = 0; i < passableAmount; i++)
     {
       int num = (int)RNG.Call("GetInteger", possiblePassableWeapons.Count - 1);
-      Weapon.WEAPON_TYPES type = (Weapon.WEAPON_TYPES)System.Enum.Parse(typeof(Weapon.WEAPON_TYPES), (string)possiblePassableWeapons[num]);
+      BaseWeapon.WEAPON_TYPES type = (BaseWeapon.WEAPON_TYPES)System.Enum.Parse(typeof(BaseWeapon.WEAPON_TYPES), (string)possiblePassableWeapons[num]);
       generatedProficiencies[(int)type] = Character.WEAPON_PROFICIENCIES.passable;
       if (possibleClumsyWeapons.Contains(possiblePassableWeapons[num]))
       {
@@ -111,7 +112,7 @@ public partial class CharacterGenerator : Resource
 
     for (int i = 0; i < possibleClumsyWeapons.Count; i++)
     {
-      Weapon.WEAPON_TYPES type = (Weapon.WEAPON_TYPES)System.Enum.Parse(typeof(Weapon.WEAPON_TYPES), (string)possibleClumsyWeapons[i]);
+      BaseWeapon.WEAPON_TYPES type = (BaseWeapon.WEAPON_TYPES)System.Enum.Parse(typeof(BaseWeapon.WEAPON_TYPES), (string)possibleClumsyWeapons[i]);
       generatedProficiencies[(int)type] = Character.WEAPON_PROFICIENCIES.clumsy;
     }
     return generatedProficiencies;

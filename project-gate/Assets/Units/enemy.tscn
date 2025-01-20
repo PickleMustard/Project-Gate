@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://2bswkiikpwx4"]
+[gd_scene load_steps=9 format=3 uid="uid://2bswkiikpwx4"]
 
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
 [ext_resource type="Script" path="res://Assets/Scripts/Characters/Enemy.cs" id="1_k8ecc"]
@@ -8,12 +8,20 @@
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/HealthbarTexture.cs" id="6_yb7xx"]
 [ext_resource type="AudioStream" uid="uid://d4ao63nnk7xvy" path="res://Assets/Sound-Effects/Dev-Only/Explosion3_modified.mp3" id="7_hnkry"]
 
+[sub_resource type="SphereMesh" id="SphereMesh_dfani"]
+
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_k8ecc")
 team = 1
 
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+[node name="Mesh" type="Node" parent="."]
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="Mesh"]
 material_override = ExtResource("1_b2i4i")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Mesh"]
+transform = Transform3D(2.30376, 0, 0, 0, 1, 0, 0, 0, 1, -0.0111587, 0.893569, 0)
+mesh = SubResource("SphereMesh_dfani")
 
 [node name="Healthbar" type="Sprite3D" parent="."]
 transform = Transform3D(2.7, 0, 0, 0, 2.7, 0, 0, 0, 2.7, 0, 1.20144, 0)

@@ -38,17 +38,17 @@ public partial class EnemyGenerator : Resource
     }
 
     string chosenWeapon = (string)parsedData["Enemy-Weapon"];
-    Weapon startingWeapon = weaponGenerator.GenerateWeapon(chosenWeapon);
+    BaseWeapon startingWeapon = weaponGenerator.GenerateWeapon(chosenWeapon);
 
     string chosenGrenade = (string)parsedData["Enemy-Grenade"];
-    Grenade startingGrenade = null;
+    BaseGrenade startingGrenade = null;
     if (chosenGrenade != "None")
     {
       startingGrenade = weaponGenerator.GenerateGrenade(chosenGrenade);
     }
 
     Array<Character.WEAPON_PROFICIENCIES> proficiencies = new Array<Character.WEAPON_PROFICIENCIES>();
-    proficiencies.Resize(System.Enum.GetNames(typeof(Weapon.WEAPON_TYPES)).Length);
+    proficiencies.Resize(System.Enum.GetNames(typeof(BaseWeapon.WEAPON_TYPES)).Length);
     for (int i = 0; i < proficiencies.Count; i++)
     {
       proficiencies[i] = Character.WEAPON_PROFICIENCIES.clumsy;
