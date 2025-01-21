@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BaseWeapon" load_steps=2 format=3 uid="uid://dhdficfpduqnh"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/PickUps/BaseWeapon.cs" id="1_f7o60"]
+
+[resource]
+script = ExtResource("1_f7o60")
+WeaponIndex = 1
+WeaponName = "test_pistol"
+MaxRange = 5
+EffectiveRange = 3
+IgnoresLineSight = false
+BaseDamage = 3
+weaponType = 1
+OnHitBehaviorLocation = "res://Assets/Scripts/PickUps/WeaponBehaviors/SimpleDamageBehavior.cs"
+StartTurnBehaviorLocation = ""
+EndTurnBehaviorLocation = ""
+TargetingBehaviorLocation = ""
