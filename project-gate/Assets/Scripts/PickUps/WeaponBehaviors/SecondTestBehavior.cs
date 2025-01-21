@@ -1,10 +1,13 @@
 using Godot;
 
-public partial class SecondTestBehavior : Resource, IOnHitBehavior
+namespace ProjGate.Pickups
 {
-  public void CalculateOnHit(Weapon attackingWeapon, Character Attacker, Resource TargetedLocation, Node TileGrid)
+  public partial class SecondTestBehavior : Resource, IOnHitBehavior
   {
-    GD.Print("Second Test Behavior OnHit Method");
+    public void CalculateOnHit(BaseWeapon attackingWeapon, Character Attacker, Resource TargetedLocation, Node TileGrid)
+    {
+      GD.Print("Second Test Behavior OnHit Method");
 
+    }
   }
 }

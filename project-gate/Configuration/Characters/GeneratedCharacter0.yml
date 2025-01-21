@@ -1,4 +1,5 @@
 Potential-Names: "Names/Ranged"
+Potential-Icons: "CharacterIcons/icons0"
 Health-Range-Bounds:
   - 30
   - 60

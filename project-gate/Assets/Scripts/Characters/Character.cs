@@ -2,10 +2,14 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using Godot.Collections;
+using ProjGate.Pickups;
 
 [GlobalClass]
 public partial class Character : Node3D
 {
+  [Signal]
+  public delegate void CharacterKilledEventHandler();
+
   protected const float INTITIAL_REQUEUE_PRIORITY = 1.0f;
   public enum CHARACTER_TEAM
   {
@@ -54,11 +58,17 @@ public partial class Character : Node3D
   [Export]
   public float HeapPriority = 1;
   [Export]
-  public Weapon MainWeapon { get; protected set; }
+  public BaseWeapon MainWeapon { get; protected set; }
   [Export]
-  public Grenade grenade { get; protected set; }
+  public BaseGrenade grenade { get; protected set; }
   [Export]
   public CHARACTER_TEAM team;
+  [Export]
+  public Texture2D Icon;
+  [Export]
+  public int distanceRemaining { get; set; }
+  [Export]
+  public Dictionary CharacterAbilities {get; set;}
   public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
   public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
@@ -69,11 +79,11 @@ public partial class Character : Node3D
   public bool isMoving { get; set; } = false;
   protected Godot.Collections.Array items;
   protected Node TileGrid;
-  [Export]
-  public int distanceRemaining { get; set; }
-  protected internal Callable updateMovementCalcs;
+  private Callable updateMovementCalcs;
 
-  public void GenerateCharacter(string name, Weapon weapon, Grenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies, int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed, int turnPriority)
+  public void GenerateCharacter(string name, BaseWeapon weapon, BaseGrenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies,
+      int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed,
+      int turnPriority, Texture2D icon, Dictionary abilities)
   {
     this.CharacterName = name;
     this.MainWeapon = weapon;
@@ -85,6 +95,8 @@ public partial class Character : Node3D
     this.BaseSpeedAccumulator = accumulationRate;
     this.SpeedNeededToRequeue = requeueSpeed;
     this.HeapPriority = turnPriority;
+    this.Icon = icon;
+    this.CharacterAbilities = abilities;
   }
 
   public void IdentifyStray()
@@ -97,6 +109,7 @@ public partial class Character : Node3D
 
   public override void _Ready()
   {
+    Connect(SignalName.CharacterKilled, CommunicationBus.Instance.GetCharacterKilledEventCallable());
     CommunicationBus s = (CommunicationBus)Engine.GetSingleton("CommunicationBus");
     s.IdentifyStrayNode += IdentifyStray;
   }
@@ -129,6 +142,14 @@ public partial class Character : Node3D
     ResetPriority();
   }
 
+  public Texture2D GetCharacterIcon()
+  {
+    return Icon;
+  }
+  public Callable GetUpdateMovementCalculation()
+  {
+    return updateMovementCalcs;
+  }
   protected void SetupHealthbar()
   {
     currentHealth = TotalHealth;
@@ -209,13 +230,15 @@ public partial class Character : Node3D
     CurrentHeapPriority = -HeapPriority;
   }
 
-  protected virtual void KillCharacter()
+  protected void KillCharacter()
   {
-    CharacterTurnController.Instance.RemoveCharacterFromTurnController(this);
-    CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(updateMovementCalcs);
+    GD.Print("I'm dying here");
     AudioStreamPlayer3D player = (AudioStreamPlayer3D)FindChild("character_death");
     player.Play();
     Visible = false;
+
+    EmitSignal(SignalName.CharacterKilled, this);
+    //QueueFree();
   }
 
   public void EndCharacterTurn()
@@ -291,8 +314,9 @@ public partial class Character : Node3D
     EmitSignal(SignalName.UpdatedMovementRemaining, GetDistanceRemaining());
   }
 
-  public bool UpdateMovementCalcs()
+  public (bool, bool) UpdateMovementCalculation()
   {
+    bool enqueue = false;
     bool requeue = false;
     GD.Print("CurrentHeapPriority: ", CurrentHeapPriority, "| Should Requeue: ", requeue, "| CurrentSpeed: ", CurrentSpeed, "| Requeue Speed: ", SpeedNeededToRequeue);
     if (CurrentHeapPriority < 0)
@@ -301,22 +325,24 @@ public partial class Character : Node3D
     }
     if (CurrentSpeed >= SpeedNeededToRequeue)
     {
-      CharacterTurnController.Instance.AddCharacterToMovementQueue(this);
+      //Replace with signal
+      //CharacterTurnController.Instance.AddCharacterToMovementQueue(this);
+      enqueue = true;
       CurrentSpeed -= SpeedNeededToRequeue;
       if (CurrentSpeed >= SpeedNeededToRequeue)
       {
         requeue = true;
       }
     }
-    return requeue;
+    return (enqueue, requeue);
   }
 
-  public void SetMainWeapon(Weapon UpdatedWeapon)
+  public void SetMainWeapon(BaseWeapon UpdatedWeapon)
   {
     MainWeapon = UpdatedWeapon;
   }
 
-  public Weapon GetMainWeapon()
+  public BaseWeapon GetMainWeapon()
   {
     return MainWeapon;
   }

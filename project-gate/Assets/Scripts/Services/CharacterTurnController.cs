@@ -2,6 +2,7 @@ using Godot;
 using Godot.Collections;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public partial class CharacterTurnController : Node
 {
@@ -10,14 +11,19 @@ public partial class CharacterTurnController : Node
   [Signal]
   public delegate void EndTurnSignalEventHandler();
 
+  //UI Object to display FinalizedMovementQueue and FlexibleMovementQueue
+  private TurnOrderBanner OrderBanner;
+
   //Ordered List of what character is moving next in the turn (Can hold duplicates)
-  Queue<Character> MovementQueue;
+  List<Character> FinalizedMovementQueue;
+  //Similar list to FinalizeMovementQueue, allows characters positions to shift before finalization
+  List<Character> FlexibleMovementQueue;
   //Max Heap of Alive characters ordered by their move priority
   PriorityQueue<Character, float> PriorityUpdateHeap;
-  //Characters current alive on the level
+  //Collection of all Characters currently alive on the level
   List<Character> AliveCharacterList;
   //Callable to the movement calculation function under each alive character
-  List<Callable> UpdateMovementCalcs;
+  List<Callable> CharacterMovementUpdateFunctions;
   //Current Character in the turn order | Updates the movement controller
   [Export]
   Character CurrentCharacter;
@@ -27,15 +33,20 @@ public partial class CharacterTurnController : Node
   Node level;
   Callable StartLevelTurnController;
 
-  public override void _EnterTree() {
+  private Texture2D endturnicon;
+
+  public override void _EnterTree()
+  {
     AddToGroup("TurnController");
   }
 
   public override void _Ready()
   {
+    endturnicon = ResourceLoader.Load("res://Assets/Icons/End-Turn-Icon.png") as Texture2D;
     StartLevelTurnController = new Callable(this, "StartLevel");
-    UpdateMovementCalcs = new List<Callable>();
-    MovementQueue = new Queue<Character>();
+    CharacterMovementUpdateFunctions = new List<Callable>();
+    FinalizedMovementQueue = new List<Character>();
+    FlexibleMovementQueue = new List<Character>();
     AliveCharacterList = new List<Character>();
     PriorityUpdateHeap = new PriorityQueue<Character, float>();
     unitControl = GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl;
@@ -44,27 +55,57 @@ public partial class CharacterTurnController : Node
     Instance = this;
   }
 
+  private void Enqueue(List<Character> queue, Character value)
+  {
+    queue.Add(value);
+  }
+
+  private Character Dequeue(List<Character> queue)
+  {
+    Character candidate = queue[0];
+    queue.Remove(candidate);
+    return candidate;
+  }
+
+  private Character Peek(List<Character> queue)
+  {
+    try {
+    Character candidate = queue[0];
+    return candidate;
+    } catch {
+      return null;
+    }
+  }
+
   /* Upon start of the level, after the characters are generated, calls this function
    * Will generate the initial priority queue then create the turn list from it
    *
    */
   public void StartLevel()
   {
+    OrderBanner = GetTree().GetNodesInGroup("TurnOrderBanner")[0] as TurnOrderBanner;
     GD.Print("Starting Turn Controller, ", AliveCharacterList.Count);
     CallDeferred("CalculateMovementQueue");
-    CurrentCharacter = (Character)CallDeferred("NextCharacter");
+    CallDeferred("FinalizeMovementQueue");
+    CallDeferred("NextCharacter");
+    CallDeferred("GenerateOrderBanner");
   }
 
   public Character NextCharacter()
   {
-    if (MovementQueue.Count > 0)
+    GD.Print("Next Character");
+    GD.Print(FinalizedMovementQueue.Count);
+    if(CurrentCharacter != null) {
+      Dequeue(FinalizedMovementQueue);
+    }
+    if (FinalizedMovementQueue.Count > 0)
     {
-      Character next_character = MovementQueue.Dequeue();
+      Character next_character = Peek(FinalizedMovementQueue);
       next_character.ResetDistanceRemaining();
       next_character.MakeMainCharacter();
+      CurrentCharacter = next_character;
       if (next_character.IsInGroup("Enemies"))
       {
-        PrintOrphanNodes();
         next_character.Call("RunAI");
       }
       return next_character;
@@ -81,19 +122,20 @@ public partial class CharacterTurnController : Node
    * If it doesn't exist, all characters for the Global turn have moved
    * Thus, all movement stats should be rerolled
    */
-  public void EndTurn()
+  public void EndCharacterTurn()
   {
     CommunicationBus s = (CommunicationBus)Engine.GetSingleton("CommunicationBus");
     s.EmitSignal(CommunicationBus.SignalName.IdentifyStrayNode);
     PrintOrphanNodes();
 
-    //GD.Print("Ending ", CurrentCharacter.ToString(), "'s turn");
     CurrentCharacter = NextCharacter();
+    GenerateOrderBanner();
     if (CurrentCharacter != null)
     {
       GD.Print("Another Character Available");
       GD.Print(unitControl, "| ", CurrentCharacter);
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
+      //GenerateOrderBanner();
     }
     else
     {
@@ -101,16 +143,18 @@ public partial class CharacterTurnController : Node
       EndGlobalTurn();
       CurrentCharacter = NextCharacter();
       unitControl.UpdateCurrentCharacter(CurrentCharacter);
+      //GenerateOrderBanner();
     }
   }
 
-  public Callable GetEndTurnCall() {
-    return new Callable(this, "EndTurn");
+  public Callable GetEndTurnCall()
+  {
+    return new Callable(this, "EndCharacterTurn");
   }
 
   public void AddCharacterToMovementQueue(Character SpawnedCharacter)
   {
-    MovementQueue.Enqueue(SpawnedCharacter);
+    Enqueue(FlexibleMovementQueue, SpawnedCharacter);
   }
 
   public void AddCharacterToMovementHeap(Character character)
@@ -124,35 +168,70 @@ public partial class CharacterTurnController : Node
    */
   public void EndGlobalTurn()
   {
-    //    GD.Print("Character List Size: ", AliveCharacterList.Count);
-    //    int caution = 0;
-    //    foreach(Character c in AliveCharacterList) {
-    //      c.ResetPriority();
-    //      GD.Print("CurrentHeapPriority b4 enqueue: ", c.CurrentHeapPriority);
-    //      PriorityUpdateHeap.Enqueue(c, c.CurrentHeapPriority);
-    //    }
-    //    GD.Print("heap: ", PriorityUpdateHeap.Count);
-    //    while(PriorityUpdateHeap.Count > 0 && caution < 1000) {
-    //      GD.Print("Going through heap");
-    //      Character calclatee = PriorityUpdateHeap.Dequeue();
-    //      bool ShouldRequeue = calclatee.UpdateMovementCalcs();
-    //      GD.Print(ShouldRequeue);
-    //      if(ShouldRequeue) {
-    //        calclatee.RequeueingCharacter();
-    //        GD.Print("Requeueing with Priority: ", calclatee.CurrentHeapPriority);
-    //        PriorityUpdateHeap.Enqueue(calclatee, calclatee.CurrentHeapPriority);
-    //      }
-    //      caution++;
-    //    }
-    //    GD.Print("MovementQueue: ", MovementQueue.Count);
-    //    GD.Print(MovementQueue.ToString());
-    //CurrentCharacter = NextCharacter();
-    CalculateMovementQueue();
+    FinalizeMovementQueue();
+    GenerateOrderBanner();
+  }
 
+  private void FinalizeMovementQueue()
+  {
+    GD.Print("Finalizing Movement Queue");
+    FinalizedMovementQueue = new List<Character>(FlexibleMovementQueue);
+    GD.Print("FinalizeMovementQueue: ", FinalizedMovementQueue.Count, "| Flexible: ", FlexibleMovementQueue.Count);
+    FlexibleMovementQueue.Clear();
+    CalculateMovementQueue();
+  }
+
+  public void UpdateMovementQueue()
+  {
+    GD.Print("Updating Movement Queue");
+    FlexibleMovementQueue.Clear();
+    CalculateMovementQueue();
+    GenerateOrderBanner();
+  }
+
+  private void GenerateOrderBanner()
+  {
+    Texture2D[] IconBannerArray = new Texture2D[7];
+    GD.Print("Debug Order Banner: ------------------------, ", FinalizedMovementQueue.Count);
+    if (FinalizedMovementQueue.Count >= TurnOrderBanner.ICONS_IN_BANNER)
+    {
+      GD.Print("Debug Order Banner: Are we here?");
+      //IconBannerArray[0] = CurrentCharacter.Icon;
+      Character[] MovementArray = FinalizedMovementQueue.ToArray();
+      for (int i = 0; i < 7; i++)
+      {
+        GD.Print("Debug Order Banner: ", MovementArray[i]);
+        //IconBannerArray[i+1] = MovementArray[i].Icon;
+        IconBannerArray[i] = MovementArray[i].Icon;
+      }
+      OrderBanner.UpdateTurnOrderBanner(IconBannerArray);
+    }
+    else
+    {
+      //IconBannerArray[0] = CurrentCharacter.Icon;
+      Character[] MovementArray = FinalizedMovementQueue.ToArray();
+      GD.Print("Debug Order Banner: Movement Array Length: ", MovementArray.Length);
+      for (int i = 0; i < MovementArray.Length; i++)
+      {
+        //GD.Print("Debug Order Banner: ", i, "| ", FinalizedMovementQueue.Peek());
+        GD.Print("Debug Order Banner: ", MovementArray[i], " | ", i, " | ");
+        IconBannerArray[i] = MovementArray[i].Icon;
+      }
+      GD.Print("Debug Order Banner: End Turn at position: ", MovementArray.Length);
+      IconBannerArray[MovementArray.Length] = endturnicon;
+      Character[] FlexibleMovementArray = FlexibleMovementQueue.ToArray();
+      for (int i = MovementArray.Length + 1, j = 0; i < TurnOrderBanner.ICONS_IN_BANNER; i++, j++)
+      {
+        IconBannerArray[i] = FlexibleMovementArray[j].Icon;
+        GD.Print("Debug Order Banner: ", IconBannerArray[i], " | ", i, "| ", FlexibleMovementArray[j], " | ", j);
+      }
+      OrderBanner.UpdateTurnOrderBanner(IconBannerArray);
+    }
   }
 
   private void CalculateMovementQueue()
   {
+    GD.Print("Calculate Movement Queue");
     PriorityUpdateHeap.Clear();
     foreach (Character c in AliveCharacterList)
     {
@@ -163,7 +242,11 @@ public partial class CharacterTurnController : Node
     while (PriorityUpdateHeap.Count > 0)
     {
       Character calculatingCharacter = PriorityUpdateHeap.Dequeue();
-      bool ShouldRequeue = calculatingCharacter.UpdateMovementCalcs();
+      (bool ShouldEnqueue, bool ShouldRequeue) = calculatingCharacter.UpdateMovementCalculation();
+      if (ShouldEnqueue)
+      {
+        AddCharacterToMovementQueue(calculatingCharacter);
+      }
       if (ShouldRequeue)
       {
         calculatingCharacter.RequeueingCharacter();
@@ -175,12 +258,12 @@ public partial class CharacterTurnController : Node
 
   public void AddUpdateCharacterMovementCallable(Callable updateFunction)
   {
-    UpdateMovementCalcs.Add(updateFunction);
+    CharacterMovementUpdateFunctions.Add(updateFunction);
   }
 
   public void RemoveUpdateCharacterMovementCallable(Callable updateFunction)
   {
-    UpdateMovementCalcs.Remove(updateFunction);
+    CharacterMovementUpdateFunctions.Remove(updateFunction);
   }
 
   public void AddCharacterToTurnController(Character character)
@@ -194,6 +277,14 @@ public partial class CharacterTurnController : Node
     if (AliveCharacterList.Contains(character))
     {
       AliveCharacterList.Remove(character);
+    }
+    if (FinalizedMovementQueue.Contains(character))
+    {
+      FinalizedMovementQueue.Remove(character);
+    }
+    if (FlexibleMovementQueue.Contains(character))
+    {
+      FlexibleMovementQueue.Remove(character);
     }
   }
 

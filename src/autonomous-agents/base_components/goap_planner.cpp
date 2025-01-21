@@ -99,18 +99,18 @@ HashSet<Ref<GoapAction>> GoapPlanner::ActionSubset(HashSet<Ref<GoapAction>> acti
 	return subset;
 }
 
-bool GoapPlanner::InState(Dictionary test, Dictionary state) {
-	Array keys = test.keys();
-	for (int i = 0; i < keys.size(); i++) {
-		UtilityFunctions::print("Testing key: ", keys[i], "| ", state.has(keys[i]), " | ", state[keys[i]] == test[keys[i]]);
-		UtilityFunctions::print(state[keys[i]], " | ", test[keys[i]]);
-		UtilityFunctions::print("Type: ", test[keys[i]].get_type());
-		if (state.has(keys[i])) {
-			if (test[keys[i]].get_type() == 25 && (Callable(test[keys[i]])).call(state[keys[i]])) {
-        UtilityFunctions::print(Callable(test[keys[i]]).call(state[keys[i]]));
+bool GoapPlanner::InState(Dictionary stateToTest, Dictionary currentState) {
+	Array testKeys = stateToTest.keys();
+	for (int i = 0; i < testKeys.size(); i++) {
+		UtilityFunctions::print("Testing key: ", testKeys[i], "| ", currentState.has(testKeys[i]), " | ", currentState[testKeys[i]] == stateToTest[testKeys[i]]);
+		UtilityFunctions::print(currentState[testKeys[i]], " | ", stateToTest[testKeys[i]]);
+		UtilityFunctions::print("Type: ", stateToTest[testKeys[i]].get_type());
+		if (currentState.has(testKeys[i])) {
+			if (stateToTest[testKeys[i]].get_type() == 25 && (Callable(stateToTest[testKeys[i]])).call(currentState[testKeys[i]])) {
+        UtilityFunctions::print(Callable(stateToTest[testKeys[i]]).call(currentState[testKeys[i]]));
         UtilityFunctions::print("Callable Precondition");
         continue;
-			} else if (state[keys[i]] == test[keys[i]]) {
+			} else if (currentState[testKeys[i]] == stateToTest[testKeys[i]]) {
 				UtilityFunctions::print("Boolean Precondition");
 				continue;
 			} else {

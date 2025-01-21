@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BaseWeapon" load_steps=2 format=3 uid="uid://bhujejdvk2hqg"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/PickUps/BaseWeapon.cs" id="1_pqahc"]
+
+[resource]
+script = ExtResource("1_pqahc")
+WeaponIndex = 3
+WeaponName = "test_shotgun"
+MaxRange = 8
+EffectiveRange = 3
+IgnoresLineSight = false
+BaseDamage = 10
+weaponType = 2
+OnHitBehaviorLocation = "res://Assets/Scripts/PickUps/WeaponBehaviors/SimpleDamageBehavior.cs"
+StartTurnBehaviorLocation = ""
+EndTurnBehaviorLocation = ""
+TargetingBehaviorLocation = ""

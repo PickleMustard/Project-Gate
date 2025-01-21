@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Gate of Scalad"
-run/main_scene="res://Scenes/test_level.tscn"
+config/name="Project-Gate"
+run/main_scene="res://Scenes/bootup_scene.tscn"
 config/features=PackedStringArray("4.3", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

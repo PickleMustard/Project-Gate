@@ -30,9 +30,9 @@ script = ExtResource("4_ht3ou")
 [node name="Level" type="Level" parent="."]
 m_level_file_location = "res://Configuration/Levels/Showrooms_1.yml"
 
-[node name="@TileGrid@18425" type="TileGrid" parent="Level"]
+[node name="@TileGrid@17457" type="TileGrid" parent="Level"]
 
-[node name="Characters" type="Node" parent="."]
+[node name="Characters" type="Node" parent="." groups=["Characters"]]
 
 [node name="pivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2074.5, 30.2608, 3873.73)

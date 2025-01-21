@@ -1,4 +1,5 @@
 Name: "Basic Ruffian"
+Icon: "res://Assets/Temporary-Assets/Enemy-Icons/elephant.png"
 Health: 30
 Movement-Range: 8
 Action-Points: 3

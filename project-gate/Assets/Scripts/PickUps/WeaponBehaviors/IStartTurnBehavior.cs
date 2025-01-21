@@ -1,3 +1,7 @@
-public interface IStartTurnBehavior {
-  public void StartTurn();
+namespace ProjGate.Pickups
+{
+  public interface IStartTurnBehavior
+  {
+    public void StartTurn();
+  }
 }

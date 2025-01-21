@@ -12,6 +12,7 @@ public:
 	~TileNotifier();
 	void TileSelected(godot::TileCollision *selected_tile);
   void GridCreationNotification(TileGrid* grid);
+  void _enter_tree() override;
 
 	static TileNotifier *getInstance();
 
