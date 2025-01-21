@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using ProjGate.Pickups;
 
 public partial class CharacterGenerator : Resource
 {

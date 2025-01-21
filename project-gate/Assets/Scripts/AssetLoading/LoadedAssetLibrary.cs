@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
+//using System.Threading.Mutex;
+using System.Reflection;
+using Godot;
 using ProjGate.Pickups;
 namespace ProjGate.AssetLoading
 {
@@ -16,10 +18,38 @@ namespace ProjGate.AssetLoading
       };
 
   }
-  private static Mutex mut = new Mutex();
+  private static System.Threading.Mutex mut = new System.Threading.Mutex();
   static List<BaseWeapon> _loadedWeapons;
   static List<BaseGrenade> _loadedGrenades;
   static List<BaseItem> _loadedItems;
+
+  static void CreateLoadedAsset(Type assetType, GodotObject loadedAsset) {
+    mut.WaitOne();
+
+    FieldInfo[] fields = typeof(LoadedAssetLibrary).GetFields(BindingFlags.Static | BindingFlags.Public);
+    foreach(FieldInfo field in fields) {
+      if(IsList(field.FieldType) && ListType(field.FieldType) == assetType) {
+        dynamic ListToAppendTo = typeof(LoadedAssetLibrary)?.GetField(field.Name)?.GetValue(assetType);
+        ListToAppendTo.Add(loadedAsset);
+      }
+    }
+
+    mut.ReleaseMutex();
+  }
+
+  public static void ReadLoadedAssetLibraries() {
+    foreach (BaseWeapon weapon in _loadedWeapons) {
+      GD.Print(weapon);
+    }
+  }
+
+  static bool IsList(this Type type) {
+    return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
+  }
+
+  static Type ListType(this Type type) {
+    return type.GetGenericArguments()[0];
+  }
 
 }
 }

@@ -3,7 +3,7 @@ using Godot;
 namespace ProjGate.Pickups
 {
   [GlobalClass]
-  public class BaseItem : Resource
+  public partial class BaseItem : Resource
   {
     private int _index;
     public string ItemName;

@@ -1,4 +1,5 @@
 using Godot;
+using ProjGate.Pickups;
 
 public partial class CommunicationBus : Node
 {

@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using System.Text.RegularExpressions;
+using ProjGate.Pickups;
 
 public partial class EnemyGenerator : Resource
 {

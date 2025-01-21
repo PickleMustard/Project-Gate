@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -31,8 +32,17 @@ public partial class Daemon : Node
     generator = new CharacterGenerator();
     e_generator = new EnemyGenerator();
     communicator = Engine.GetSingleton("CommunicationBus") as CommunicationBus;
-    Level = GetTree().GetNodesInGroup("Level")[0];
-    Characters = GetTree().GetNodesInGroup("Characters")[0];
+    Array<Node> NodeGroups = GetTree().GetNodesInGroup("Level");
+    if (NodeGroups.Count > 0)
+    {
+      Level = NodeGroups[0];
+    }
+    NodeGroups = GetTree().GetNodesInGroup("Characters");
+    if (NodeGroups.Count > 0)
+    {
+      Characters = NodeGroups[0];
+    }
+
     Level.Connect("LevelGenerated", new Callable(this, "LevelStartProcesses"));
   }
 
@@ -109,7 +119,8 @@ public partial class Daemon : Node
 
   }
 
-  public void SpawnEnemy(Resource Tile, Character generatedEnemy) {
+  public void SpawnEnemy(Resource Tile, Character generatedEnemy)
+  {
     Character enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as Character;
     Characters.AddChild(enemy, true);
     enemy.ReplaceBy(generatedEnemy);
