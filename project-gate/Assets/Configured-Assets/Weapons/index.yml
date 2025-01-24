@@ -1,0 +1,14 @@
+index-name: "Weapon-Definitions"
+definitions:
+  -
+      name: "Test-Pistol"
+      file: "test_pistol.tres"
+      type: "resource"
+  -
+      name: "Test-Rifle"
+      file: "test_rifle.tres"
+      type: "resource"
+  -
+      name: "Test-Shotgun"
+      file: "test_rifle.tres"
+      type: "resource"
