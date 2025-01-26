@@ -1,46 +1,145 @@
+using System;
 using System.Collections.Generic;
-using Godot.Collections;
-using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Godot;
-public class AssetLoader
+using Godot.Collections;
+
+namespace ProjGate.AssetLoading
 {
 
-  /* TODO:
-   * The basegame loader needs to navigate through the repository to the Content-Packs directory
-   * From there, it needs to parse through each of the content packs to load the values into the game
-   *
-   * Currently, grab the current directory and work to the 1st Content pack
-   */
-  public void LoadBaseContent()
+  public class AssetLoader
   {
-    DirAccess workingDirectory = DirAccess.Open("res://");
-    string[] dirs = workingDirectory.GetDirectories();
-    foreach (string d in dirs)
+    private CancellationTokenSource _cts;
+    private Task _loadingTask;
+    private Exception _loadingException;
+    private object _exceptionLock = new object();
+    private GodotObject _yamlParser;
+
+    public bool IsLoading => _loadingTask?.Status == TaskStatus.Running;
+    public bool IsCompleted => _loadingTask?.IsCompleted ?? false;
+    public bool IsFaulted => _loadingTask?.IsFaulted ?? false;
+    public Exception Exception => _loadingException;
+
+    public event Action<Exception> LoadingCompleted;
+
+    private static DirAccess GetBaseDirectory()
     {
-      GD.Print(d);
-    }
+      DirAccess topDirectory = DirAccess.Open("res://");
 #if TOOLS
-    GD.Print("Tools");
-    workingDirectory.ChangeDir("Assets");
-    string BaseDirectory = workingDirectory.GetCurrentDir();
-    GD.Print("Base Directory: " + BaseDirectory);
+      GD.Print("Tools");
+      topDirectory.ChangeDir("Assets");
 #else
-    string BaseDirectory = workingDirectory.GetCurrentDir() + "Content-Packs/";
+      topDirectory.ChangeDir("Content-Packs");
+      string baseDirectory = topDirectory.GetCurrentDir() + "Content-Packs/";
 #endif
-    AssetFileLocationDiscoverer.DiscoverFileLocation(BaseDirectory);
+      return topDirectory;
+    }
 
-    /*string testReadWeapons = BaseDirectory + "/Configured-Assets/Weapons/";
+    public void StartLoading()
+    {
+      _cts?.Cancel();
+      _cts = new CancellationTokenSource();
+      DirAccess directory = GetBaseDirectory();
+      List<string> indexLocation = AssetFileLocationDiscoverer.DiscoverFileLocation(directory.GetCurrentDir());
+      _yamlParser = ClassDB.Instantiate("YamlParser").AsGodotObject();
 
-    GodotObject yamlParser = ClassDB.Instantiate("YamlParser").AsGodotObject();
-    string toLoad = testReadWeapons + "index.yml";
-    GD.Print(toLoad);
-    Dictionary parsedData = (Dictionary)yamlParser.Call("parse_file", toLoad);
+      _loadingTask = Task.Run(async () =>
+      {
+        try
+        {
+          await InternalLoadAssetsAsync(indexLocation, _cts.Token);
+          LoadingCompleted?.Invoke(null);
+        }
+        catch (Exception ex)
+        {
+          lock (_exceptionLock)
+          {
+            _loadingException = ex;
+          }
+          LoadingCompleted?.Invoke(ex);
+        }
+      }, _cts.Token);
 
-    GD.Print(parsedData);
-    Array definitions = (Array)parsedData["definitions"];
-    GD.Print(definitions[0]);
-    Dictionary indexItem = (Dictionary)definitions[0];
-    GD.Print(string.Format("File Exists: {0}, {1}", testReadWeapons + indexItem["file"], FileAccess.FileExists(testReadWeapons + indexItem["file"])));
-    */
+    }
+
+    public void CancelLoading()
+    {
+      _cts?.Cancel();
+    }
+
+    private async Task InternalLoadAssetsAsync(List<string> indexPaths, CancellationToken ct)
+    {
+      List<Task> tasks = new List<Task>();
+      object exceptionLock = new object();
+      Exception firstException = null;
+
+      foreach (string indexPath in indexPaths)
+      {
+        tasks.Add(Task.Run(async () =>
+        {
+          try
+          {
+            await ProcessIndexAsync(indexPath, ct);
+          }
+          catch (Exception ex) when (ex is not OperationCanceledException)
+          {
+            lock (exceptionLock)
+            {
+              if (firstException == null)
+              {
+                firstException = new Exception($"Loading failed at {indexPath}", ex);
+                _cts.Cancel();
+              }
+            }
+            throw;
+          }
+        }, ct));
+      }
+      try
+      {
+        await Task.WhenAll(tasks);
+      }
+      catch
+      {
+        if (firstException != null)
+        {
+          throw firstException;
+        }
+        throw;
+      }
+    }
+
+    private async Task ProcessIndexAsync(string indexPath, CancellationToken ct)
+    {
+      ct.ThrowIfCancellationRequested();
+      string directoryPath = indexPath.Split("index")[0];
+      DirAccess indexDirectory = DirAccess.Open(directoryPath);
+      Dictionary parsedData = (Dictionary)_yamlParser.Call("parse_file", indexPath);
+      Godot.Collections.Array definitions = (Godot.Collections.Array)parsedData["definitions"];
+      foreach (Dictionary indexItem in definitions)
+      {
+        string type = (string)indexItem["type"];
+        if (type == "resource")
+        {
+          string assetType = (string)indexItem["asset_type"];
+          string filePath = directoryPath + indexItem["file"];
+          GD.Print(string.Format("File Exists: {0}, {1}", filePath, FileAccess.FileExists(filePath)));
+          if (!FileAccess.FileExists(directoryPath + indexItem["file"]))
+          {
+            GD.Print("File doesn't exist");
+            throw new Exception($"Unable to find file {indexItem["file"]}");
+          }
+          try {
+          LoadedAssetLibrary.CreateLoadedAsset(LoadedAssetLibrary.TypeDictionary.ReflectStringToType[assetType],
+              ResourceLoader.Load(filePath, null, ResourceLoader.CacheMode.IgnoreDeep));
+          } catch (Exception ex) {
+            GD.Print($"Encountered exception {ex.Message}");
+          }
+        }
+      }
+
+    }
+
   }
 }
