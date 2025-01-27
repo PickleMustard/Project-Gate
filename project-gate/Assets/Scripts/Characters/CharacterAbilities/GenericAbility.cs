@@ -1,6 +1,6 @@
 using Godot;
 
-public class GenericAbility {
+public class GenericAbility{
   public enum ABILITY_TYPE {
     SECONDARY,
     UTILITY,
@@ -10,6 +10,4 @@ public class GenericAbility {
   string AbilityName;
   string AbilityDescription;
   Texture2D AbilityIcon;
-
-  public virtual void ActivateAbility(){}
 }

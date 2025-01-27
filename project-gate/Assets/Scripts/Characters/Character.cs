@@ -68,7 +68,13 @@ public partial class Character : Node3D
   [Export]
   public int distanceRemaining { get; set; }
   [Export]
-  public Dictionary CharacterAbilities {get; set;}
+  public GenericAbility SecondaryAbility { get; private set; }
+  [Export]
+  public GenericAbility UtilityAbility { get; private set; }
+  [Export]
+  public GenericAbility MovementAbility { get; private set; }
+  [Export]
+  public GenericAbility UltimateAbility { get; private set; }
   public Array<WEAPON_PROFICIENCIES> proficiencies = new Array<WEAPON_PROFICIENCIES>();
   public List<IGenericPassiveBehavior> passiveAbilities = new List<IGenericPassiveBehavior>();
 
@@ -83,7 +89,9 @@ public partial class Character : Node3D
 
   public void GenerateCharacter(string name, BaseWeapon weapon, BaseGrenade grenade, Array<WEAPON_PROFICIENCIES> proficiencies,
       int movementDistance, int actionPoints, int health, float accumulationRate, float requeueSpeed,
-      int turnPriority, Texture2D icon, Dictionary abilities)
+      int turnPriority, Texture2D icon,
+      GenericAbility secondary, GenericAbility utility,
+      GenericAbility movement, GenericAbility ultimate)
   {
     this.CharacterName = name;
     this.MainWeapon = weapon;
@@ -96,7 +104,10 @@ public partial class Character : Node3D
     this.SpeedNeededToRequeue = requeueSpeed;
     this.HeapPriority = turnPriority;
     this.Icon = icon;
-    this.CharacterAbilities = abilities;
+    SecondaryAbility = secondary;
+    UtilityAbility = utility;
+    MovementAbility = movement;
+    UltimateAbility = ultimate;
   }
 
   public void IdentifyStray()
@@ -122,7 +133,7 @@ public partial class Character : Node3D
     CurrentSpeed = StartingSpeed;
     distanceRemaining = TotalDistance;
     currentActionPoints = TotalActionPoints;
-#if DEBUG
+#if TOOLS
     InputHandler i_handle = GetTree().GetNodesInGroup("InputHandler")[0] as InputHandler;
     i_handle.UpdateCharacter += MakeMainCharacter;
     i_handle.ResetCharacter += ResetDistanceRemaining;
