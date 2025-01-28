@@ -1,14 +1,16 @@
 using Godot;
 using System;
 
+using ProjGate.Character;
+
 namespace ProjGate.Pickups
 {
   public partial class IncreaseDamageFromDistanceRemaining : Resource, IOnHitBehavior
   {
-    void IOnHitBehavior.CalculateOnHit(BaseWeapon attackingWeapon, Character Attacker, Resource TargetedLocation, Node TileGrid)
+    void IOnHitBehavior.CalculateOnHit(BaseWeapon attackingWeapon, BaseCharacter Attacker, Resource TargetedLocation, Node TileGrid)
     {
 
-      Character target = TargetedLocation.Call("GetCharacterOnTile").AsGodotObject() as Character;
+      BaseCharacter target = TargetedLocation.Call("GetCharacterOnTile").AsGodotObject() as BaseCharacter;
       float proficiency = 1.0f / (int)Attacker.proficiencies[(int)attackingWeapon.weaponType];
       float distanceRemaining = (float)Attacker.distanceRemaining / (float)Attacker.TotalDistance;
       GD.Print("Distance Remaining Coefficient: ", distanceRemaining, "| ", (float)Attacker.distanceRemaining, ", ", (float)Attacker.TotalDistance);

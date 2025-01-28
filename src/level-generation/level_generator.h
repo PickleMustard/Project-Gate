@@ -83,6 +83,8 @@ private:
   int m_num_rooms;
   int m_level_point_total; //Defines the # of points a level can use to generate interactable items
 
+  String path;
+
 protected:
 	static void _bind_methods();
 
@@ -118,6 +120,8 @@ private:
 	Vector2i m_HexRound(Vector2i first_room, Vector2i second_room, int distance, int step);
 	int m_HexDistance(Vector2i first_room, Vector2i second_room);
   bool m_HasNeighbors(Vector<uint16_t> &tile_map, int q, int r);
+  String m_FindTargetableNode();
+  String m_RecurseThroughDirecties(String path, String wanted_file);
 };
 } //namespace godot
 #endif

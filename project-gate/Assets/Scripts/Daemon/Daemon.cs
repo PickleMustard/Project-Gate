@@ -1,7 +1,8 @@
 using Godot;
 using Godot.Collections;
 using System.Collections.Generic;
-using System;
+
+using ProjGate.Character;
 
 public partial class Daemon : Node
 {
@@ -91,7 +92,7 @@ public partial class Daemon : Node
         location = (int)rnd.Call("GetInteger", 0, EnemySpawnLocations.Count - 1);
       }
       GD.Print("Attemptin to spawn something at ", location);
-      Character generatedEnemy = e_generator.GenerateEnemy("BasicRuffian");
+      BaseCharacter generatedEnemy = e_generator.GenerateEnemy("BasicRuffian");
       GD.Print("Generated Enemy: ", generatedEnemy);
       //communicator.SpawnEnemy((Resource)EnemySpawnLocations[location], generatedEnemy);
       SpawnEnemy((Resource)EnemySpawnLocations[location], generatedEnemy);
@@ -99,9 +100,9 @@ public partial class Daemon : Node
     }
   }
 
-  public void SpawnPlayerCharacter(Resource Tile, Character generatedCharacter)
+  public void SpawnPlayerCharacter(Resource Tile, BaseCharacter generatedCharacter)
   {
-    Character character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Character;
+    BaseCharacter character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as BaseCharacter;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
     Characters.AddChild(character, true);
 
@@ -111,17 +112,17 @@ public partial class Daemon : Node
     generatedCharacter.Name = name;
     GD.Print("Character Name Inbetween: ", generatedCharacter.CharacterName);
     ((CommunicationBus)Engine.GetSingleton("CommunicationBus")).AddCharacter(generatedCharacter, characterBanner);
-    generatedCharacter.Connect(Character.SignalName.UpdatedMovementRemaining, characterBanner.GetUpdateMovementCallable());
-    generatedCharacter.Connect(Character.SignalName.UpdatedHeapPriority, characterBanner.GetUpdateHeapPriorityCallable());
+    generatedCharacter.Connect(BaseCharacter.SignalName.UpdatedMovementRemaining, characterBanner.GetUpdateMovementCallable());
+    generatedCharacter.Connect(BaseCharacter.SignalName.UpdatedHeapPriority, characterBanner.GetUpdateHeapPriorityCallable());
     generatedCharacter.AddToGroup("PlayerTeam");
     generatedCharacter.SetupCharacter();
     generatedCharacter.Call("SetPosition", Tile);
 
   }
 
-  public void SpawnEnemy(Resource Tile, Character generatedEnemy)
+  public void SpawnEnemy(Resource Tile, BaseCharacter generatedEnemy)
   {
-    Character enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as Character;
+    BaseCharacter enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as BaseCharacter;
     Characters.AddChild(enemy, true);
     enemy.ReplaceBy(generatedEnemy);
     generatedEnemy.AddToGroup("Enemies");
@@ -133,7 +134,7 @@ public partial class Daemon : Node
   private void AddPlayerTeam()
   {
     List<int> used_location = new List<int>();
-    Character generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
+    BaseCharacter generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");
     GD.Print("Character Name Before: ", generatedCharacter.CharacterName);
     SpawnPlayerCharacter((Resource)PlayerTeamSpawnLocations[0], generatedCharacter);
     generatedCharacter = generator.GenerateCharacter("GeneratedCharacter0");

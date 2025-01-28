@@ -1,8 +1,0 @@
-Godot Engine v4.3.dev.mono.custom_build.61282068f (2024-03-12 15:28:12 UTC) - https://godotengine.org
-OpenGL API 3.3.0 NVIDIA 555.58.02 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2080
-
-Editing project: /home/picklemustard/Documents/Godot_Projects/Gate-Of-Scalad/demo
-Godot Engine v4.3.dev.mono.custom_build.61282068f (2024-03-12 15:28:12 UTC) - https://godotengine.org
-Vulkan 1.3.278 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 2080
-
-24

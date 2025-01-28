@@ -1,36 +1,19 @@
-[gd_scene load_steps=9 format=3 uid="uid://ccrv07q1oy36f"]
+[gd_scene load_steps=6 format=3 uid="uid://ccrv07q1oy36f"]
 
-[ext_resource type="Script" path="res://Assets/Scripts/Services/InputHandler.cs" id="1_jpc2j"]
+[ext_resource type="PackedScene" uid="uid://cwmq8ec2vf8pf" path="res://Assets/Subscenes/Services.tscn" id="1_h2qip"]
 [ext_resource type="Script" path="res://Assets/Scripts/camera_movement.cs" id="1_pyq38"]
-[ext_resource type="Script" path="res://Assets/Scripts/Services/UnitControl.cs" id="2_ggfwn"]
-[ext_resource type="Script" path="res://Assets/Scripts/Services/CharacterTurnController.cs" id="3_7h1qw"]
-[ext_resource type="Script" path="res://Assets/Scripts/Services/CurrencyService.cs" id="4_ht3ou"]
 [ext_resource type="ArrayMesh" uid="uid://byuiot46edvse" path="res://sphere.tres" id="5_7frrk"]
 [ext_resource type="Texture2D" uid="uid://dehwatay32wkt" path="res://Assets/Textures/Sprites/Gasp.png" id="6_1dwfk"]
 [ext_resource type="PackedScene" uid="uid://c8yim1xd3mn7o" path="res://User-Interface/user_interface.tscn" id="6_qmqhf"]
 
 [node name="Level" type="Node3D"]
 
-[node name="Services" type="Node" parent="."]
-
-[node name="InputHandler" type="Node" parent="Services"]
-script = ExtResource("1_jpc2j")
-
-[node name="UnitControl" type="Node" parent="Services"]
-script = ExtResource("2_ggfwn")
-movementTime = 0.01
-rotationDuration = 0.001
-
-[node name="CharacterTurnController" type="Node" parent="Services"]
-script = ExtResource("3_7h1qw")
-
-[node name="CurrencyService" type="Node" parent="Services"]
-script = ExtResource("4_ht3ou")
+[node name="Services" parent="." instance=ExtResource("1_h2qip")]
 
 [node name="Level" type="Level" parent="."]
 m_level_file_location = "res://Configuration/Levels/Showrooms_1.yml"
 
-[node name="@TileGrid@22398" type="TileGrid" parent="Level"]
+[node name="@TileGrid@21152" type="TileGrid" parent="Level"]
 
 [node name="Characters" type="Node" parent="." groups=["Characters"]]
 

@@ -1,5 +1,6 @@
 using Godot;
 using ProjGate.Pickups;
+using ProjGate.Character;
 
 public partial class CommunicationBus : Node
 {
@@ -15,7 +16,7 @@ public partial class CommunicationBus : Node
 
   public static CommunicationBus Instance { get; private set; }
 
-  public Character CurrentCharacter { get; set; }
+  public BaseCharacter CurrentCharacter { get; set; }
 
   private Callable SpawnEnemyCall;
   private Callable SpawnCharacterCall;
@@ -71,7 +72,7 @@ public partial class CommunicationBus : Node
     return CharacterKilledCall;
   }
 
-  public void AddCharacter(Character character, GenericCharacterBanner CharacterBanner)
+  public void AddCharacter(BaseCharacter character, GenericCharacterBanner CharacterBanner)
   {
     Node charInf = GetTree().GetNodesInGroup("CharacterInfo")[0];
     MarginContainer bannerMargin = new MarginContainer();
@@ -88,7 +89,7 @@ public partial class CommunicationBus : Node
     CharacterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
   }
 
-  public void SpawnCharacter(Resource Tile, Character generatedCharacter, Node resourceProvider, Godot.Collections.Array<Resource> Actions)
+  public void SpawnCharacter(Resource Tile, BaseCharacter generatedCharacter, Node resourceProvider, Godot.Collections.Array<Resource> Actions)
   {
     Node character = ResourceLoader.Load<PackedScene>("res://Assets/Units/character.tscn").Instantiate();
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
@@ -113,7 +114,7 @@ public partial class CommunicationBus : Node
 
 
 
-  public void SpawnPlayerCharacter(Resource Tile, Character generatedCharacter)
+  public void SpawnPlayerCharacter(Resource Tile, BaseCharacter generatedCharacter)
   {
     Node3D character = ResourceLoader.Load<PackedScene>("res://Assets/Units/playerteamcharacter.tscn").Instantiate() as Node3D;
     GenericCharacterBanner characterBanner = (GenericCharacterBanner)ResourceLoader.Load<PackedScene>("res://User-Interface/generic_character_banner.tscn").Instantiate();
@@ -142,9 +143,9 @@ public partial class CommunicationBus : Node
     generatedCharacter.Call("SetPosition", Tile);
   }
 
-  public void SpawnEnemy(Resource Tile, Character generatedCharacter)
+  public void SpawnEnemy(Resource Tile, BaseCharacter generatedCharacter)
   {
-    Character enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as Character;
+    BaseCharacter enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as BaseCharacter;
     Level.AddChild(enemy, true);
     enemy.ReplaceBy(generatedCharacter);
     generatedCharacter.AddToGroup("Enemies");
@@ -165,21 +166,21 @@ public partial class CommunicationBus : Node
     return UpdateCharacterCall;
   }
 
-  public void UpdateCurrentCharacter(Character UpdateCharacter)
+  public void UpdateCurrentCharacter(BaseCharacter UpdateCharacter)
   {
     CurrentCharacter = UpdateCharacter;
   }
 
-  private void CharacterKilled(Character character)
+  private void CharacterKilled(BaseCharacter character)
   {
     GD.Print("Enemy Has Been Killed: ", character.Name);
-    if(character.GetCharacterTeam() == (int)Character.CHARACTER_TEAM.enemy) {
+    if(character.GetCharacterTeam() == (int)BaseCharacter.CHARACTER_TEAM.enemy) {
       Enemy enemy = character as Enemy;
       EmitSignal(SignalName.AddCurrency, enemy.GetAmountOfCurrencyDroppedOnKill());
     }
     CharacterTurnController.Instance.RemoveCharacterFromTurnController(character);
     CharacterTurnController.Instance.RemoveUpdateCharacterMovementCallable(character.GetUpdateMovementCalculation());
-    (GetTree().GetNodesInGroup("UnitControl")[0] as UnitControl).ResetTileAfterCharacterDeath(character);
+    (GetTree().GetNodesInGroup("UnitControl")[0] as UnitController).ResetTileAfterCharacterDeath(character);
     CharacterTurnController.Instance.UpdateMovementQueue();
   }
 

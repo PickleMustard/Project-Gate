@@ -1,6 +1,7 @@
 #include "yaml_parser.h"
 #include "godot_cpp/classes/file_access.hpp"
 #include "godot_cpp/classes/json.hpp"
+#include "godot_cpp/classes/ref_counted.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/memory.hpp"
 #include "godot_cpp/variant/char_string.hpp"
@@ -30,11 +31,13 @@ void godot::YamlParser::_bind_methods() {
 }
 
 godot::Dictionary godot::YamlParser::parse_file(godot::String file) {
-	godot::JSON parse_result;
+  UtilityFunctions::print("Here");
+  godot::Ref<godot::JSON> parse_result;
 	godot::Dictionary results;
 	//ryml::Parser parser;
 	godot::String input_string = "";
 	godot::Ref<godot::FileAccess> fa = godot::FileAccess::open(file, FileAccess::READ);
+  //godot::Ref<godot::FileAccess> fa = memnew(godot::FileAccess());
 	while (!fa->eof_reached()) {
 		input_string += fa->get_line() + '\n';
 	}
@@ -49,7 +52,7 @@ godot::Dictionary godot::YamlParser::parse_file(godot::String file) {
 	input_string = input_string.substr(0, input_string.rfind("}") + 1);
 	UtilityFunctions::print(vformat("Input String: %s", input_string));
 	UtilityFunctions::print(input_string);
-	results = parse_result.parse_string(input_string);
+	results = parse_result->parse_string(input_string);
 	fa->close();
 	return results;
 }

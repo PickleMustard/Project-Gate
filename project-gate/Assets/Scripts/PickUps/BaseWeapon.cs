@@ -1,4 +1,5 @@
 using Godot;
+using ProjGate.Character;
 
 namespace ProjGate.Pickups
 {
@@ -89,7 +90,7 @@ namespace ProjGate.Pickups
     {
       IgnoresLineSight = shouldIgnore;
     }
-    public void OnHit(Character attacker, Resource targetedLocation, Node TileGrid)
+    public void OnHit(BaseCharacter attacker, Resource targetedLocation, Node TileGrid)
     {
       if (OnHitBehavior != null)
       {

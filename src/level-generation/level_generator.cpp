@@ -1,16 +1,23 @@
 #include "level-generation/level_generator.h"
 #include "godot_cpp/classes/collision_shape3d.hpp"
+#include "godot_cpp/classes/dir_access.hpp"
 #include "godot_cpp/classes/engine.hpp"
+#include "godot_cpp/classes/gd_script.hpp"
 #include "godot_cpp/classes/json.hpp"
+#include "godot_cpp/classes/script.hpp"
 #include "godot_cpp/classes/mesh.hpp"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/resource_loader.hpp"
 #include "godot_cpp/classes/resource_saver.hpp"
+#include "godot_cpp/classes/script_language.hpp"
 #include "godot_cpp/classes/shader_material.hpp"
+#include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/core/math.hpp"
 #include "godot_cpp/core/memory.hpp"
+#include "godot_cpp/variant/packed_string_array.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/variant/variant.hpp"
 #include "seeded_random_access.h"
 #include "tile_collision.h"
 #include "tile_mesh_generator.h"
@@ -85,6 +92,7 @@ HashMap<String, Ref<Tile>> *LevelGenerator::GenerateLevel(TileGrid *root, Vector
 	m_ConnectGraphNodes(tile_bit_map, rooms_graph);
 	m_GenerateGraphTileBitMap(tile_bit_map, rooms_graph, gridCenter);
 	UtilityFunctions::print("Generated Bitmap");
+  path = m_FindTargetableNode();
 	m_GenerateRoom(tile_bit_map, tile_grid, root, spawnable_locations);
 	UtilityFunctions::print("Tile Grid Before Return: ", tile_grid->size());
 
@@ -319,6 +327,14 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 				TileCollision *m_collision_body = memnew(TileCollision);
 				CollisionShape3D *m_collision_shape = memnew(CollisionShape3D);
 				TileMeshGenerator *m_mesh_generator = memnew(TileMeshGenerator(m_inner_size, m_outer_size, m_height, m_is_flat_topped));
+        Node *m_targeting_node;
+        Ref<Script> script = ResourceLoader::get_singleton()->load(path);
+        if(script.is_valid()) {
+          Variant ret = script->call("new");
+          if(ret.get_type() != Variant::NIL) {
+            m_targeting_node = Object::cast_to<Node>(ret);
+          }
+        }
 
 				String m_tile_mesh_name = vformat("res://Assets/Tile_Meshes/Mesh_%d_%d_%d_%d_%d.tres", (m_inner_size * 10), (m_outer_size * 10), (m_height * 10), (int)m_is_flat_topped, tile_map.get(i));
 				String mesh_material_names[] = {
@@ -340,6 +356,10 @@ void LevelGenerator::m_GenerateRoom(Vector<uint16_t> &tile_map, HashMap<String, 
 
 				m_collision_body->add_child(m_mesh_generator);
 				m_mesh_generator->set_owner(root->get_owner());
+
+        m_collision_body->add_child(m_targeting_node);
+        m_targeting_node->set_owner(root->get_owner());
+        m_targeting_node->set_name("Targeting Node");
 
 				m_collision_body->set_ray_pickable(true);
 				//m_mesh_generator->create_convex_collision();
@@ -1042,4 +1062,28 @@ int LevelGenerator::m_HexDistance(Vector2i first_room, Vector2i second_room) {
 
 int LevelGenerator::GetNumRooms() {
 	return m_num_rooms;
+}
+
+String LevelGenerator::m_FindTargetableNode() {
+  String path = m_RecurseThroughDirecties("res://", "TargetableNode.cs");
+  return path;
+}
+
+String LevelGenerator::m_RecurseThroughDirecties(String path, String wanted_file) {
+  String absolute_path = "";
+  Ref<DirAccess> file_finder = DirAccess::open(path);
+  PackedStringArray files = file_finder->get_files();
+  if(files.size() > 0 && files.has(wanted_file)) {
+    int64_t location = files.find(wanted_file);
+    return file_finder->get_current_dir() + "/" + files[location];
+  } else if(file_finder->get_directories().size()) {
+    PackedStringArray dirs = file_finder->get_directories();
+    for(String path : dirs) {
+      absolute_path = m_RecurseThroughDirecties(file_finder->get_current_dir() + "/" + path, wanted_file);
+      if(!absolute_path.is_empty()) {
+        return absolute_path;
+      }
+    }
+  }
+  return "";
 }

@@ -1,0 +1,4 @@
+[configuration]
+
+entry_symbol = "register_types"
+compatibility_minimum ="4.3"

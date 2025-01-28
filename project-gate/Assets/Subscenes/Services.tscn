@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://cwmq8ec2vf8pf"]
+
+[ext_resource type="Script" path="res://Assets/Scripts/Services/InputHandler.cs" id="1_ckcrf"]
+[ext_resource type="Script" path="res://Assets/Scripts/Services/UnitController.cs" id="2_lfywm"]
+[ext_resource type="Script" path="res://Assets/Scripts/Services/CharacterTurnController.cs" id="3_ylqiw"]
+[ext_resource type="Script" path="res://Assets/Scripts/Services/CurrencyService.cs" id="4_fut1i"]
+
+[node name="Services" type="Node"]
+
+[node name="InputHandler" type="Node" parent="."]
+script = ExtResource("1_ckcrf")
+
+[node name="UnitControl" type="Node" parent="."]
+script = ExtResource("2_lfywm")
+movementTime = 0.01
+rotationDuration = 0.001
+
+[node name="CharacterTurnController" type="Node" parent="."]
+script = ExtResource("3_ylqiw")
+
+[node name="CurrencyService" type="Node" parent="."]
+script = ExtResource("4_fut1i")

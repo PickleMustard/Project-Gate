@@ -1,13 +1,15 @@
 using Godot;
 using System.Collections.Generic;
 
-public class AbilityContext
+namespace ProjGate.Character
 {
-  public Character Source { get; }
+  public class AbilityContext
+  {
+    public BaseCharacter Source { get; }
+    public Node TileGrid { get; }
 
-  public Vector3I TargetPosition { get; set; }
-  public Character PrimaryTarget { get; set; }
-  public List<Character> SecondaryTargets { get; } = new();
-
-  public Dictionary<string, object> CustomData {get; } = new();
+    public Vector3I TargetPosition { get; set; }
+    public BaseCharacter PrimaryTarget { get; set; }
+    public List<BaseCharacter> SecondaryTargets { get; } = new();
+  }
 }
