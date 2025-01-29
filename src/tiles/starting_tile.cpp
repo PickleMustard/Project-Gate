@@ -31,12 +31,12 @@ void godot::StartingTile::_bind_methods() {
   godot::ClassDB::bind_method(godot::D_METHOD("SpawnCharacter"), &StartingTile::SpawnCharacter);
 }
 
-void godot::StartingTile::TileSteppedOnEvent() {
+void godot::StartingTile::TileSteppedOnEvent(godot::Variant entity) {
   UtilityFunctions::print("Hello, you stepped on me!");
 
 }
 
-void godot::StartingTile::TileSteppedOffEvent() {
+void godot::StartingTile::TileSteppedOffEvent(godot::Variant entity) {
   UtilityFunctions::print("Goodbye, you stepped off me!");
 
 }

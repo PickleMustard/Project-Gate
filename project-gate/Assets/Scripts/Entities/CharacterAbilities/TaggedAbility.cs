@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Godot;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public partial class TaggedAbility : Resource
   {

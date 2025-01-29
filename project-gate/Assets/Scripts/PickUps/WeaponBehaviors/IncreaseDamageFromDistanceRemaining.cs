@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-using ProjGate.Character;
+using ProjGate.TargetableEntities;
 
 namespace ProjGate.Pickups
 {

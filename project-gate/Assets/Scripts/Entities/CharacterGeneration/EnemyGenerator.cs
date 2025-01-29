@@ -3,7 +3,7 @@ using Godot.Collections;
 using System.Text.RegularExpressions;
 using ProjGate.Pickups;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public partial class EnemyGenerator : Resource
   {

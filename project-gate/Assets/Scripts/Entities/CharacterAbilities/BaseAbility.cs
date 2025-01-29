@@ -1,6 +1,6 @@
 using Godot;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public partial class BaseAbility : Resource
   {

@@ -1,4 +1,4 @@
-namespace ProjGate.Character {
+namespace ProjGate.TargetableEntities {
   public static class AbilityExtenisions {
     public static bool TryGetBehavior<T>(this BaseAbility ability, out T result) where T: class, IAbility {
       result = ability as T;

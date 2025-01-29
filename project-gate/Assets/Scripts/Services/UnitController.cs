@@ -2,7 +2,7 @@ using Godot;
 using System.Collections;
 using HCoroutines;
 
-using ProjGate.Character;
+using ProjGate.TargetableEntities;
 
 public enum InteractionStates
 {
@@ -16,17 +16,27 @@ public partial class UnitController : Node
   class ControlState
   {
     private bool processingCharacter = false;
-    private InteractionStates currentState = InteractionStates.DisplayMovement;
+    public InteractionStates currentState {get; private set;} = InteractionStates.DisplayMovement;
     private InteractionStates nextState = InteractionStates.DisplayMovement;
+
+    public ControlState()
+    {
+      currentState = InteractionStates.DisplayMovement;
+    }
+
+    public ControlState(InteractionStates startingState)
+    {
+      currentState = startingState;
+    }
 
     public void UpdateNextState(InteractionStates nextState)
     {
       this.nextState = nextState;
     }
 
-    public bool ChangeState()
+    public bool AttemptChangeState(InteractionStates nextState)
     {
-      if (!processingCharacter)
+      if (!IsProcessingState())
       {
         currentState = nextState;
         if (nextState == InteractionStates.DisplayAbilityDetails || nextState == InteractionStates.DisplayGrenadeDetails)
@@ -36,7 +46,18 @@ public partial class UnitController : Node
       return false;
     }
 
-    public bool IsInProcessingState()
+    public void ChangeState()
+    {
+      currentState = nextState;
+      processingCharacter = false;
+    }
+
+    public void StartProcessingState()
+    {
+      processingCharacter = true;
+    }
+
+    public bool IsProcessingState()
     {
       return processingCharacter;
     }
@@ -51,6 +72,7 @@ public partial class UnitController : Node
   [Export]
   public float rotationDuration = 1.0f;
 
+  private ControlState displayState;
   private Godot.Collections.Array path = new Godot.Collections.Array { };
   private Node TileGrid;
   private Node level;
@@ -66,6 +88,12 @@ public partial class UnitController : Node
 
   public override void _EnterTree()
   {
+    displayState = new ControlState();
+    CommunicationBus cb = Engine.GetSingleton("CommunicationBus") as CommunicationBus;
+    cb.UpdateUnitControllerDisplayMovement += UpdateDisplayStateDisplayMovementDetails;
+    cb.UpdateUnitControllerDisplayWeapon += UpdateDisplayStateDisplayWeaponDetails;
+    cb.UpdateUnitControllerDisplayGrenade += UpdateDisplayStateDisplayGrenadeDetails;
+    cb.UpdateUnitControllerDisplayAbility += UpdateDisplayStateDisplayAbilityDetails;
     AddToGroup("UnitControl");
   }
 
@@ -76,12 +104,40 @@ public partial class UnitController : Node
     InputHandler i_handle = GetTree().GetNodesInGroup("InputHandler")[0] as InputHandler;
     i_handle.DisplayDestinations += DisplayPotentialDestinations;
     i_handle.HideDestinations += HidePotentialDestinations;
-    test = Engine.GetSingleton("GlobalTileNotifier");
-    var signals = test.GetSignalList();
-    GD.Print("Signals name: ", signals[0]["name"].ToString());
-    test.Connect(signals[0]["name"].ToString(), notify);
     level = GetNode<Node>("/root/Level/Level");
     unit_location = new Vector2I(0, 0);
+  }
+
+  public void UpdateDisplayStateDisplayMovementDetails()
+  {
+    if (!displayState.AttemptChangeState(InteractionStates.DisplayMovement))
+    {
+      displayState.UpdateNextState(InteractionStates.DisplayMovement);
+    }
+  }
+
+  public void UpdateDisplayStateDisplayWeaponDetails()
+  {
+    if (!displayState.AttemptChangeState(InteractionStates.DisplayWeaponDetails))
+    {
+      displayState.UpdateNextState(InteractionStates.DisplayWeaponDetails);
+    }
+  }
+
+  public void UpdateDisplayStateDisplayGrenadeDetails()
+  {
+    if (!displayState.AttemptChangeState(InteractionStates.DisplayGrenadeDetails))
+    {
+      displayState.UpdateNextState(InteractionStates.DisplayGrenadeDetails);
+    }
+  }
+
+  public void UpdateDisplayStateDisplayAbilityDetails()
+  {
+    if (!displayState.AttemptChangeState(InteractionStates.DisplayAbilityDetails))
+    {
+      displayState.UpdateNextState(InteractionStates.DisplayAbilityDetails);
+    }
   }
 
   public Callable GetUpdateCharacterSignal()
@@ -239,6 +295,23 @@ public partial class UnitController : Node
     return MovementRange;
   }
 
+  public void ProcessUnitOrder(Node tile_collider) {
+    GD.Print("Processing Right Click");
+
+    string tile_name = tile_collider.Name;
+    int divider = tile_name.Find(",");
+    int q = tile_name.Substring(4, divider - 4).ToInt();
+    int r = tile_name.Substring(divider + 1).ToInt();
+    Vector2I DesiredTileLocation = new Vector2I(q, r);
+    if(TileGrid.HasMethod("FindTileOnGrid")) {
+      Variant variantTileResource = TileGrid.Call("FindTileOnGrid", DesiredTileLocation);
+      GodotObject tileResource = variantTileResource.AsGodotObject();
+      if(tileResource.HasMethod("GetCharacterOnTile")) {
+        Variant variantCharacter = tileResource.Call("GetCharacterOnTile");
+      }
+    }
+  }
+
   public void NotifyLog(Node tile_collider)
   {
     GD.Print("In NotifyLog Proper");
@@ -272,7 +345,7 @@ public partial class UnitController : Node
       tempChar = tempObject.Call("GetCharacterOnTile");
       if (tempChar.AsGodotObject() != null)
       {
-        GD.Print("Attacking");
+        GD.Print("Attacking: ", tempChar);
         AttackTile(DesiredTileLocation, CurrentUnitLocation, CurrentCharacter);
       }
       else
@@ -300,7 +373,7 @@ public partial class UnitController : Node
         target.QueueFree();
         target = TargetTile.Call("GetCharacterOnTile").AsGodotObject() as BaseCharacter;
         //GD.Print("Getting character on tile: ", TargetTile, " | ", target);
-        if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("Character")))
+        if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("ProjGate.Character.BaseCharacter")))
         {
           GD.PushError("Could not get the Character: ", target, " on Tile: ", TargetTile);
           return;
@@ -333,7 +406,6 @@ public partial class UnitController : Node
       GodotObject character_tile = TileGrid.Call("FindTileOnGrid", character_location).AsGodotObject();
       if (character_tile.HasMethod("ResetCharacterOnTile"))
       {
-        GD.Print("Resetting Tile");
         character_tile.Call("ResetCharacterOnTile");
       }
     }
@@ -343,7 +415,6 @@ public partial class UnitController : Node
 
   public void MoveCharacter(Node tile_collider)
   {
-    GD.Print("Current Character: ", CurrentCharacter.Name, "| Distance Remaining: ", CurrentCharacter.GetDistanceRemaining());
     if (!CurrentCharacter.isMoving)
     {
       unit_location = new Vector2I(0, 0);
@@ -361,7 +432,6 @@ public partial class UnitController : Node
       HidePotentialDestinations();
       Godot.Collections.Array MovementRange = CalculateMovementRange(unit_location, CurrentCharacter.GetDistanceRemaining());
       tile = tile_collider.GetParent();
-      GD.Print("TileGrid? ", tile.Name);
       if (tile.HasMethod("GetPositionForHexFromCoordinate"))
       {
         desired_location = new Vector2I(q, r);
@@ -377,22 +447,17 @@ public partial class UnitController : Node
       var outside_range = tile_collider.GetChildren()[1];
       if (MovementRange.Contains(outside_range))
       {
-        GD.Print("Contains");
         if (path.Count > 0)
         {
-          GD.Print("Path Found");
           Variant current_tile_var = path[0];
           path.Remove(current_tile_var);
           GodotObject current_tile = current_tile_var.AsGodotObject();
           if (current_tile.HasMethod("GetLocation"))
           {
             Vector2I location = (Vector2I)current_tile.Call("GetLocation");
-            GD.Print("Moving to location: ", location);
             Vector3 location_v3 = (Vector3)tile.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
             CurrentCharacter.isMoving = true;
-            GD.Print("Removing ", distance, " tiles");
             CurrentCharacter.DecrementDistanceRemaining(distance);
-            GD.Print(CurrentCharacter.GetDistanceRemaining());
             Co.Run(PrepareMovement(location_v3));
           }
         }
@@ -402,7 +467,6 @@ public partial class UnitController : Node
 
   private IEnumerator PrepareMovement(Vector3 endPosition)
   {
-
     Quaternion startRotation = CurrentCharacter.Quaternion;
     endPosition.Y = CurrentCharacter.Position.Y;
     Vector3 direction = endPosition - CurrentCharacter.Position;
@@ -419,7 +483,6 @@ public partial class UnitController : Node
       var tempObject = temp.AsGodotObject();
       if (tempObject.HasMethod("SetCharacterOnTile"))
       {
-        GD.Print("Resetting character");
         tempObject.Call("ResetCharacterOnTile");
       }
     }
@@ -441,7 +504,6 @@ public partial class UnitController : Node
 
   private IEnumerator MoveUnitAlongTile(Vector3 endPosition)
   {
-    GD.Print("End Position: ", endPosition, "| ", CurrentCharacter.isMoving);
     Vector3 startPosition = CurrentCharacter.Position;
     float timeElapsed = 0.0f;
 
@@ -465,18 +527,16 @@ public partial class UnitController : Node
       var tempObject = temp.AsGodotObject();
       if (tempObject.HasMethod("SetCharacterOnTile"))
       {
-        GD.Print("Setting character");
         tempObject.Call("SetCharacterOnTile", CurrentCharacter);
       }
       if (tempObject.HasMethod("GetCharacterOnTile"))
       {
         //GD.Print(tempObject.Call("GetCharacterOnTile").AsGodotObject().GetMethodList());
       }
-      if (tempObject.HasMethod("TileSteppedOnEvent"))
+      /*if (tempObject.HasMethod("TileSteppedOnEvent"))
       {
-        GD.Print("TileSteppedOnEvent exists, calling");
         tempObject.Call("TileSteppedOnEvent");
-      }
+      }*/
     }
 
     if (path.Count > 0)
@@ -484,18 +544,15 @@ public partial class UnitController : Node
       Variant current_tile_var = path[0];
       path.Remove(current_tile_var);
       GodotObject current_tile = current_tile_var.AsGodotObject();
-      GD.Print("Location has character on it: ", current_tile.Call("HasCharacterOnTile"));
       if (current_tile.HasMethod("GetLocation"))
       {
         Vector2I location = (Vector2I)current_tile.Call("GetLocation");
-        GD.Print("Moving to location: ", location);
         Vector3 location_v3 = (Vector3)tile.Call("GetPositionForHexFromCoordinate", location, 3.0f, true) + new Vector3(0, 5, 0);
         Co.Run(PrepareMovement(location_v3));
       }
     }
     else
     {
-      GD.Print("Done Moving");
       CurrentCharacter.isMoving = false;
     }
   }

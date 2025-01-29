@@ -19,7 +19,7 @@ using namespace godot;
  */
 Tile::Tile() {
 	UtilityFunctions::print("Unparametered Constructor");
-  m_position = Vector3(0,0,0);
+	m_position = Vector3(0, 0, 0);
 	m_tile_row = 0;
 	m_tile_column = 0;
 	m_tile_is_flat_topped = true;
@@ -27,7 +27,8 @@ Tile::Tile() {
 	m_tile_inner_size = 0.0f;
 	m_tile_height = 1.0f;
 	m_tile_type = 0;
-  m_character_on_tile = nullptr;
+	m_entity_on_tile = nullptr;
+  InitialEventConnector();
 }
 
 /*
@@ -46,7 +47,7 @@ Tile::Tile() {
  * Functions exactly the same as default constructor
  */
 Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, float inner_size, float height, uint16_t type) {
-  m_position = position;
+	m_position = position;
 	m_tile_row = r;
 	m_tile_column = c;
 	m_tile_is_flat_topped = flat_topped;
@@ -54,22 +55,20 @@ Tile::Tile(Vector3 position, int c, int r, bool flat_topped, float outer_size, f
 	m_tile_inner_size = inner_size;
 	m_tile_height = height;
 	m_tile_type = type;
-  m_g_cost = 0;
-  m_h_cost = 0;
-  m_character_on_tile = nullptr;
+	m_g_cost = 0;
+	m_h_cost = 0;
+	m_entity_on_tile = nullptr;
+  InitialEventConnector();
 }
 
 Tile::~Tile() {
-  delete m_character_on_tile;
+	delete m_entity_on_tile;
 }
 
-/*
- * Test Function to output to a log
- */
-void Tile::NotifyLog() {
-	UtilityFunctions::print("Moe Moe Kyun >-<");
+void godot::Tile::InitialEventConnector() {
+  connect("StepOnEvent", callable_mp(this, &godot::Tile::TileSteppedOnEvent));
+  connect("StepOffEvent", callable_mp(this, &godot::Tile::TileSteppedOffEvent));
 }
-
 
 /*
  * Returns the row, column location of the tile as a Vector2i
@@ -170,28 +169,63 @@ uint8_t Tile::GetTileType() {
 }
 
 godot::Variant Tile::GetCharacterOnTile() {
-  Variant character_variant = Variant(m_character_on_tile);
-  return character_variant;
+	Variant character_variant = Variant(m_entity_on_tile);
+	return character_variant;
 }
 
 bool Tile::HasCharacterOnTile() {
-  //UtilityFunctions::print("Tile has character: ", m_character_on_tile != nullptr);
-  return m_character_on_tile != nullptr;
+	//UtilityFunctions::print("Tile has character: ", m_character_on_tile != nullptr);
+	return m_entity_on_tile != nullptr;
 }
 
-void Tile::SetCharacterOnTile(Variant character) {
-  //UtilityFunctions::print("Can Convert Character Variant: ",character.can_convert_strict(character.get_type(), Variant::OBJECT) );
-  if(character.can_convert_strict(character.get_type(), Variant::OBJECT)) {
-    m_character_on_tile = Object::cast_to<Node3D>(character);
-  }
+void Tile::SetCharacterOnTile(Variant entity) {
+	//UtilityFunctions::print("Can Convert Character Variant: ",character.can_convert_strict(character.get_type(), Variant::OBJECT) );
+	if (entity.can_convert_strict(entity.get_type(), Variant::OBJECT)) {
+		m_entity_on_tile = Object::cast_to<Node3D>(entity);
+		emit_signal("StepOnEvent", m_entity_on_tile);
+	}
 }
 
 void Tile::ResetCharacterOnTile() {
-  m_character_on_tile = nullptr;
+	emit_signal("StepOffEvent", m_entity_on_tile);
+	m_entity_on_tile = nullptr;
+}
+void Tile::TileSteppedOnEvent(godot::Variant entity) {
+	for (int i = 0; i < SteppedOnTileCallables.size(); i++) {
+		SteppedOnTileCallables[i].call(entity);
+	}
+}
+void Tile::TileSteppedOffEvent(godot::Variant entity) {
+	for (int i = 0; i < SteppedOffTileCallables.size(); i++) {
+		SteppedOffTileCallables[i].call(entity);
+	}
+}
+
+void godot::Tile::AddStepOnEvent(Callable event) {
+	SteppedOnTileCallables.append(event);
+}
+bool godot::Tile::RemoveStepOnEvent(Callable event) {
+	if (SteppedOnTileCallables.has(event)) {
+		int position = SteppedOnTileCallables.find(event);
+		SteppedOnTileCallables.remove_at(position);
+		return true;
+	}
+	return false;
+}
+void godot::Tile::AddStepOffEvent(Callable event) {
+	SteppedOffTileCallables.append(event);
+}
+bool godot::Tile::RemoveStepOffEvent(Callable event) {
+	if (SteppedOffTileCallables.has(event)) {
+		int position = SteppedOffTileCallables.find(event);
+		SteppedOffTileCallables.remove_at(position);
+		return true;
+	}
+	return false;
 }
 
 Vector3 Tile::GetTilePosition() {
-  return m_position;
+	return m_position;
 }
 
 /*
@@ -202,10 +236,12 @@ Vector3 Tile::GetTilePosition() {
  * new_pos: Vector3 containing the new position in world space to move the tile to
  */
 void Tile::SetTilePosition(Vector3 new_pos) {
-  m_position = new_pos;
+	m_position = new_pos;
 }
 
 void Tile::_bind_methods() {
+	ADD_SIGNAL(MethodInfo("StepOnEvent", PropertyInfo(Variant::OBJECT, "entity", godot::PROPERTY_HINT_NONE, "", godot::PROPERTY_USAGE_DEFAULT, "Variant")));
+	ADD_SIGNAL(MethodInfo("StepOffEvent", PropertyInfo(Variant::OBJECT, "entity", godot::PROPERTY_HINT_NONE, "", godot::PROPERTY_USAGE_DEFAULT, "Variant")));
 	//godot::ClassDB::bind_static_method("TileGrid", godot::D_METHOD("GetPositionForhexFromCoordinate", "coordinate", "size", "is_flat_topped"), &TileGrid::GetPositionForHexFromCoordinate);
 	//godot::ClassDB::bind_method(godot::D_METHOD("GetNumRooms"), &TileGrid::GetNumRooms);
 
@@ -213,18 +249,25 @@ void Tile::_bind_methods() {
 	//godot::ClassDB::bind_method(godot::D_METHOD("CalculatePath", "starting_location", "end_location"), &TileGrid::CalculatePath);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetLocation"), &Tile::GetLocation);
 	godot::ClassDB::bind_method(godot::D_METHOD("SetLocation", "new_location"), &Tile::SetLocation);
-  godot::ClassDB::bind_method(godot::D_METHOD("GetTilePosition"), &Tile::GetTilePosition);
-  godot::ClassDB::bind_method(godot::D_METHOD("SetTilePosition"), &Tile::SetTilePosition);
-  godot::ClassDB::bind_method(godot::D_METHOD("GetSize"), &Tile::GetOuterSize);
-  godot::ClassDB::bind_method(godot::D_METHOD("SetSize"), &Tile::SetOuterSize);
-  godot::ClassDB::bind_method(godot::D_METHOD("SetCharacterOnTile", "character"), &Tile::SetCharacterOnTile);
-  godot::ClassDB::bind_method(godot::D_METHOD("ResetCharacterOnTile"), &Tile::ResetCharacterOnTile);
-  godot::ClassDB::bind_method(godot::D_METHOD("GetCharacterOnTile"), &Tile::GetCharacterOnTile);
-  godot::ClassDB::bind_method(godot::D_METHOD("HasCharacterOnTile"), &Tile::HasCharacterOnTile);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetTilePosition"), &Tile::GetTilePosition);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetTilePosition"), &Tile::SetTilePosition);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetSize"), &Tile::GetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetSize"), &Tile::SetOuterSize);
+	godot::ClassDB::bind_method(godot::D_METHOD("SetCharacterOnTile", "character"), &Tile::SetCharacterOnTile);
+	godot::ClassDB::bind_method(godot::D_METHOD("ResetCharacterOnTile"), &Tile::ResetCharacterOnTile);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetCharacterOnTile"), &Tile::GetCharacterOnTile);
+	godot::ClassDB::bind_method(godot::D_METHOD("HasCharacterOnTile"), &Tile::HasCharacterOnTile);
+
+	godot::ClassDB::bind_method(godot::D_METHOD("TileSteppedOnEvent"), &Tile::TileSteppedOnEvent);
+	godot::ClassDB::bind_method(godot::D_METHOD("TileSteppedOffEvent"), &Tile::TileSteppedOffEvent);
+	godot::ClassDB::bind_method(godot::D_METHOD("AddStepOnEvent", "event"), &Tile::AddStepOnEvent);
+	godot::ClassDB::bind_method(godot::D_METHOD("AddStepOffEvent", "event"), &Tile::AddStepOffEvent);
+	godot::ClassDB::bind_method(godot::D_METHOD("RemoveStepOnEvent", "event"), &Tile::RemoveStepOnEvent);
+	godot::ClassDB::bind_method(godot::D_METHOD("RemoveStepOffEvent", "event"), &Tile::RemoveStepOffEvent);
 
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "m_location"), "SetLocation", "GetLocation");
 
-  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "m_character_on_tile"), "SetCharacterOnTile", "GetCharacterOnTile");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "m_character_on_tile"), "SetCharacterOnTile", "GetCharacterOnTile");
 
 	//	ADD_GROUP("Tile Properties", "m_tile_");
 	//	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "m_tile_is_flat_topped"), "SetFlatTopped", "GetFlatTopped");

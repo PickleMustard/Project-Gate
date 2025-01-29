@@ -1,9 +1,10 @@
 #include "interactable.h"
 #include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/variant/callable_method_pointer.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
+#include "godot_cpp/variant/variant.hpp"
 
-godot::Interactable::Interactable() :
-		Tile() {
+godot::Interactable::Interactable() : Tile() {
 }
 
 godot::Interactable::Interactable(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint16_t tile_type, int interactable_type) :
@@ -14,7 +15,7 @@ godot::Interactable::Interactable(Vector3 position, int r, int c, bool flat_topp
 godot::Interactable::~Interactable() {
 }
 
-void godot::Interactable::TileSteppedOnEvent() {
+void godot::Interactable::TileSteppedOnEvent(godot::Variant entity) {
 	UtilityFunctions::print("Interacting");
 	/*if (SteppedOnTileCallables.size() > 0) {
 		for (int i = 0; i < SteppedOnTileCallables.size(); i++) {
@@ -29,7 +30,7 @@ void godot::Interactable::TileSteppedOnEvent() {
 	}*/
 }
 
-void godot::Interactable::TileSteppedOffEvent() {
+void godot::Interactable::TileSteppedOffEvent(godot::Variant entity) {
 	UtilityFunctions::print("Goodbye, you stepped off me!");
 }
 

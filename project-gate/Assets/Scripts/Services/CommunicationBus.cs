@@ -1,6 +1,6 @@
 using Godot;
 using ProjGate.Pickups;
-using ProjGate.Character;
+using ProjGate.TargetableEntities;
 
 public partial class CommunicationBus : Node
 {
@@ -13,11 +13,25 @@ public partial class CommunicationBus : Node
   [Signal]
   public delegate void DecementCurrencyEventHandler();
 
+  [Signal]
+  public delegate void UpdateUnitControllerDisplayMovementEventHandler();
+  [Signal]
+  public delegate void UpdateUnitControllerDisplayWeaponEventHandler();
+  [Signal]
+  public delegate void UpdateUnitControllerDisplayGrenadeEventHandler();
+  [Signal]
+  public delegate void UpdateUnitControllerDisplayAbilityEventHandler();
+
+
 
   public static CommunicationBus Instance { get; private set; }
 
-  public BaseCharacter CurrentCharacter { get; set; }
+  public BaseCharacter ActiveCharacter { get; set; }
 
+  private Callable RightClickDownEvent;
+  private Callable RightClickUpEvent;
+  private Callable LevelLoadingFinishedCall;
+  private Callable TileNotifiedEvent;
   private Callable SpawnEnemyCall;
   private Callable SpawnCharacterCall;
   private Callable UpdateCharacterCall;
@@ -31,19 +45,35 @@ public partial class CommunicationBus : Node
   {
     Instance = this;
     Engine.RegisterSingleton("CommunicationBus", this);
+    RightClickDownEvent = new Callable(this, "OnRightClickEvent");
+    TileNotifiedEvent = new Callable(this, "OnTileNotifiedEvent");
     UpdateCharacterCall = new Callable(this, "UpdateCurrentCharacter");
     GenerateItemCall = new Callable(this, "GenerateItem");
     SpawnEnemyCall = new Callable(this, "SpawnEnemy");
     SpawnCharacterCall = new Callable(this, "SpawnPlayerCharacter");
     CharacterKilledCall = new Callable(this, "CharacterKilled");
+    LevelLoadingFinishedCall = new Callable(this, "OnLevelLoadingFinish");
   }
 
 
   public override void _Ready()
   {
+    GodotObject TileNotifierSingleton = Engine.GetSingleton("GlobalTileNotifier");
+    var signals = TileNotifierSingleton.GetSignalList();
+    TileNotifierSingleton.Connect(signals[0]["name"].ToString(), TileNotifiedEvent);
+
     Connect(SignalName.AddCurrency, CurrencyService.Instance.GetIncrementCurrencyCallable());
     Connect(SignalName.DecementCurrency, CurrencyService.Instance.GetDecrementCurrencyCallable());
     Level = GetNodeOrNull<Node3D>("/root/Level");
+  }
+
+  public void OnTileNotifiedEvent(Node tile_collider) {
+    GD.Print("In CommunicationBus Tile Notified Event");
+
+  }
+
+  public Callable GetLevelLoadingFinishedCall(){
+    return LevelLoadingFinishedCall;
   }
 
   public Callable GetGenerateItemSignal()
@@ -56,7 +86,7 @@ public partial class CommunicationBus : Node
     weaponGenerator.GenerateWeapon("testweapon");
     BaseWeapon weapon = new BaseWeapon();
     weapon.SetWeaponName("Ooga Booga Gun");
-    CurrentCharacter.SetMainWeapon(weapon);
+    ActiveCharacter.SetMainWeapon(weapon);
   }
 
   public Callable GetSpawnCharacterSignal()
@@ -104,11 +134,11 @@ public partial class CommunicationBus : Node
     bannerMargin.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
 
     characterBanner.UpdateCharacterName("This is a temporary name");
-    characterBanner.UpdateMovementRemaining(CurrentCharacter.GetDistanceRemaining());
-    characterBanner.UpdateHeapPriority(CurrentCharacter.HeapPriority);
+    characterBanner.UpdateMovementRemaining(ActiveCharacter.GetDistanceRemaining());
+    characterBanner.UpdateHeapPriority(ActiveCharacter.HeapPriority);
     characterBanner.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
-    CurrentCharacter.Connect(CurrentCharacter.GetSignalList()[1]["name"].ToString(), characterBanner.GetUpdateMovementCallable());
-    CurrentCharacter.Connect(CurrentCharacter.GetSignalList()[2]["name"].ToString(), characterBanner.GetUpdateHeapPriorityCallable());
+    ActiveCharacter.Connect(ActiveCharacter.GetSignalList()[1]["name"].ToString(), characterBanner.GetUpdateMovementCallable());
+    ActiveCharacter.Connect(ActiveCharacter.GetSignalList()[2]["name"].ToString(), characterBanner.GetUpdateHeapPriorityCallable());
     character.Call("SetPosition", Tile);
   }
 
@@ -166,15 +196,20 @@ public partial class CommunicationBus : Node
     return UpdateCharacterCall;
   }
 
-  public void UpdateCurrentCharacter(BaseCharacter UpdateCharacter)
+  public void UpdateCurrentCharacter(BaseCharacter NextCharacter)
   {
-    CurrentCharacter = UpdateCharacter;
+    ActiveCharacter = NextCharacter;
+  }
+
+  public void OnLevelLoadingFinish() {
+
   }
 
   private void CharacterKilled(BaseCharacter character)
   {
     GD.Print("Enemy Has Been Killed: ", character.Name);
-    if(character.GetCharacterTeam() == (int)BaseCharacter.CHARACTER_TEAM.enemy) {
+    if (character.GetCharacterTeam() == (int)BaseCharacter.CHARACTER_TEAM.enemy)
+    {
       Enemy enemy = character as Enemy;
       EmitSignal(SignalName.AddCurrency, enemy.GetAmountOfCurrencyDroppedOnKill());
     }

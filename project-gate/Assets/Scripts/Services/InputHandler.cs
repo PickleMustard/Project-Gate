@@ -61,7 +61,6 @@ public partial class InputHandler : Node
   {
     if (Input.IsActionJustPressed("mouse_right"))
     {
-      GD.Print("Hello!");
       EmitSignal(SignalName.DisplayDestinations);
     }
     else if (Input.IsActionJustReleased("mouse_right"))

@@ -1,10 +1,9 @@
 #ifndef STARTING_TILE_H
 #define STARTING_TILE_H
 
-#include "tiles/IStepOnTile.h"
 #include "tiles/tile.h"
 namespace godot {
-class StartingTile : public Tile, public IStepOnTile {
+class StartingTile : public Tile {
 	GDCLASS(StartingTile, Tile);
 
 public:
@@ -12,8 +11,8 @@ public:
 	StartingTile(Vector3 position, int r, int c, bool flat_topped, float outer_size, float inner_size, float height, uint16_t type);
 	~StartingTile();
 
-	void TileSteppedOnEvent() override;
-	void TileSteppedOffEvent() override;
+	void TileSteppedOnEvent(godot::Variant) override;
+	void TileSteppedOffEvent(godot::Variant) override;
 
 	void SpawnCharacter();
 

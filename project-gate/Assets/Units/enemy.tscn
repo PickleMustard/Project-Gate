@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://2bswkiikpwx4"]
 
+[ext_resource type="Script" path="res://Assets/Scripts/Entities/Enemy.cs" id="1_4btdo"]
 [ext_resource type="Material" uid="uid://k6f12crlx6sk" path="res://Assets/Materials/test_material.tres" id="1_b2i4i"]
-[ext_resource type="Script" path="res://Assets/Scripts/Characters/Enemy.cs" id="1_k8ecc"]
 [ext_resource type="AudioStream" uid="uid://dq57eheww3cd1" path="res://Assets/Sound-Effects/Dev-Only/Death_Sound.mp3" id="3_m1hy7"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/Healthbar.cs" id="4_iculo"]
 [ext_resource type="Texture2D" uid="uid://bg6fhem324yn0" path="res://Assets/Textures/User-Interface/barHorizontal_green_mid 200.png" id="4_jsanq"]
@@ -11,8 +11,7 @@
 [sub_resource type="SphereMesh" id="SphereMesh_dfani"]
 
 [node name="Enemy" type="Node3D"]
-script = ExtResource("1_k8ecc")
-team = 1
+script = ExtResource("1_4btdo")
 
 [node name="Mesh" type="Node" parent="."]
 

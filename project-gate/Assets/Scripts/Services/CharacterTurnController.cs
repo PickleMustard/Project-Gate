@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 
-using ProjGate.Character;
+using ProjGate.TargetableEntities;
 
 public partial class CharacterTurnController : Node
 {
@@ -28,7 +28,7 @@ public partial class CharacterTurnController : Node
   List<Callable> CharacterMovementUpdateFunctions;
   //Current Character in the turn order | Updates the movement controller
   [Export]
-  ProjGate.Character.BaseCharacter CurrentCharacter;
+  ProjGate.TargetableEntities.BaseCharacter CurrentCharacter;
   //Unit Controller Object to update which character to control
   UnitController unitControl;
   Node TileGrid;

@@ -1,9 +1,10 @@
+
 using Godot;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public static class AbilityDatabase
   {
@@ -19,7 +20,9 @@ namespace ProjGate.Character
           .Where(a => !a.Tags.Any(tag => query.BannedTags.Contains(tag)))
           .Select(a => a.Ability)
           .ToList();
-      } else {
+      }
+      else
+      {
         return new List<BaseAbility>();
       }
     }
@@ -30,4 +33,4 @@ namespace ProjGate.Character
     }
   }
 
- }
+}

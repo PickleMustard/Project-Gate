@@ -2,7 +2,7 @@ using Godot;
 using Godot.Collections;
 using ProjGate.Pickups;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public partial class CharacterGenerator : Resource
   {

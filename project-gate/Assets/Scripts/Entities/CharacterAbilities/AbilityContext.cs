@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public class AbilityContext
   {

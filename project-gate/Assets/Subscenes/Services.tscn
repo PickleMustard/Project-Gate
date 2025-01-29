@@ -10,7 +10,7 @@
 [node name="InputHandler" type="Node" parent="."]
 script = ExtResource("1_ckcrf")
 
-[node name="UnitControl" type="Node" parent="."]
+[node name="UnitController" type="Node" parent="."]
 script = ExtResource("2_lfywm")
 movementTime = 0.01
 rotationDuration = 0.001
@@ -20,3 +20,7 @@ script = ExtResource("3_ylqiw")
 
 [node name="CurrencyService" type="Node" parent="."]
 script = ExtResource("4_fut1i")
+
+[node name="DamageSystem" type="Node" parent="."]
+
+[node name="MovementSystem" type="Node" parent="."]

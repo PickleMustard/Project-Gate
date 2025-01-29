@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Godot.Collections;
 using ProjGate.Pickups;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   [GlobalClass]
   public partial class BaseCharacter : Node3D
@@ -185,7 +185,7 @@ namespace ProjGate.Character
 
     public void AttackCharacter(Resource target)
     {
-      GD.Print("Attac Character Calculations: ", (int)MainWeapon.weaponType, " | ", proficiencies[(int)MainWeapon.weaponType], " | ", (int)proficiencies[(int)MainWeapon.weaponType]);
+      GD.Print("Attack Character Calculations: ", (int)MainWeapon.weaponType, " | ", proficiencies[(int)MainWeapon.weaponType], " | ", (int)proficiencies[(int)MainWeapon.weaponType]);
       PlayAttackSound();
       MainWeapon.OnHit(this, target, GetTree().GetNodesInGroup("Tilegrid")[0]);
       currentActionPoints--;

@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public partial class PlayerTeamCharacter : BaseCharacter
   {

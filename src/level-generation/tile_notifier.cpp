@@ -27,10 +27,6 @@ TileNotifier *TileNotifier::getInstance() {
 	}
 }
 
-void TileNotifier::_enter_tree() {
-  UtilityFunctions::print("Tile Notifier entered the tree");
-}
-
 /* Emits a signal when the TileGrid has finished creation
  *
  * Arguments:
@@ -40,7 +36,6 @@ void TileNotifier::_enter_tree() {
  *    No Direct Returns
  */
 void TileNotifier::GridCreationNotification(TileGrid *grid) {
-	UtilityFunctions::print("Emiting Grid Created Signal");
 	emit_signal("GridCreated", grid);
 }
 

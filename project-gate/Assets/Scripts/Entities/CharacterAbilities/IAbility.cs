@@ -1,4 +1,4 @@
-namespace ProjGate.Character
+namespace ProjGate.TargetableEntities
 {
   public interface IAbility
   {

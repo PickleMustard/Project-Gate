@@ -1,4 +1,5 @@
-namespace ProjGate.Character
+
+namespace ProjGate.TargetableEntities
 {
   public struct AbilityTag
   {

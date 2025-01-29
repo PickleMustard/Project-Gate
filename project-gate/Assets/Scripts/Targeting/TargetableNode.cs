@@ -7,7 +7,7 @@ namespace ProjGate.Targeting {
       return new Vector3(0,0,0);
     }
 
-    public bool IsValidFor(ProjGate.Character.BaseAbility.ABILITY_TYPE types) {
+    public bool IsValidFor(ProjGate.TargetableEntities.BaseAbility.ABILITY_TYPE types) {
       return true;
     }
   }

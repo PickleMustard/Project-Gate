@@ -6,14 +6,16 @@
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/string.hpp"
 #include "godot_cpp/variant/variant.hpp"
+#include "tiles/IStepOnTile.h"
 #include <cstdint>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
 namespace godot {
 
-class Tile : public Resource{
-  GDCLASS(Tile, Resource);
+class Tile : public Resource, IStepOnTile {
+	GDCLASS(Tile, Resource);
+
 private:
 	Vector3 m_position;
 	int m_tile_row;
@@ -25,7 +27,7 @@ private:
 	float m_tile_inner_size;
 	float m_tile_height;
 	uint16_t m_tile_type; //Defines the type of the tile walkable, interacable, obstacle, wall
-  Node3D *m_character_on_tile;
+	Node3D *m_entity_on_tile;
 	Ref<Tile> m_path_parent;
 	void (*TileSelected)(Tile *);
 
@@ -58,15 +60,26 @@ public:
 	uint8_t GetTileType();
 	Ref<Tile> GetParent();
 	void SetParent(Ref<Tile> parent);
-  void SetCharacterOnTile(Variant character);
-  Variant GetCharacterOnTile();
-  bool HasCharacterOnTile();
-  void ResetCharacterOnTile();
+	void SetCharacterOnTile(Variant character);
+	Variant GetCharacterOnTile();
+	bool HasCharacterOnTile();
+	void ResetCharacterOnTile();
+  //Override this method in children to create different behavior in TileSteppedOnEvent
+  void InitialEventConnector();
+  //Override these two methods for different behavior on Step events
+	void TileSteppedOnEvent(godot::Variant entity) override;
+	void TileSteppedOffEvent(godot::Variant entity) override;
+	void AddStepOnEvent(Callable event);
+	bool RemoveStepOnEvent(Callable event);
+	void AddStepOffEvent(Callable event);
+	bool RemoveStepOffEvent(Callable event);
 
-
-	void NotifyLog();
 protected:
-  static void _bind_methods();
+	static void _bind_methods();
+
+private:
+	TypedArray<Callable> SteppedOnTileCallables;
+	TypedArray<Callable> SteppedOffTileCallables;
 };
 
 } //namespace godot

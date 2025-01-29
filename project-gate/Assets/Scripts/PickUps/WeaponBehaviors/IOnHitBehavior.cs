@@ -1,6 +1,6 @@
 using Godot;
 
-using ProjGate.Character;
+using ProjGate.TargetableEntities;
 /* Basic Interface to define the different behaviors a weapon can have when hitting an opponent
  *
  */

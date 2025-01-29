@@ -1,4 +1,5 @@
-namespace ProjGate.Character {
+
+namespace ProjGate.TargetableEntities {
   public partial class Fireball : BaseAbility, IAbility {
 
     public bool CanExecute(AbilityContext context) {

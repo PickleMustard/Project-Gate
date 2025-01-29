@@ -34,13 +34,11 @@ TileCollision::~TileCollision() {
 * Will output signal indicating that it was the tile that was clicked
 */
 void TileCollision::_input_event(Camera3D *camera, const Ref<InputEvent> &event, const Vector3 &position, const Vector3 &normal, int32_t shape_idx) {
-  //UtilityFunctions::print(event->as_text());
   if(event->is_action_released("mouse_right")) {
     TileCollision::NotifyLog();
   }
 }
 
 void TileCollision::NotifyLog() {
-  UtilityFunctions::print("In NotifyLog");
   TileNotifier::getInstance()->TileSelected(this);
 }
