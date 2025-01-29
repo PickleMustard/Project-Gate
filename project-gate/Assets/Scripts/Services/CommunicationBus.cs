@@ -21,6 +21,8 @@ public partial class CommunicationBus : Node
   public delegate void UpdateUnitControllerDisplayGrenadeEventHandler();
   [Signal]
   public delegate void UpdateUnitControllerDisplayAbilityEventHandler();
+  [Signal]
+  public delegate void ProcessUnitCommandEventHandler(Node tile_collider);
 
 
 
@@ -69,7 +71,7 @@ public partial class CommunicationBus : Node
 
   public void OnTileNotifiedEvent(Node tile_collider) {
     GD.Print("In CommunicationBus Tile Notified Event");
-
+    EmitSignal(SignalName.ProcessUnitCommand, tile_collider);
   }
 
   public Callable GetLevelLoadingFinishedCall(){

@@ -94,6 +94,7 @@ public partial class UnitController : Node
     cb.UpdateUnitControllerDisplayWeapon += UpdateDisplayStateDisplayWeaponDetails;
     cb.UpdateUnitControllerDisplayGrenade += UpdateDisplayStateDisplayGrenadeDetails;
     cb.UpdateUnitControllerDisplayAbility += UpdateDisplayStateDisplayAbilityDetails;
+    cb.ProcessUnitCommand += ProcessUnitOrder;
     AddToGroup("UnitControl");
   }
 
@@ -297,6 +298,7 @@ public partial class UnitController : Node
 
   public void ProcessUnitOrder(Node tile_collider) {
     GD.Print("Processing Right Click");
+    TargetableEntity target = null;
 
     string tile_name = tile_collider.Name;
     int divider = tile_name.Find(",");
@@ -308,54 +310,26 @@ public partial class UnitController : Node
       GodotObject tileResource = variantTileResource.AsGodotObject();
       if(tileResource.HasMethod("GetCharacterOnTile")) {
         Variant variantCharacter = tileResource.Call("GetCharacterOnTile");
-      }
-    }
-  }
-
-  public void NotifyLog(Node tile_collider)
-  {
-    GD.Print("In NotifyLog Proper");
-    unit_location = new Vector2I(0, 0);
-    string tile_name = tile_collider.Name;
-    tile = tile_collider.GetParent();
-
-    int divider = tile_name.Find(",");
-    int q = tile_name.Substring(4, divider - 4).ToInt();
-    int r = tile_name.Substring(divider + 1).ToInt();
-    Vector2I DesiredTileLocation = new Vector2I(q, r);
-    Vector2I CurrentUnitLocation = new Vector2I(0, 0);
-    Variant temp;
-    GodotObject tempObject = new GodotObject();
-    Variant tempChar;
-    if (tile.HasMethod("GetCoordinateFromPosition"))
-    {
-      CurrentUnitLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
-    }
-    GD.Print("Desired Tile Location: ", DesiredTileLocation, "| Current Unit Location: ", CurrentUnitLocation);
-
-    if (TileGrid.HasMethod("FindTileOnGrid"))
-    {
-      temp = TileGrid.Call("FindTileOnGrid", DesiredTileLocation);
-      GD.Print("unit_location ", unit_location);
-      tempObject = temp.AsGodotObject();
-    }
-
-    if (tempObject.HasMethod("GetCharacterOnTile"))
-    {
-      tempChar = tempObject.Call("GetCharacterOnTile");
-      if (tempChar.AsGodotObject() != null)
-      {
-        GD.Print("Attacking: ", tempChar);
-        AttackTile(DesiredTileLocation, CurrentUnitLocation, CurrentCharacter);
-      }
-      else
-      {
-        GD.Print("Moving");
-        MoveCharacter(tile_collider);
+        if(variantCharacter.AsGodotObject() != null) {
+          target = variantCharacter.AsGodotObject() as TargetableEntity;
+        }
       }
     }
 
+    //If there is a targetable entity, send it to the DamageSystem
+    if(target != null) {
+      Node tile = tile_collider.GetParent();
+      Vector2I SourceCharacterLocation = new Vector2I(0,0);
+      if(tile.HasMethod("GetCoordinateFromPosition")) {
+        SourceCharacterLocation = (Vector2I)tile.Call("GetCoordinateFromPosition", CurrentCharacter.Position, 3.0f);
+      }
 
+      AttackTile(DesiredTileLocation, SourceCharacterLocation, CurrentCharacter);
+    }
+    //Otherwise, attempt to move to the tile
+    else {
+      MoveCharacter(tile_collider);
+    }
   }
 
   public void AttackTile(Vector2I TargetPosition, Vector2I ShooterLocation, GodotObject attacker)
@@ -373,7 +347,7 @@ public partial class UnitController : Node
         target.QueueFree();
         target = TargetTile.Call("GetCharacterOnTile").AsGodotObject() as BaseCharacter;
         //GD.Print("Getting character on tile: ", TargetTile, " | ", target);
-        if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("ProjGate.Character.BaseCharacter")))
+        if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("ProjGate.TargetableEntities.TargetableEntity")))
         {
           GD.PushError("Could not get the Character: ", target, " on Tile: ", TargetTile);
           return;

@@ -1,6 +1,7 @@
+using Godot;
 
 namespace ProjGate.TargetableEntities {
-  public class TargetableEntity {
+  public partial class TargetableEntity : Node3D {
 
   }
 }

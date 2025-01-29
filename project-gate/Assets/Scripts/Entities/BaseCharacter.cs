@@ -7,7 +7,7 @@ using ProjGate.Pickups;
 namespace ProjGate.TargetableEntities
 {
   [GlobalClass]
-  public partial class BaseCharacter : Node3D
+  public partial class BaseCharacter : TargetableEntity
   {
     [Signal]
     public delegate void CharacterKilledEventHandler();
