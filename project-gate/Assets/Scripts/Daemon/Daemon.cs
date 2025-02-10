@@ -3,6 +3,7 @@ using Godot.Collections;
 using System.Collections.Generic;
 
 using ProjGate.TargetableEntities;
+using ProjGate.Services;
 
 public partial class Daemon : Node
 {
@@ -33,18 +34,14 @@ public partial class Daemon : Node
     generator = new CharacterGenerator();
     e_generator = new EnemyGenerator();
     communicator = Engine.GetSingleton("CommunicationBus") as CommunicationBus;
-    Array<Node> NodeGroups = GetTree().GetNodesInGroup("Level");
-    if (NodeGroups.Count > 0)
-    {
-      Level = NodeGroups[0];
-    }
-    NodeGroups = GetTree().GetNodesInGroup("Characters");
+
+    Array<Node> NodeGroups = GetTree().GetNodesInGroup("Characters");
     if (NodeGroups.Count > 0)
     {
       Characters = NodeGroups[0];
     }
 
-    Level.Connect("LevelGenerated", new Callable(this, "LevelStartProcesses"));
+    CommunicationBus.Instance.LevelGenerated += LevelStartProcesses;
   }
 
   public void SetEnemySpawnLocations(Godot.Collections.Array EnemySpawnLocations)

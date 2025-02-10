@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://c8yim1xd3mn7o"]
+[gd_scene load_steps=5 format=3 uid="uid://c8yim1xd3mn7o"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/EndTurnButton.cs" id="1_43gg1"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/DisplayCurrency.cs" id="2_3acg4"]
+[ext_resource type="Script" path="res://Assets/Scripts/User-Interface/GenericCharacterInteractionStateButton.cs" id="2_dehgf"]
 [ext_resource type="Script" path="res://Assets/Scripts/User-Interface/TurnOrderBanner.cs" id="3_jdt4b"]
 
 [node name="Control" type="Control"]
@@ -31,6 +32,42 @@ focus_mode = 1
 text = "End Turn
 "
 script = ExtResource("1_43gg1")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 2
+offset_left = 40.0
+offset_top = 751.0
+offset_right = 514.0
+offset_bottom = 1013.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="MoveCharacter" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Move Character"
+script = ExtResource("2_dehgf")
+
+[node name="UseWeapon" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Use Weapon"
+script = ExtResource("2_dehgf")
+
+[node name="UseGrenade" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Use Grenade"
+script = ExtResource("2_dehgf")
+
+[node name="Ability" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+tooltip_text = "
+"
+text = "Use Ability"
+script = ExtResource("2_dehgf")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1

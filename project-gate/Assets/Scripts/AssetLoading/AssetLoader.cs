@@ -8,6 +8,9 @@ using Godot.Collections;
 namespace ProjGate.AssetLoading
 {
 
+  /// <summary>
+  /// <class> AssetLoader </class> is responsible for loading all assets into memory upon program initialization;
+  /// </summary>
   public class AssetLoader
   {
     private CancellationTokenSource _cts;

@@ -2,6 +2,8 @@ using Godot;
 using System.Collections;
 using HCoroutines;
 
+using ProjGate.Services;
+
 public partial class camera_movement : Node3D
 {
   [Export]

@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://cwmq8ec2vf8pf"]
+[gd_scene load_steps=7 format=3 uid="uid://cwmq8ec2vf8pf"]
 
 [ext_resource type="Script" path="res://Assets/Scripts/Services/InputHandler.cs" id="1_ckcrf"]
 [ext_resource type="Script" path="res://Assets/Scripts/Services/UnitController.cs" id="2_lfywm"]
 [ext_resource type="Script" path="res://Assets/Scripts/Services/CharacterTurnController.cs" id="3_ylqiw"]
 [ext_resource type="Script" path="res://Assets/Scripts/Services/CurrencyService.cs" id="4_fut1i"]
+[ext_resource type="Script" path="res://Assets/Scripts/Services/DamageSystem.cs" id="5_gpmpy"]
+[ext_resource type="Script" path="res://Assets/Scripts/Services/MovementSystem.cs" id="6_1eonv"]
 
 [node name="Services" type="Node"]
 
@@ -12,8 +14,6 @@ script = ExtResource("1_ckcrf")
 
 [node name="UnitController" type="Node" parent="."]
 script = ExtResource("2_lfywm")
-movementTime = 0.01
-rotationDuration = 0.001
 
 [node name="CharacterTurnController" type="Node" parent="."]
 script = ExtResource("3_ylqiw")
@@ -22,5 +22,9 @@ script = ExtResource("3_ylqiw")
 script = ExtResource("4_fut1i")
 
 [node name="DamageSystem" type="Node" parent="."]
+script = ExtResource("5_gpmpy")
 
 [node name="MovementSystem" type="Node" parent="."]
+script = ExtResource("6_1eonv")
+movementTime = 0.01
+rotationDuration = 0.001

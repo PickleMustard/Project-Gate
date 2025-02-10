@@ -105,7 +105,24 @@ godot::TileGrid *godot::GoapAgent::GetTileGrid() {
 godot::Node *godot::GoapAgent::GetUnitController() {
 	SceneTree *tree = get_tree();
 	TypedArray<Node> unit_control_group = tree->get_nodes_in_group("UnitControl");
-	Node *unit_controller = cast_to<Node>(unit_control_group[0]);
+	Node *unit_controller;
+	unit_controller = cast_to<Node>(unit_control_group[0]);
+	return unit_controller;
+}
+
+godot::Node *godot::GoapAgent::GetDamageSystem() {
+	SceneTree *tree = get_tree();
+	TypedArray<Node> unit_control_group = tree->get_nodes_in_group("UnitControl");
+	Node *unit_controller;
+	unit_controller = cast_to<Node>(unit_control_group[1]);
+	return unit_controller;
+}
+
+godot::Node *godot::GoapAgent::GetMovementSystem() {
+	SceneTree *tree = get_tree();
+	TypedArray<Node> unit_control_group = tree->get_nodes_in_group("UnitControl");
+	Node *unit_controller;
+	unit_controller = cast_to<Node>(unit_control_group[2]);
 	return unit_controller;
 }
 
@@ -240,6 +257,8 @@ void godot::GoapAgent::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("GetAvailableActions"), &GoapAgent::GetAvailableActions);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetTileGrid"), &GoapAgent::GetTileGrid);
 	godot::ClassDB::bind_method(godot::D_METHOD("GetUnitController"), &GoapAgent::GetUnitController);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetDamageSystem"), &GoapAgent::GetDamageSystem);
+	godot::ClassDB::bind_method(godot::D_METHOD("GetMovementSystem"), &GoapAgent::GetMovementSystem);
 	godot::ClassDB::bind_method(godot::D_METHOD("RunAI"), &GoapAgent::RunAI);
 	godot::ClassDB::bind_method(godot::D_METHOD("IdleState", "FSM"), &GoapAgent::IdleState);
 	godot::ClassDB::bind_method(godot::D_METHOD("MoveToState", "FSM"), &GoapAgent::MoveToState);

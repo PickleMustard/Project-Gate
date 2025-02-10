@@ -1,4 +1,5 @@
 #include "attempt_to_discover_enemy_action.h"
+#include "autonomous-agents/base_components/goap_agent.h"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/array.hpp"
@@ -78,12 +79,16 @@ bool AttemptToDiscoverEnemyAction::CheckProceduralPrecondition(Node *goap_agent,
 
 bool AttemptToDiscoverEnemyAction::Perform(Node *goap_agent) {
 	UtilityFunctions::print("Performing action: ", GetActionName());
-	Node *unit_controller = cast_to<Node>(goap_agent->call("GetUnitController"));
-	Array destinations = unit_controller->call("GetPotentialDestinations");
+	Node *unit_controller = cast_to<Node>(goap_agent->call("GetMovementSystem"));
+	UtilityFunctions::print("Got Controller");
+	Array destinations = unit_controller->call("GetPotentialDestinations", goap_agent->get_parent());
+	UtilityFunctions::print("Got Destinations: ", destinations.size());
 	SeededRandomAccess *instance = SeededRandomAccess::GetInstance();
 	int location = instance->GetWholeNumber(destinations.size() - 1);
 	Dictionary meshDict = destinations[location];
 	Node *tile = cast_to<Node>(meshDict["TileMesh"]);
-	unit_controller->call("MoveCharacter", tile->get_parent());
+	UtilityFunctions::print("Moving Character");
+	unit_controller->call("MoveCharacter", goap_agent->get_parent(), tile->get_parent());
+	UtilityFunctions::print("Moved Character");
 	return true;
 }

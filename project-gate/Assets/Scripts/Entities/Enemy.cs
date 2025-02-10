@@ -1,6 +1,8 @@
 using Godot;
 using Godot.Collections;
+
 using ProjGate.Pickups;
+using ProjGate.Services;
 
 namespace ProjGate.TargetableEntities
 {
@@ -13,7 +15,7 @@ namespace ProjGate.TargetableEntities
 
     public override void _Ready()
     {
-      Connect(SignalName.CharacterKilled, CommunicationBus.Instance.GetCharacterKilledEventCallable());
+      Connect(SignalName.CharacterKilled, CommunicationBus.Instance.CharacterKilledCall);
       team = BaseCharacter.CHARACTER_TEAM.enemy;
       Callable SetPositionCall = new Callable(this, "SetPosition");
       var test = ResourceLoader.Load("res://Assets/Scripts/User-Interface/GenericCharacterBanner.cs") as CSharpScript;

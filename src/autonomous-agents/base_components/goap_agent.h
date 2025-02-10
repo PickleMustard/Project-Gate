@@ -43,6 +43,8 @@ public:
 
   TileGrid *GetTileGrid();
   Node *GetUnitController();
+  Node *GetMovementSystem();
+  Node *GetDamageSystem();
   void SetAvailableActions(Dictionary actions);
   Dictionary GetAvailableActions();
 protected:

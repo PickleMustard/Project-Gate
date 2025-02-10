@@ -1,6 +1,9 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+/// <summary>
+/// <class> AssetFileLocationDiscoverer </class>
+/// </summary>
 public static class AssetFileLocationDiscoverer
 {
 

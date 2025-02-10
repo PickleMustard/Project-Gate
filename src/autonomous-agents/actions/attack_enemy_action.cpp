@@ -110,7 +110,9 @@ bool AttackEnemyAction::Perform(Node *goap_agent) {
 	Vector2i character_location = tilegrid->call("GetCoordinateFromPosition", target->call("get_position"), tilegrid->call("GetOuterSize"));
   UtilityFunctions::print("Targeting Tile at Position: ", character_location);
   Ref<Tile> targeted_tile = tilegrid->call("FindTileOnGrid", character_location);
-  goap_agent->get_parent()->call("AttackCharacter", targeted_tile);
+  //goap_agent->get_parent()->call("AttackCharacter", targeted_tile);
+	Node *unit_controller = cast_to<Node>(goap_agent->call("GetDamageSystem"));
+	unit_controller->call("MoveCharacter", goap_agent->get_parent(), tile->get_parent());
   UtilityFunctions::print("Performing action ", GetActionName());
   attacked_enemy = true;
   return true;
