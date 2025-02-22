@@ -42,7 +42,7 @@ bool AttemptToDiscoverEnemyAction::IsDone(Node *goap_agent) {
 
 bool AttemptToDiscoverEnemyAction::InProgress(Node *goap_agent) {
 	bool is_moving = goap_agent->get_parent()->call("GetIsMoving");
-	UtilityFunctions::print("Is Moving Call: ", is_moving);
+	//UtilityFunctions::print("Is Moving Call: ", is_moving);
 	return is_moving;
 }
 bool AttemptToDiscoverEnemyAction::RequiresInRange() {

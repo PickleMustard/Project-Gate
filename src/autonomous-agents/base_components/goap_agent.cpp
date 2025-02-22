@@ -181,7 +181,7 @@ bool godot::GoapAgent::MoveToState(godot::FiniteStateMachineBase *fsm) {
 }
 
 bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
-	UtilityFunctions::print("Performing an action | ", HasActionPlan());
+	//UtilityFunctions::print("Performing an action | ", HasActionPlan());
 	if (!HasActionPlan()) {
 		fsm->PopState();
 		fsm->PushState(idle_state);
@@ -190,8 +190,8 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	}
 
 	Ref<GoapAction> action = current_actions[0];
-	UtilityFunctions::print("Is Done? ", action->IsDone(this));
-	UtilityFunctions::print("name: ", action->GetActionName());
+	//UtilityFunctions::print("Is Done? ", action->IsDone(this));
+	//UtilityFunctions::print("name: ", action->GetActionName());
 	if (action->InProgress(this)) {
 		return true;
 	}
@@ -200,15 +200,15 @@ bool godot::GoapAgent::PerformActionState(godot::FiniteStateMachineBase *fsm) {
 	}
 
 	if (HasActionPlan()) {
-		UtilityFunctions::print("2");
 		action = current_actions[0];
-		UtilityFunctions::print("Requires in Range? ", action->RequiresInRange());
+    UtilityFunctions::print("Plan has been found. 1st Action Name: ", action->GetActionName(), " | Range: ", action->RequiresInRange());
+		//UtilityFunctions::print("Requires in Range? ", action->RequiresInRange());
 		Dictionary world_state = data_provider->GetWorldState();
 		bool in_range = action->RequiresInRange() ? action->GetInRange(this, world_state) : true;
 
 		if (in_range) {
 			bool success = action->Perform(this);
-			UtilityFunctions::print("Success? ", success);
+			//UtilityFunctions::print("Success? ", success);
 
 			if (!success) {
 				fsm->PopState();

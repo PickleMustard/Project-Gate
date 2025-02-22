@@ -18,17 +18,20 @@ namespace ProjGate.Services
         class ControlState
         {
             private bool processingCharacter = false;
-            public InteractionStates currentState { get; private set; } = InteractionStates.DisplayMovement;
+            public InteractionStates currentDisplayState {get; private set;}
+            public InteractionStates currentInteractionState { get; private set; } = InteractionStates.DisplayMovement;
             private InteractionStates nextState = InteractionStates.DisplayMovement;
 
             public ControlState()
             {
-                currentState = InteractionStates.DisplayMovement;
+                currentInteractionState = InteractionStates.DisplayMovement;
+                currentDisplayState = InteractionStates.DisplayMovement;
             }
 
             public ControlState(InteractionStates startingState)
             {
-                currentState = startingState;
+                currentInteractionState = startingState;
+                currentDisplayState = startingState;
             }
 
             public void UpdateNextState(InteractionStates nextState)
@@ -36,21 +39,29 @@ namespace ProjGate.Services
                 this.nextState = nextState;
             }
 
+            /// <summary>
+            /// <func> AttemptChangeState </func> will attempt to change the UnitController Interaction state
+            /// to the state clicked on. If it is unable to, it will change the display state and wait for the
+            /// current process to finish
+            /// </summary
             public bool AttemptChangeState(InteractionStates desiredNextState)
             {
                 if (!IsProcessingState())
                 {
-                    currentState = desiredNextState;
+                    currentInteractionState = desiredNextState;
+                    currentDisplayState = desiredNextState;
                     if (nextState == InteractionStates.DisplayAbilityDetails || nextState == InteractionStates.DisplayGrenadeDetails)
                         nextState = InteractionStates.DisplayMovement;
                     return true;
                 }
+                currentDisplayState = desiredNextState;
                 return false;
             }
 
             public void ChangeState()
             {
-                currentState = nextState;
+                currentInteractionState = nextState;
+                currentDisplayState = nextState;
                 processingCharacter = false;
             }
 
@@ -167,7 +178,7 @@ namespace ProjGate.Services
 
         public void DisplayOptionsOnGrid()
         {
-            switch (displayState.currentState)
+            switch (displayState.currentDisplayState)
             {
                 case InteractionStates.DisplayMovement:
                     movementSystem.DisplayPotentialDestinations(CurrentCharacter);
@@ -183,7 +194,7 @@ namespace ProjGate.Services
 
         public void HideOptionsOnGrid()
         {
-            switch (displayState.currentState)
+            switch (displayState.currentDisplayState)
             {
                 case InteractionStates.DisplayMovement:
                     movementSystem.HidePotentialDestinations(CurrentCharacter);

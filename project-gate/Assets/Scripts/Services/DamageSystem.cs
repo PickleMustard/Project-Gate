@@ -103,6 +103,7 @@ namespace ProjGate.Services
         {
             GD.Print("Attacking Location");
             BaseCharacter target = new BaseCharacter();
+            BaseCharacter attackerChar = attacker as BaseCharacter;
             Resource TargetTile = new Resource();
             Resource ShooterTile = new Resource();
             if (TileGrid.HasMethod("FindTileOnGrid"))
@@ -113,7 +114,7 @@ namespace ProjGate.Services
                 {
                     target.QueueFree();
                     target = TargetTile.Call("GetCharacterOnTile").AsGodotObject() as BaseCharacter;
-                    //GD.Print("Getting character on tile: ", TargetTile, " | ", target);
+                    GD.Print("Getting character on tile: ", TargetTile, " | ", target);
                     if (target == null || !target.GetType().IsSubclassOf(System.Type.GetType("ProjGate.TargetableEntities.TargetableEntity")))
                     {
                         GD.PushError("Could not get the Character: ", target, " on Tile: ", TargetTile);
@@ -127,13 +128,14 @@ namespace ProjGate.Services
                 int distance = (int)TileGrid.Call("CalculateDistance", ShooterLocation, TargetPosition);
                 GD.Print("Distance between attacker and target: ", distance);
                 GD.Print(attacker);
+                GD.Print(target);
                 //GD.Print(attacker.Call("GetMainWeapon"));
                 if (distance <= (int)((attacker.Call("GetMainWeapon").AsGodotObject()).Call("GetMaxRange")))
                 {
                     GD.Print("Target: ", target, "| Has AttackCharacter Method: ", target.HasMethod("AttackCharacter"));
-                    if (target.HasMethod("AttackCharacter") && target.team != currentCharacter.team)
+                    if (target.HasMethod("AttackCharacter") && target.team != attackerChar.team)
                     {
-                        currentCharacter.AttackCharacter(TargetTile);
+                        attackerChar.AttackCharacter(TargetTile);
                     }
                 }
             }

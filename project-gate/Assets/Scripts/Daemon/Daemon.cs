@@ -119,6 +119,7 @@ public partial class Daemon : Node
 
   public void SpawnEnemy(Resource Tile, BaseCharacter generatedEnemy)
   {
+    GD.Print("Spawning Enemies in Daemon");
     BaseCharacter enemy = ResourceLoader.Load<PackedScene>("res://Assets/Units/enemy.tscn").Instantiate() as BaseCharacter;
     Characters.AddChild(enemy, true);
     enemy.ReplaceBy(generatedEnemy);

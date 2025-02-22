@@ -54,7 +54,7 @@ bool BaseEnemy::MoveAgent(Ref<GoapAction> next_action) {
 	//move towards it using the unitcontroller
 	Dictionary world_data = GetWorldState();
 	TypedArray<Node> unitcontrols = get_tree()->get_nodes_in_group("UnitControl");
-	Node *unit_controller = cast_to<Node>(unitcontrols[0]);
+	Node *unit_controller = cast_to<Node>(unitcontrols[2]);
 	TypedArray<Node> potential_grid = get_tree()->get_nodes_in_group("Tilegrid");
 	TileGrid *tilegrid = cast_to<TileGrid>(potential_grid[0]);
 	Vector2i target_location = tilegrid->call("GetCoordinateFromPosition", next_action->target->call("get_position"), tilegrid->call("GetOuterSize"));
@@ -85,7 +85,7 @@ bool BaseEnemy::MoveAgent(Ref<GoapAction> next_action) {
 		//int location = instance->GetWholeNumber(destinations.size() - 1);
 		//Dictionary meshDict = destinations[location];
 		//Node *tile = cast_to<Node>(meshDict["TileMesh"]);
-		unit_controller->call("MoveCharacter", found_tile);
+		unit_controller->call("MoveCharacter", get_parent(), found_tile);
 		//return true;
 	}
 
@@ -106,9 +106,7 @@ void BaseEnemy::CheckForEnemies() {
 	UtilityFunctions::print("Checking for Enemies");
 	known_enemies.clear();
 	SceneTree *tree = get_tree();
-	UtilityFunctions::print("1");
 	TypedArray<Node> tilegrid = tree->get_nodes_in_group("Tilegrid");
-	UtilityFunctions::print("2", tilegrid);
 	TileGrid *tilegrid_obj = cast_to<TileGrid>(tilegrid[0]);
 	UtilityFunctions::print("Got the TileGrid ", ((Node3D *)get_parent())->get_position());
 	Vector2i tile_location = tilegrid_obj->call("GetCoordinateFromPosition", ((Node3D *)get_parent())->get_position(), tilegrid_obj->call("GetOuterSize"));

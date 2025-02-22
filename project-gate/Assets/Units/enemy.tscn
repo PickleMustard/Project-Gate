@@ -13,7 +13,7 @@
 [node name="Enemy" type="Node3D"]
 script = ExtResource("1_4btdo")
 
-[node name="Mesh" type="Node" parent="."]
+[node name="Mesh" type="Node3D" parent="."]
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="Mesh"]
 material_override = ExtResource("1_b2i4i")
@@ -21,6 +21,7 @@ material_override = ExtResource("1_b2i4i")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Mesh"]
 transform = Transform3D(2.30376, 0, 0, 0, 1, 0, 0, 0, 1, -0.0111587, 0.893569, 0)
 mesh = SubResource("SphereMesh_dfani")
+skeleton = NodePath("")
 
 [node name="Healthbar" type="Sprite3D" parent="."]
 transform = Transform3D(2.7, 0, 0, 0, 2.7, 0, 0, 0, 2.7, 0, 1.20144, 0)

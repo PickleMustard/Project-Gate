@@ -107,12 +107,16 @@ bool AttackEnemyAction::HasMovementRemaining(int remaining) {
 
 bool AttackEnemyAction::Perform(Node *goap_agent) {
 	TileGrid *tilegrid = cast_to<TileGrid>(goap_agent->call("GetTileGrid"));
+	Vector2i source_location = tilegrid->call("GetCoordinateFromPosition", goap_agent->get_parent()->call("get_position"), tilegrid->call("GetOuterSize"));
 	Vector2i character_location = tilegrid->call("GetCoordinateFromPosition", target->call("get_position"), tilegrid->call("GetOuterSize"));
   UtilityFunctions::print("Targeting Tile at Position: ", character_location);
   Ref<Tile> targeted_tile = tilegrid->call("FindTileOnGrid", character_location);
+	String potential_formated_tile_name = vformat("/root/Level/Level/%s/Hex %d,%d", tilegrid->get_name(), character_location[0], character_location[1]);
+	Node *found_tile = goap_agent->get_node_or_null(potential_formated_tile_name);
   //goap_agent->get_parent()->call("AttackCharacter", targeted_tile);
 	Node *unit_controller = cast_to<Node>(goap_agent->call("GetDamageSystem"));
-	unit_controller->call("MoveCharacter", goap_agent->get_parent(), tile->get_parent());
+  UtilityFunctions::print("Locations: ", character_location, "|", source_location, "| parent: ", goap_agent->get_parent());
+	unit_controller->call("AttackTile", character_location, source_location, goap_agent->get_parent());
   UtilityFunctions::print("Performing action ", GetActionName());
   attacked_enemy = true;
   return true;

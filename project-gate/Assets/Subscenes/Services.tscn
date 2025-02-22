@@ -27,4 +27,4 @@ script = ExtResource("5_gpmpy")
 [node name="MovementSystem" type="Node" parent="."]
 script = ExtResource("6_1eonv")
 movementTime = 0.01
-rotationDuration = 0.001
+rotationDuration = 0.01
